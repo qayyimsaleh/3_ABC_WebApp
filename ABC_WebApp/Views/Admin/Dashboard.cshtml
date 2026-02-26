@@ -261,7 +261,45 @@
                 font-weight: 600
             }
 
-        /* ─ EMPTY STATE ─ */
+        /* ─ DATE RANGE ─ */
+        .date-range-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--s2);
+            border: 1px solid rgba(79,142,247,.25);
+            border-radius: var(--r);
+            padding: 5px 10px
+        }
+
+        .date-input {
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            padding: 2px 4px;
+            font-size: 13px;
+            color: var(--t1);
+            width: 130px;
+            cursor: pointer
+        }
+
+            .date-input:focus {
+                outline: none;
+                box-shadow: none;
+                border: none;
+                background: transparent
+            }
+
+            .date-input::-webkit-calendar-picker-indicator {
+                filter: invert(.5) sepia(1) saturate(3) hue-rotate(180deg);
+                cursor: pointer;
+                opacity: .7
+            }
+
+                .date-input::-webkit-calendar-picker-indicator:hover {
+                    opacity: 1
+                }
+
         .empty {
             padding: 48px;
             text-align: center;
@@ -373,9 +411,16 @@
                 <span class="row-count" id="reportCount"></span>
             </div>
             <div class="tbar-right">
-                <select class="filter-sel" id="rYear" onchange="changeYear()" style="font-weight:600;color:var(--blue);border-color:rgba(79,142,247,.25)">
-                    <option value="">Loading years...</option>
-                </select>
+                <!-- Date range -->
+                <div class="date-range-wrap">
+                    <i class="fas fa-calendar-days" style="color:var(--t3);font-size:12px"></i>
+                    <input type="date" class="form-input date-input" id="rDateFrom" onchange="onDateChange()">
+                    <span style="color:var(--t3);font-size:12px;padding:0 2px">to</span>
+                    <input type="date" class="form-input date-input" id="rDateTo" onchange="onDateChange()">
+                    <button class="btn btn-ghost btn-sm" onclick="resetDateRange()" title="Reset to current year">
+                        <i class="fas fa-rotate-left"></i>
+                    </button>
+                </div>
                 <div class="search-box">
                     <i class="fas fa-magnifying-glass"></i>
                     <input type="text" id="rSearch" placeholder="Search name or ID…" oninput="filterReport()">
@@ -542,7 +587,7 @@
 @section Scripts {
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <script>
-var CY=@Model.CurrentYear, allScores=[], allEmps=[], filteredScores=[], filteredEmps=[], editMode=false, editID='', delTargetID='', selectedYear=@Model.CurrentYear;
+var CY=@Model.CurrentYear, allScores=[], allEmps=[], filteredScores=[], filteredEmps=[], editMode=false, editID='', delTargetID='';
 var tok=function(){var t=document.querySelector('input[name="__RequestVerificationToken"]');return t?t.value:'';};
 
 // ── TABS ────────────────────────────────────────────────────────────────────
@@ -552,47 +597,56 @@ function showTab(id){
     document.getElementById('tab-'+id).classList.add('on');
 }
 
-// ── LOAD YEARS ───────────────────────────────────────────────────────────────
-function loadYears(){
-    fetch('@Url.Action("GetYearsJson","Admin")').then(function(r){return r.json();}).then(function(years){
-        var sel=document.getElementById('rYear');
-        sel.innerHTML='';
-        years.forEach(function(y){
-            var o=document.createElement('option');
-            o.value=y;
-            o.textContent=y+(y===CY?' (Current)':'');
-            if(y===CY) o.selected=true;
-            sel.appendChild(o);
-        });
-        selectedYear=CY;
-        loadReport();
-    });
+// ── DATE HELPERS ─────────────────────────────────────────────────────────────
+function toInputDate(d){ return d.toISOString().slice(0,10); }
+function defaultFrom(){ return toInputDate(new Date(CY, 0, 1)); }   // 1 Jan current year
+function defaultTo()  { return toInputDate(new Date()); }            // today
+
+function initDateRange(){
+    document.getElementById('rDateFrom').value = defaultFrom();
+    document.getElementById('rDateTo').value   = defaultTo();
 }
 
-// ── LOAD DATA ────────────────────────────────────────────────────────────────
+function resetDateRange(){
+    document.getElementById('rDateFrom').value = defaultFrom();
+    document.getElementById('rDateTo').value   = defaultTo();
+    document.getElementById('rSearch').value = '';
+    document.getElementById('rDept').value   = '';
+    document.getElementById('rType').value   = '';
+    document.getElementById('rStatus').value = '';
+    loadReport();
+}
+
+var dateChangeTimer = null;
+function onDateChange(){
+    clearTimeout(dateChangeTimer);
+    dateChangeTimer = setTimeout(function(){
+        var from = document.getElementById('rDateFrom').value;
+        var to   = document.getElementById('rDateTo').value;
+        if(from && to && from <= to) loadReport();
+    }, 400);
+}
+
+// ── LOAD REPORT ───────────────────────────────────────────────────────────────
 function loadReport(){
-    var yr=document.getElementById('rYear').value||CY;
-    selectedYear=parseInt(yr);
+    var from = document.getElementById('rDateFrom').value;
+    var to   = document.getElementById('rDateTo').value;
+    if(!from || !to){ return; }
     document.getElementById('reportBody').innerHTML='<tr><td colspan="8" style="text-align:center;padding:32px"><span class="spin" style="border-top-color:var(--blue)"></span></td></tr>';
-    fetch('@Url.Action("GetScoresJson","Admin")?year='+yr).then(function(r){return r.json();}).then(function(d){
+    fetch('@Url.Action("GetScoresJson","Admin")?dateFrom='+encodeURIComponent(from)+'&dateTo='+encodeURIComponent(to))
+    .then(function(r){return r.json();}).then(function(d){
         allScores=d; filteredScores=d;
         populateDepts(d.map(function(e){return e.Department;}), 'rDept');
+        // keep existing dept filter selected if still valid
         filterReport();
         updateStats(d);
     });
 }
 
-function changeYear(){
-    // reset filters when year changes
-    document.getElementById('rSearch').value='';
-    document.getElementById('rDept').value='';
-    document.getElementById('rType').value='';
-    document.getElementById('rStatus').value='';
-    loadReport();
-}
-
+// ── LOAD ALL ─────────────────────────────────────────────────────────────────
 function loadAll(){
-    loadYears();
+    initDateRange();
+    loadReport();
     fetch('@Url.Action("GetEmployeesJson","Admin")').then(function(r){return r.json();}).then(function(d){
         allEmps=d; filteredEmps=d;
         populateDepts(d.map(function(e){return e.Department;}), 'eDept');
@@ -789,13 +843,15 @@ function exportExcel(){
     if(!allScores.length){alert('No data.');return;}
     var rows=allScores.map(function(e){return{'Employee ID':e.EmployeeID,'Name':e.UserName,'Department':e.Department,'Company':e.CompanyID,'Type':e.Local==='1'?'Local':'Foreign','Part 1':e.Part1,'Part 1 Date':e.Part1Timestamp?fmtDT(e.Part1Timestamp):'','Part 2':e.Part2,'Part 2 Date':e.Part2Timestamp?fmtDT(e.Part2Timestamp):''};});
     var wb=XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),'Training '+selectedYear);
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),'Training Data');
     // summary
     var dm={};allScores.forEach(function(e){if(!dm[e.Department])dm[e.Department]={total:0,p1:0,p2:0};dm[e.Department].total++;if(e.Part1==='pass')dm[e.Department].p1++;if(e.Part2==='pass')dm[e.Department].p2++;});
     var sum=[['Department','Total','P1 Passed','P1 %','P2 Passed','P2 %']];
     Object.keys(dm).sort().forEach(function(k){var d=dm[k];sum.push([k,d.total,d.p1,(d.p1/d.total*100).toFixed(1)+'%',d.p2,(d.p2/d.total*100).toFixed(1)+'%']);});
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(sum),'Dept Summary');
-    XLSX.writeFile(wb,'ABC_Training_Report_'+selectedYear+'_'+new Date().toISOString().slice(0,10)+'.xlsx');
+    var from=document.getElementById('rDateFrom').value||'';
+    var to=document.getElementById('rDateTo').value||'';
+    XLSX.writeFile(wb,'ABC_Training_'+from+'_to_'+to+'.xlsx');
 }
 
 function exportCSV(){
@@ -803,7 +859,9 @@ function exportCSV(){
     var h=['Employee ID','Name','Department','Company','Type','Part 1','Part 1 Date','Part 2','Part 2 Date'];
     var rows=allScores.map(function(e){return[e.EmployeeID,'"'+e.UserName+'"','"'+e.Department+'"',e.CompanyID,e.Local==='1'?'Local':'Foreign',e.Part1,e.Part1Timestamp?fmtDT(e.Part1Timestamp):'',e.Part2,e.Part2Timestamp?fmtDT(e.Part2Timestamp):''].join(',');});
     var blob=new Blob([[h.join(',')].concat(rows).join('\n')],{type:'text/csv'});
-    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ABC_Training_'+selectedYear+'.csv';a.click();
+    var from=document.getElementById('rDateFrom').value||'';
+    var to=document.getElementById('rDateTo').value||'';
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ABC_Training_'+from+'_to_'+to+'.csv';a.click();
 }
 
 // ── HELPERS ──────────────────────────────────────────────────────────────────
