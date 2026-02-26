@@ -1,64 +1,321 @@
 @model ABC_WebApp.Models.AdminDashboardViewModel
 @{ ViewBag.Title = "Admin"; ViewBag.ActivePage = "admin"; }
-
 @section Styles {
-<style>
-/* ─ TABS ─ */
-.tabs{display:flex;gap:2px;background:var(--s2);border:1px solid var(--bd);border-radius:var(--rl);padding:4px;width:fit-content;margin-bottom:28px}
-.tab{padding:7px 18px;border-radius:var(--r);font-size:13px;font-weight:500;cursor:pointer;transition:var(--tr);color:var(--t3);border:none;background:none;font-family:inherit}
-.tab.on{background:var(--s1);color:var(--t1);border:1px solid var(--bd2);box-shadow:0 2px 8px rgba(0,0,0,.3)}
-.tab-panel{display:none}.tab-panel.on{display:block}
+    <style>
 
-/* ─ STATS ─ */
-.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:28px}
-.stat{background:var(--s1);border:1px solid var(--bd);border-radius:var(--rl);padding:18px 20px}
-.stat-num{font-size:30px;font-weight:700;letter-spacing:-1px;line-height:1}
-.stat-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--t3);margin-top:4px;font-weight:600}
-.stat-bar{height:3px;border-radius:2px;margin-top:12px;background:var(--s4);overflow:hidden}
-.stat-bar-fill{height:100%;border-radius:2px;transition:width .7s ease}
+        /* ─ TABS ─ */
+        .tabs {
+            display: flex;
+            gap: 2px;
+            background: var(--s2);
+            border: 1px solid var(--bd);
+            border-radius: var(--rl);
+            padding: 4px;
+            width: fit-content;
+            margin-bottom: 28px
+        }
 
-/* ─ TABLE TOOLBAR ─ */
-.tbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:14px}
-.tbar h3{font-size:14px;font-weight:600}
-.tbar-right{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-.search-box{position:relative}
-.search-box i{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:12px;pointer-events:none}
-.search-box input{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);padding:7px 10px 7px 30px;font-size:13px;color:var(--t1);font-family:inherit;width:200px;transition:var(--tr)}
-.search-box input:focus{outline:none;border-color:rgba(79,142,247,.3);width:240px}
-.filter-sel{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);padding:7px 10px;font-size:13px;color:var(--t2);font-family:inherit;cursor:pointer}
-.filter-sel:focus{outline:none;border-color:rgba(79,142,247,.3)}
-.filter-sel option{background:var(--s2)}
-.row-count{font-size:12px;color:var(--t3);font-family:'JetBrains Mono',monospace}
+        .tab {
+            padding: 7px 18px;
+            border-radius: var(--r);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--tr);
+            color: var(--t3);
+            border: none;
+            background: none;
+            font-family: inherit
+        }
 
-/* ─ TABLE ─ */
-.action-btns{display:flex;gap:5px}
-.icon-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--bd);background:var(--s2);color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;transition:var(--tr)}
-.icon-btn:hover{border-color:var(--bd2);color:var(--t1);background:var(--s3)}
-.icon-btn.del:hover{border-color:rgba(248,113,113,.3);color:var(--red);background:var(--red-g)}
-.icon-btn.edit:hover{border-color:rgba(79,142,247,.3);color:var(--blue);background:var(--blue-g)}
-.toggle-sw{position:relative;width:34px;height:18px;cursor:pointer}
-.toggle-sw input{opacity:0;width:0;height:0}
-.slider{position:absolute;inset:0;background:var(--s4);border-radius:9px;transition:.3s}
-.slider:before{content:'';position:absolute;width:12px;height:12px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
-.toggle-sw input:checked+.slider{background:var(--green)}
-.toggle-sw input:checked+.slider:before{transform:translateX(16px)}
+            .tab.on {
+                background: var(--s1);
+                color: var(--t1);
+                border: 1px solid var(--bd2);
+                box-shadow: 0 2px 8px rgba(0,0,0,.3)
+            }
 
-/* ─ SECTION HEADER ─ */
-.sec-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
-.sec-head h2{font-size:16px;font-weight:600}
+        .tab-panel {
+            display: none
+        }
 
-/* ─ EMPTY STATE ─ */
-.empty{padding:48px;text-align:center;color:var(--t3)}
-.empty i{font-size:32px;margin-bottom:12px;opacity:.4;display:block}
+            .tab-panel.on {
+                display: block
+            }
 
-/* ─ CONFIRM DELETE ─ */
-.del-info{background:var(--red-g);border:1px solid rgba(248,113,113,.2);border-radius:var(--r);padding:14px;font-size:13px;color:#fca5a5;margin-bottom:16px}
+        /* ─ STATS ─ */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fill,minmax(200px,1fr));
+            gap: 14px;
+            margin-bottom: 28px
+        }
 
-@@media(max-width:768px){.stats-row{grid-template-columns:1fr 1fr}.tbar{flex-direction:column;align-items:flex-start}.search-box input{width:100%}.tbar-right{width:100%}.filter-sel{flex:1}}
-@@media(max-width:480px){.stats-row{grid-template-columns:1fr}}
-</style>
+        .stat {
+            background: var(--s1);
+            border: 1px solid var(--bd);
+            border-radius: var(--rl);
+            padding: 18px 20px
+        }
+
+        .stat-num {
+            font-size: 30px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            line-height: 1
+        }
+
+        .stat-lbl {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            color: var(--t3);
+            margin-top: 4px;
+            font-weight: 600
+        }
+
+        .stat-bar {
+            height: 3px;
+            border-radius: 2px;
+            margin-top: 12px;
+            background: var(--s4);
+            overflow: hidden
+        }
+
+        .stat-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width .7s ease
+        }
+
+        /* ─ TABLE TOOLBAR ─ */
+        .tbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 14px
+        }
+
+            .tbar h3 {
+                font-size: 14px;
+                font-weight: 600
+            }
+
+        .tbar-right {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center
+        }
+
+        .search-box {
+            position: relative
+        }
+
+            .search-box i {
+                position: absolute;
+                left: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--t3);
+                font-size: 12px;
+                pointer-events: none
+            }
+
+            .search-box input {
+                background: var(--s2);
+                border: 1px solid var(--bd);
+                border-radius: var(--r);
+                padding: 7px 10px 7px 30px;
+                font-size: 13px;
+                color: var(--t1);
+                font-family: inherit;
+                width: 200px;
+                transition: var(--tr)
+            }
+
+                .search-box input:focus {
+                    outline: none;
+                    border-color: rgba(79,142,247,.3);
+                    width: 240px
+                }
+
+        .filter-sel {
+            background: var(--s2);
+            border: 1px solid var(--bd);
+            border-radius: var(--r);
+            padding: 7px 10px;
+            font-size: 13px;
+            color: var(--t2);
+            font-family: inherit;
+            cursor: pointer
+        }
+
+            .filter-sel:focus {
+                outline: none;
+                border-color: rgba(79,142,247,.3)
+            }
+
+            .filter-sel option {
+                background: var(--s2)
+            }
+
+        .row-count {
+            font-size: 12px;
+            color: var(--t3);
+            font-family: 'JetBrains Mono',monospace
+        }
+
+        /* ─ TABLE ─ */
+        .action-btns {
+            display: flex;
+            gap: 5px
+        }
+
+        .icon-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: 1px solid var(--bd);
+            background: var(--s2);
+            color: var(--t2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            transition: var(--tr)
+        }
+
+            .icon-btn:hover {
+                border-color: var(--bd2);
+                color: var(--t1);
+                background: var(--s3)
+            }
+
+            .icon-btn.del:hover {
+                border-color: rgba(248,113,113,.3);
+                color: var(--red);
+                background: var(--red-g)
+            }
+
+            .icon-btn.edit:hover {
+                border-color: rgba(79,142,247,.3);
+                color: var(--blue);
+                background: var(--blue-g)
+            }
+
+        .toggle-sw {
+            position: relative;
+            width: 34px;
+            height: 18px;
+            cursor: pointer
+        }
+
+            .toggle-sw input {
+                opacity: 0;
+                width: 0;
+                height: 0
+            }
+
+        .slider {
+            position: absolute;
+            inset: 0;
+            background: var(--s4);
+            border-radius: 9px;
+            transition: .3s
+        }
+
+            .slider:before {
+                content: '';
+                position: absolute;
+                width: 12px;
+                height: 12px;
+                left: 3px;
+                bottom: 3px;
+                background: #fff;
+                border-radius: 50%;
+                transition: .3s
+            }
+
+        .toggle-sw input:checked + .slider {
+            background: var(--green)
+        }
+
+            .toggle-sw input:checked + .slider:before {
+                transform: translateX(16px)
+            }
+
+        /* ─ SECTION HEADER ─ */
+        .sec-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px
+        }
+
+            .sec-head h2 {
+                font-size: 16px;
+                font-weight: 600
+            }
+
+        /* ─ EMPTY STATE ─ */
+        .empty {
+            padding: 48px;
+            text-align: center;
+            color: var(--t3)
+        }
+
+            .empty i {
+                font-size: 32px;
+                margin-bottom: 12px;
+                opacity: .4;
+                display: block
+            }
+
+        /* ─ CONFIRM DELETE ─ */
+        .del-info {
+            background: var(--red-g);
+            border: 1px solid rgba(248,113,113,.2);
+            border-radius: var(--r);
+            padding: 14px;
+            font-size: 13px;
+            color: #fca5a5;
+            margin-bottom: 16px
+        }
+
+        @@media(max-width:768px) {
+            .stats-row {
+                grid-template-columns: 1fr 1fr
+            }
+
+            .tbar {
+                flex-direction: column;
+                align-items: flex-start
+            }
+
+            .search-box input {
+                width: 100%
+            }
+
+            .tbar-right {
+                width: 100%
+            }
+
+            .filter-sel {
+                flex: 1
+            }
+        }
+
+        @@media(max-width:480px) {
+            .stats-row {
+                grid-template-columns: 1fr
+            }
+        }
+    </style>
 }
-
 <div class="wrap-xl">
     <!-- Page Header -->
     <div style="padding:32px 0 24px;border-bottom:1px solid var(--bd);margin-bottom:28px" class="fade-up">
@@ -74,7 +331,6 @@
             </div>
         </div>
     </div>
-
     <!-- Stats -->
     <div class="stats-row fade-up">
         <div class="stat">
@@ -98,19 +354,17 @@
             <div class="stat-bar"><div class="stat-bar-fill" id="sb-np" style="width:@(Model.TotalActive>0?(Model.NotPassedPart1*100/Model.TotalActive):0)%;background:var(--red)"></div></div>
         </div>
         <div class="stat">
-            @{ double bothPct = Model.TotalActive>0 ? Math.Round((double)Model.PassedPart2/Model.TotalActive*100,1) : 0; }
+            @{ double bothPct = Model.TotalActive > 0 ? Math.Round((double)Model.PassedPart2 / Model.TotalActive * 100, 1) : 0; }
             <div class="stat-num" style="color:var(--amber)">@bothPct%</div>
             <div class="stat-lbl">Full Completion</div>
             <div class="stat-bar"><div class="stat-bar-fill" style="width:@bothPct%;background:var(--amber)"></div></div>
         </div>
     </div>
-
     <!-- Tabs -->
     <div class="tabs fade-up">
         <button class="tab on" onclick="showTab('report')"><i class="fas fa-chart-bar" style="margin-right:5px"></i>Training Report</button>
         <button class="tab" onclick="showTab('employees')"><i class="fas fa-users" style="margin-right:5px"></i>Employees</button>
     </div>
-
     <!-- ═══ TAB: REPORT ═══ -->
     <div class="tab-panel on" id="tab-report">
         <div class="tbar">
@@ -155,7 +409,6 @@
             </table>
         </div>
     </div>
-
     <!-- ═══ TAB: EMPLOYEES ═══ -->
     <div class="tab-panel" id="tab-employees">
         <div class="tbar">
@@ -191,7 +444,6 @@
         </div>
     </div>
 </div>
-
 <!-- ═══ MODAL: Create / Edit Employee ═══ -->
 <div class="modal" id="empModal">
     <div class="modal-box">
@@ -264,7 +516,6 @@
         </div>
     </div>
 </div>
-
 <!-- ═══ MODAL: Confirm Delete ═══ -->
 <div class="modal" id="delModal">
     <div class="modal-box" style="max-width:400px">
@@ -285,10 +536,9 @@
         </div>
     </div>
 </div>
-
 @section Scripts {
-<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
-<script>
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script>
 var CY=@Model.CurrentYear, allScores=[], allEmps=[], filteredScores=[], filteredEmps=[], editMode=false, editID='', delTargetID='';
 var tok=function(){var t=document.querySelector('input[name="__RequestVerificationToken"]');return t?t.value:'';};
 
@@ -404,7 +654,7 @@ function renderEmployees(){
             '<td style="color:var(--t2)">'+esc(e.Department)+'</td>'+
             '<td style="color:var(--t3)">'+esc(e.CompanyID)+'</td>'+
             '<td>'+typeBadge(e.Local)+'</td>'+
-            '<td><label class="toggle-sw" title="Toggle access"><input type="checkbox" '+(acc?'checked':'')+' onchange="toggleAccess(\''+esc(e.EmployeeID)+'\',this.checked)"><span class="slider"></span></label></td>'+
+            '<td><label class="toggle-sw" title="Toggle active status"><input type="checkbox" '+(acc?'checked':'')+' onchange="toggleAccess(\''+esc(e.EmployeeID)+'\',this.checked)"><span class="slider"></span></label></td>'+
             '<td>'+(su?'<span class="badge badge-purple">Admin</span>':'<span style="color:var(--t3);font-size:12px">—</span>')+'</td>'+
             '<td><div class="action-btns">'+
                 '<button class="icon-btn edit" onclick="openEdit(\''+esc(e.EmployeeID)+'\')" title="Edit"><i class="fas fa-pen"></i></button>'+
@@ -415,13 +665,13 @@ function renderEmployees(){
 }
 
 // ── ACCESS TOGGLE ─────────────────────────────────────────────────────────────
-function toggleAccess(id, grant){
-    fetch('@Url.Action("ToggleAccess","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
-        body:'__RequestVerificationToken='+encodeURIComponent(tok())+'&employeeId='+encodeURIComponent(id)+'&grant='+(grant?'true':'false')})
+function toggleAccess(id, currentlyActive){
+    fetch('@Url.Action("ToggleActive","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:'__RequestVerificationToken='+encodeURIComponent(tok())+'&empID='+encodeURIComponent(id)})
     .then(function(r){return r.json();}).then(function(d){
-        if(!d.success) alert('Failed: '+d.message);
-        else{ var e=allEmps.find(function(x){return x.EmployeeID===id;});if(e)e.Access=grant?'1':'0'; }
-    });
+        if(!d.success){alert('Failed: '+d.message);loadAll();}
+        // no reload needed - toggle already reflects UI state
+    }).catch(function(){alert('Network error.');loadAll();});
 }
 
 // ── CREATE / EDIT MODAL ───────────────────────────────────────────────────────
@@ -444,7 +694,7 @@ function openEdit(id){
     document.getElementById('empModalTitle').textContent='Edit Employee';
     document.getElementById('fEmpID').disabled=true;
     document.getElementById('empModalAlert').innerHTML='';
-    fetch('@Url.Action("GetEmployeeJson","Admin")?id='+encodeURIComponent(id))
+    fetch('@Url.Action("GetEmployee","Admin")?id='+encodeURIComponent(id))
     .then(function(r){return r.json();}).then(function(d){
         document.getElementById('fEmpID').value=d.EmployeeID||'';
         document.getElementById('fIC').value=d.EmployeeIC||'';
@@ -466,8 +716,7 @@ function saveEmployee(){
     var btn=document.getElementById('empSaveBtn');
     btn.disabled=true;btn.innerHTML='<span class="spin"></span> Saving…';
     var model={EmployeeID:document.getElementById('fEmpID').value.trim(),UserName:document.getElementById('fName').value.trim(),EmployeeIC:document.getElementById('fIC').value.trim(),Department:document.getElementById('fDept').value.trim(),CompanyID:document.getElementById('fCo').value.trim(),Local:document.getElementById('fLocal').value,Active:document.getElementById('fActive').value,Access:document.getElementById('fAccess').value,SuperUser:document.getElementById('fSU').value};
-    var url='@Url.Action("CreateEmployee","Admin")';
-    if(editMode){url='@Url.Action("UpdateEmployee","Admin")';}
+    var url='@Url.Action("SaveEmployee","Admin")';
     var body='__RequestVerificationToken='+encodeURIComponent(tok());
     Object.keys(model).forEach(function(k){body+='&'+k+'='+encodeURIComponent(model[k]);});
     fetch(url,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body})
@@ -491,7 +740,7 @@ function confirmDelete(){
     var btn=document.getElementById('delConfirmBtn');
     btn.disabled=true;btn.innerHTML='<span class="spin"></span> Deleting…';
     fetch('@Url.Action("DeleteEmployee","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
-        body:'__RequestVerificationToken='+encodeURIComponent(tok())+'&employeeId='+encodeURIComponent(delTargetID)})
+        body:'__RequestVerificationToken='+encodeURIComponent(tok())+'&empID='+encodeURIComponent(delTargetID)})
     .then(function(r){return r.json();}).then(function(d){
         btn.disabled=false;btn.innerHTML='<i class="fas fa-trash"></i> Delete';
         if(d.success){closeDelModal();loadAll();}
@@ -527,6 +776,6 @@ function fmtDT(s){try{return new Date(s).toLocaleDateString('en-MY',{day:'2-digi
 function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 
 loadAll();
-</script>
-@Html.AntiForgeryToken()
+    </script>
+    @Html.AntiForgeryToken()
 }

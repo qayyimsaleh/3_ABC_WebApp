@@ -8,59 +8,110 @@ namespace ABC_WebApp.Controllers
 {
     public class AdminController : Controller
     {
-        // ── GET /Admin/Dashboard ─────────────────────────────────────────────
         public ActionResult Dashboard()
         {
-            if (!SessionHelper.IsLoggedIn)
-                return RedirectToAction("Login", "Auth");
+            if (!SessionHelper.IsLoggedIn) return RedirectToAction("Login", "Auth");
+            if (!SessionHelper.IsAdmin) return RedirectToAction("Index", "Home");
 
-            if (!SessionHelper.IsAdmin)
-            {
-                TempData["ErrorMessage"] = "You do not have permission to access the Admin Dashboard.";
-                return RedirectToAction("Index", "Home");
-            }
-
-            int  year   = DateTime.Now.Year;
-            var  scores = DbHelper.GetAllScores();
+            int year = DateTime.Now.Year;
+            var scores = DbHelper.GetAllScores();
+            var employees = DbHelper.GetAllEmployeesAdmin();
 
             var vm = new AdminDashboardViewModel
             {
-                Scores         = scores,
+                Scores = scores,
+                Employees = employees,
                 TotalEmployees = scores.Count,
-                PassedPart1    = scores.Count(s => DbHelper.IsPassedInYear(s.Part1, s.Part1Timestamp, year)),
-                PassedPart2    = scores.Count(s => DbHelper.IsPassedInYear(s.Part2, s.Part2Timestamp, year)),
-                CurrentYear    = year
+                PassedPart1 = scores.Count(s => DbHelper.IsPassedInYear(s.Part1, s.Part1Timestamp, year)),
+                PassedPart2 = scores.Count(s => DbHelper.IsPassedInYear(s.Part2, s.Part2Timestamp, year)),
+                TotalActive = employees.Count(e => e.Active == "1"),
+                TotalInactive = employees.Count(e => e.Active != "1"),
+                CurrentYear = year
             };
             vm.NotPassedPart1 = vm.TotalEmployees - vm.PassedPart1;
             vm.NotPassedPart2 = vm.TotalEmployees - vm.PassedPart2;
-
             return View(vm);
         }
 
-        // ── AJAX GET /Admin/GetScoresJson  (DataTable live reload) ───────────
         [HttpGet]
         public JsonResult GetScoresJson()
         {
             if (!SessionHelper.IsLoggedIn || !SessionHelper.IsAdmin)
                 return Json(new { error = "Unauthorised" }, JsonRequestBehavior.AllowGet);
-
-            int year   = DateTime.Now.Year;
-            var scores = DbHelper.GetAllScores();
-
-            var result = scores.Select(s => new
-            {
+            int year = DateTime.Now.Year;
+            var result = DbHelper.GetAllScores().Select(s => new {
                 s.EmployeeID,
                 s.UserName,
                 s.Department,
                 s.CompanyID,
                 s.Local,
-                Part1           = DbHelper.IsPassedInYear(s.Part1, s.Part1Timestamp, year) ? "pass" : "not pass",
-                Part2           = DbHelper.IsPassedInYear(s.Part2, s.Part2Timestamp, year) ? "pass" : "not pass",
+                Part1 = DbHelper.IsPassedInYear(s.Part1, s.Part1Timestamp, year) ? "pass" : "not pass",
+                Part2 = DbHelper.IsPassedInYear(s.Part2, s.Part2Timestamp, year) ? "pass" : "not pass",
                 s.Part1Timestamp,
                 s.Part2Timestamp
             });
-
             return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public JsonResult GetEmployeesJson()
+        {
+            if (!SessionHelper.IsLoggedIn || !SessionHelper.IsAdmin)
+                return Json(new { error = "Unauthorised" }, JsonRequestBehavior.AllowGet);
+            return Json(DbHelper.GetAllEmployeesAdmin(), JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public JsonResult GetEmployee(string id)
+        {
+            if (!SessionHelper.IsLoggedIn || !SessionHelper.IsAdmin)
+                return Json(new { error = "Unauthorised" }, JsonRequestBehavior.AllowGet);
+            var emp = DbHelper.GetEmployeeAdmin(id);
+            if (emp == null) return Json(new { error = "Not found" }, JsonRequestBehavior.AllowGet);
+            return Json(emp, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpPost]
+        public JsonResult SaveEmployee(EmployeeFormModel model)
+        {
+            if (!SessionHelper.IsLoggedIn || !SessionHelper.IsAdmin)
+                return Json(new { success = false, message = "Unauthorised" });
+            if (string.IsNullOrWhiteSpace(model.EmployeeID) || string.IsNullOrWhiteSpace(model.UserName))
+                return Json(new { success = false, message = "Employee ID and Name are required." });
+            try
+            {
+                bool isNew = !DbHelper.EmployeeExists(model.EmployeeID);
+                if (isNew) DbHelper.InsertEmployee(model);
+                else DbHelper.UpdateEmployee(model);
+                return Json(new { success = true, message = isNew ? "Employee added." : "Employee updated.", isNew });
+            }
+            catch (Exception ex) { return Json(new { success = false, message = ex.Message }); }
+        }
+
+        [HttpPost]
+        public JsonResult ToggleActive(string empID)
+        {
+            if (!SessionHelper.IsLoggedIn || !SessionHelper.IsAdmin)
+                return Json(new { success = false, message = "Unauthorised" });
+            try
+            {
+                string s = DbHelper.ToggleEmployeeActive(empID);
+                return Json(new { success = true, status = s });
+            }
+            catch (Exception ex) { return Json(new { success = false, message = ex.Message }); }
+        }
+
+        [HttpPost]
+        public JsonResult DeleteEmployee(string empID)
+        {
+            if (!SessionHelper.IsLoggedIn || !SessionHelper.IsAdmin)
+                return Json(new { success = false, message = "Unauthorised" });
+            try
+            {
+                DbHelper.DeleteEmployee(empID);
+                return Json(new { success = true, message = "Employee deleted." });
+            }
+            catch (Exception ex) { return Json(new { success = false, message = ex.Message }); }
         }
     }
 }
