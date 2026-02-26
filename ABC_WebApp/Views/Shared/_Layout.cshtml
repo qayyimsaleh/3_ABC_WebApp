@@ -1,0 +1,529 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <meta http-equiv="Pragma" content="no-cache" />
+    <meta http-equiv="Expires" content="0" />
+    <title>@ViewBag.Title - ABC Training Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    <style>
+
+        :root {
+            --primary: #0056b3;
+            --primary-dark: #004494;
+            --primary-light: #e8f1ff;
+            --secondary: #4a6fa5;
+            --accent: #ff6b35;
+            --success: #28a745;
+            --warning: #ffc107;
+            --error: #dc3545;
+            --info: #17a2b8;
+            --text-dark: #2c3e50;
+            --text-light: #5d6d7e;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-300: #dee2e6;
+            --gray-400: #ced4da;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,.05);
+            --shadow-md: 0 4px 12px rgba(0,0,0,.08);
+            --shadow-lg: 0 8px 24px rgba(0,0,0,.12);
+            --radius: 8px;
+            --radius-lg: 12px;
+            --transition: all .3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI','Roboto',Arial,sans-serif;
+            background: var(--gray-100);
+            color: var(--text-dark);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .container-wide {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* ─── Header ─── */
+        header {
+            background: #fff;
+            box-shadow: var(--shadow-sm);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-size: 20px;
+        }
+
+        .logo-text h1 {
+            font-size: 22px;
+            font-weight: 600;
+            color: var(--primary);
+            line-height: 1.2;
+        }
+
+        .logo-text p {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .user-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: var(--gray-100);
+            padding: 8px 16px;
+            border-radius: var(--radius);
+            border: 1px solid var(--gray-200);
+        }
+
+        .avatar {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg,var(--primary),var(--secondary));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            font-size: 15px;
+            flex-shrink: 0;
+        }
+
+        .user-details h3 {
+            font-size: 15px;
+            font-weight: 600;
+        }
+
+        .user-details p {
+            font-size: 12px;
+            color: var(--text-light);
+        }
+
+        .btn-logout {
+            background: transparent;
+            border: 1px solid var(--error);
+            color: var(--error);
+            padding: 6px 12px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: var(--transition);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+            .btn-logout:hover {
+                background: var(--error);
+                color: #fff;
+            }
+
+        /* ─── Main ─── */
+        main {
+            flex: 1;
+            padding: 40px 0;
+        }
+
+        /* ─── Buttons ─── */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 22px;
+            border: none;
+            border-radius: var(--radius);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: #fff;
+        }
+
+            .btn-primary:hover {
+                background: var(--primary-dark);
+                transform: translateY(-2px);
+                box-shadow: var(--shadow-md);
+            }
+
+        .btn-secondary {
+            background: var(--secondary);
+            color: #fff;
+        }
+
+            .btn-secondary:hover {
+                background: #3a5a8c;
+            }
+
+        .btn-success {
+            background: var(--success);
+            color: #fff;
+        }
+
+            .btn-success:hover {
+                background: #218838;
+            }
+
+        .btn-warning {
+            background: var(--warning);
+            color: #212529;
+        }
+
+            .btn-warning:hover {
+                background: #e0a800;
+            }
+
+        .btn-danger {
+            background: var(--error);
+            color: #fff;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+            .btn-outline:hover {
+                background: var(--primary);
+                color: #fff;
+            }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        .btn:disabled, .btn[disabled] {
+            background: var(--gray-400) !important;
+            cursor: not-allowed;
+            transform: none !important;
+            box-shadow: none !important;
+            color: #666 !important;
+            border-color: var(--gray-400) !important;
+        }
+
+        /* ─── Alerts ─── */
+        .alert {
+            padding: 14px 18px;
+            border-radius: var(--radius);
+            margin-bottom: 18px;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            font-size: 14px;
+        }
+
+            .alert i {
+                margin-top: 2px;
+                flex-shrink: 0;
+            }
+
+        .alert-danger {
+            background: rgba(220,53,69,.1);
+            border-left: 4px solid var(--error);
+            color: #721c24;
+        }
+
+        .alert-success {
+            background: rgba(40,167,69,.1);
+            border-left: 4px solid var(--success);
+            color: #155724;
+        }
+
+        .alert-warning {
+            background: #fff8e1;
+            border-left: 4px solid var(--warning);
+            color: #856404;
+        }
+
+        .alert-info {
+            background: var(--primary-light);
+            border-left: 4px solid var(--primary);
+            color: #004085;
+        }
+
+        /* ─── Cards ─── */
+        .card {
+            background: #fff;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            padding: 30px;
+        }
+
+            .card:hover {
+                transform: translateY(-4px);
+                box-shadow: var(--shadow-lg);
+            }
+
+        /* ─── Status badges ─── */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .badge-pass {
+            background: rgba(40,167,69,.15);
+            color: var(--success);
+        }
+
+        .badge-fail {
+            background: rgba(220,53,69,.15);
+            color: var(--error);
+        }
+
+        .badge-pending {
+            background: rgba(255,193,7,.15);
+            color: #856404;
+        }
+
+        .badge-locked {
+            background: rgba(108,117,125,.15);
+            color: #495057;
+        }
+
+        /* ─── Progress bar ─── */
+        .progress-bar-wrap {
+            height: 10px;
+            background: var(--gray-200);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg,var(--primary),var(--secondary));
+            border-radius: 5px;
+            transition: width .5s ease;
+        }
+
+        /* ─── Spinner ─── */
+        .spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s linear infinite;
+        }
+
+        .spinner-dark {
+            border: 3px solid rgba(0,0,0,.1);
+            border-top-color: var(--primary);
+        }
+
+        @@keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn .4s ease forwards;
+        }
+
+        /* ─── Footer ─── */
+        footer {
+            background: var(--text-dark);
+            color: #fff;
+            padding: 20px 0;
+            margin-top: auto;
+        }
+
+        .footer-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+            .footer-brand i {
+                color: var(--primary-light);
+                font-size: 18px;
+            }
+
+        .footer-text {
+            color: rgba(255,255,255,.65);
+            font-size: 13px;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 18px;
+        }
+
+            .footer-links a {
+                color: rgba(255,255,255,.65);
+                text-decoration: none;
+                font-size: 13px;
+                transition: var(--transition);
+            }
+
+                .footer-links a:hover {
+                    color: #fff;
+                }
+
+        /* ─── Responsive ─── */
+        @@media(max-width:768px) {
+            .header-inner {
+                flex-direction: column;
+                gap: 12px;
+            }
+
+            .user-bar {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .footer-inner {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+
+        @@media(max-width:576px) {
+            .container {
+                padding: 0 15px;
+            }
+
+            .card {
+                padding: 20px;
+            }
+        }
+    </style>
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+    @if (Session["EmployeeID"] != null)
+    {
+        <header>
+            <div class="container">
+                <div class="header-inner">
+                    <a href="@Url.Action("Index","Home")" class="logo">
+                        <div class="logo-icon"><i class="fas fa-shield-alt"></i></div>
+                        <div class="logo-text">
+                            <h1>ABC Training Portal</h1>
+                            <p>IOI Oleochemical &bull; Compliance Dashboard</p>
+                        </div>
+                    </a>
+                    <div class="user-bar">
+                        <div class="avatar" id="layoutAvatar"></div>
+                        <div class="user-details">
+                            <h3>@Session["UserName"]</h3>
+                            <p>ID: @Session["EmployeeID"]</p>
+                        </div>
+                        <a href="@Url.Action("Logout","Auth")" class="btn-logout">
+                            <i class="fas fa-sign-out-alt"></i> Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </header>
+        <script>
+        (function(){
+            var name = '@Session["UserName"]';
+            var initials = name.split(' ').map(function(n){return n[0];}).join('').toUpperCase().substring(0,2);
+            document.getElementById('layoutAvatar').textContent = initials;
+        })();
+        </script>
+    }
+    <main>
+        @RenderBody()
+    </main>
+    <footer>
+        <div class="container">
+            <div class="footer-inner">
+                <div class="footer-brand">
+                    <i class="fas fa-shield-alt"></i>
+                    <div>
+                        <div>ABC Compliance Portal</div>
+                        <div class="footer-text">IOI Oleochemical Industries</div>
+                    </div>
+                </div>
+                <div class="footer-text">Copyright &copy; @DateTime.Now.Year IOI Oleochemical. Proprietary and confidential.</div>
+                <div class="footer-links">
+                    <a href="#"><i class="fas fa-lock"></i> Privacy</a>
+                    <a href="#"><i class="fas fa-file-contract"></i> Terms</a>
+                    <a href="#"><i class="fas fa-headset"></i> Support</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

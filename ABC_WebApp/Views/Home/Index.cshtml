@@ -1,0 +1,147 @@
+@model ABC_WebApp.Models.DashboardViewModel
+@{
+    ViewBag.Title = "Dashboard";
+}
+
+@section Styles {
+<style>
+    .welcome-banner { background:linear-gradient(135deg,var(--primary) 0%,var(--secondary) 100%); color:#fff; padding:30px; border-radius:var(--radius-lg); margin-bottom:28px; box-shadow:var(--shadow-md); }
+    .welcome-banner h2 { font-size:26px; font-weight:600; margin-bottom:8px; }
+    .welcome-banner p  { opacity:.9; max-width:760px; }
+    .cards-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:24px; margin-bottom:32px; }
+    .train-card { background:#fff; border-radius:var(--radius-lg); box-shadow:var(--shadow-md); padding:28px; border-top:4px solid var(--primary); transition:var(--transition); }
+    .train-card:hover { transform:translateY(-4px); box-shadow:var(--shadow-lg); }
+    .card-head  { display:flex; align-items:center; gap:14px; margin-bottom:16px; }
+    .card-icon  { width:50px; height:50px; background:var(--primary-light); border-radius:12px; display:flex; align-items:center; justify-content:center; font-size:22px; color:var(--primary); flex-shrink:0; }
+    .card-title { font-size:18px; font-weight:600; }
+    .card-desc  { color:var(--text-light); font-size:14px; margin-bottom:20px; line-height:1.6; }
+    .lock-msg   { font-size:13px; color:var(--text-light); margin-top:10px; }
+    .admin-section { background:#fff; border-radius:var(--radius-lg); box-shadow:var(--shadow-md); padding:28px; border-left:4px solid var(--accent); margin-bottom:28px; }
+    .admin-section .card-icon { background:rgba(255,107,53,.12); color:var(--accent); }
+    .quick-actions { display:flex; gap:14px; flex-wrap:wrap; }
+    @@media(max-width:640px){ .cards-grid{grid-template-columns:1fr;} .quick-actions{flex-direction:column;} }
+</style>
+}
+
+<div class="container">
+
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-danger fade-in">
+            <i class="fas fa-exclamation-triangle"></i>
+            <span>@Model.ErrorMessage</span>
+        </div>
+    }
+
+    <!-- Welcome Banner -->
+    <div class="welcome-banner fade-in">
+        <h2>Welcome to ABC Training — @Model.CurrentYear</h2>
+        <p>Complete your mandatory Anti-Bribery and Corruption training modules for @Model.CurrentYear. Track your progress and access compliance resources below.</p>
+    </div>
+
+    <!-- Training Cards -->
+    <div class="cards-grid">
+
+        <!-- Part 1 Card -->
+        <div class="train-card fade-in">
+            <div class="card-head">
+                <div class="card-icon"><i class="fas fa-play-circle"></i></div>
+                <div>
+                    <div class="card-title">Part 1: Introduction to ABC</div>
+                    @if (Model.Part1Status == "pass")
+                    {
+                        <span class="badge badge-pass"><i class="fas fa-check-circle"></i> Completed (@Model.CurrentYear)</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-fail"><i class="fas fa-clock"></i> Not Started (@Model.CurrentYear)</span>
+                    }
+                </div>
+            </div>
+            <p class="card-desc">Introduces the fundamentals of Anti-Bribery and Corruption policies, key definitions, legal requirements, and company expectations.</p>
+            <a href="@Url.Action("Part1","Training")" class="btn btn-primary btn-full">
+                <i class="fas fa-play"></i>
+                @(Model.Part1Status == "pass" ? "Retake Part 1 Training" : "Start Part 1 Training")
+            </a>
+        </div>
+
+        <!-- Part 2 Card -->
+        <div class="train-card fade-in">
+            <div class="card-head">
+                <div class="card-icon"><i class="fas fa-chart-line"></i></div>
+                <div>
+                    <div class="card-title">Part 2: Advanced Scenarios</div>
+                    @if (Model.Part2Status == "pass")
+                    {
+                        <span class="badge badge-pass"><i class="fas fa-check-circle"></i> Completed (@Model.CurrentYear)</span>
+                    }
+                    else if (Model.IsPart2Unlocked)
+                    {
+                        <span class="badge badge-pending"><i class="fas fa-play-circle"></i> Ready to Start (@Model.CurrentYear)</span>
+                    }
+                    else
+                    {
+                        <span class="badge badge-locked"><i class="fas fa-lock"></i> Locked (@Model.CurrentYear)</span>
+                    }
+                </div>
+            </div>
+            <p class="card-desc">Advanced module covering real-world scenarios, case studies, and practical applications of ABC policies in the workplace.</p>
+
+            @if (Model.IsPart2Unlocked)
+            {
+                <a href="@Url.Action("Part2","Training")" class="btn btn-primary btn-full">
+                    <i class="fas fa-play"></i>
+                    @(Model.Part2Status == "pass" ? "Retake Part 2 Training" : "Start Part 2 Training")
+                </a>
+            }
+            else
+            {
+                <button class="btn btn-primary btn-full" disabled>
+                    <i class="fas fa-lock"></i> Part 2 Locked
+                </button>
+                <p class="lock-msg"><i class="fas fa-info-circle"></i> Complete and pass Part 1 in @Model.CurrentYear to unlock Part 2.</p>
+            }
+        </div>
+
+        <!-- Guidelines Card -->
+        <div class="train-card fade-in">
+            <div class="card-head">
+                <div class="card-icon"><i class="fas fa-file-pdf"></i></div>
+                <div class="card-title">ABC Guidelines &amp; Resources</div>
+            </div>
+            <p class="card-desc">Access the complete ABC guideline document, policy manuals, and additional compliance resources for reference.</p>
+            <a href="~/Content/ABC_Simple_Guideline.pdf" target="_blank" class="btn btn-outline btn-full">
+                <i class="fas fa-download"></i> View Guidelines (PDF)
+            </a>
+        </div>
+
+    </div>
+
+    <!-- Admin Section (SuperUser only) -->
+    @if (Model.IsSuperUser)
+    {
+        <div class="admin-section fade-in">
+            <div class="card-head">
+                <div class="card-icon"><i class="fas fa-user-shield"></i></div>
+                <div>
+                    <div class="card-title">Administrator Functions</div>
+                    <p style="font-size:14px;color:var(--text-light);">Supervisor access — manage training compliance monitoring.</p>
+                </div>
+            </div>
+            <a href="@Url.Action("Dashboard","Admin")" class="btn btn-warning">
+                <i class="fas fa-chart-bar"></i> View Training Status Dashboard
+            </a>
+        </div>
+    }
+
+    <!-- Quick Actions -->
+    <div class="quick-actions">
+        <a href="@Url.Action("Index","Home")" class="btn btn-secondary">
+            <i class="fas fa-sync-alt"></i> Refresh Status
+        </a>
+        <a href="mailto:admin@ioi.com" class="btn btn-outline">
+            <i class="fas fa-question-circle"></i> Contact Admin Support
+        </a>
+    </div>
+
+</div>

@@ -1,0 +1,261 @@
+@{
+    ViewBag.Title = "Part 2 Training";
+}
+
+@section Styles {
+<style>
+    .page-header { text-align:center; margin-bottom:30px; }
+    .page-header h1 { font-size:28px; font-weight:600; }
+    .page-header p  { color:var(--text-light); margin-top:6px; }
+    .user-info-card { background:var(--primary-light); border-radius:var(--radius); padding:18px 22px; margin-bottom:24px; border-left:4px solid var(--primary); display:flex; gap:30px; flex-wrap:wrap; }
+    .info-item label { font-size:13px; color:var(--text-light); display:block; margin-bottom:4px; }
+    .info-item span  { font-size:15px; font-weight:600; }
+    .progress-card { background:#fff; border-radius:var(--radius-lg); box-shadow:var(--shadow-md); padding:20px 24px; margin-bottom:24px; }
+    .progress-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+    .progress-head span { font-weight:600; }
+    .lang-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:20px; }
+    .lang-option { border:2px solid var(--gray-300); border-radius:var(--radius); padding:18px; cursor:pointer; transition:var(--transition); text-align:center; }
+    .lang-option:hover { border-color:var(--primary); }
+    .lang-option.active { border-color:var(--primary); background:var(--primary-light); }
+    .lang-option i  { font-size:28px; color:var(--primary); margin-bottom:8px; display:block; }
+    .lang-option h3 { font-size:16px; font-weight:600; margin-bottom:4px; }
+    .lang-option p  { font-size:13px; color:var(--text-light); }
+    .score-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:20px; }
+    .score-box  { background:var(--gray-100); border-radius:var(--radius); padding:16px; text-align:center; }
+    .score-box label { font-size:13px; color:var(--text-light); display:block; margin-bottom:6px; }
+    .score-val  { font-size:28px; font-weight:700; color:var(--primary); }
+    .score-val.pass { color:var(--success); }
+    .score-val.fail { color:var(--error); }
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.75); z-index:1000; flex-direction:column; }
+    .modal-overlay.active { display:flex; }
+    .modal-toolbar { background:var(--text-dark); padding:12px 20px; display:flex; justify-content:space-between; align-items:center; color:#fff; }
+    .modal-toolbar h3 { font-size:16px; font-weight:600; }
+    .modal-close { background:var(--error); border:none; color:#fff; padding:7px 14px; border-radius:var(--radius); cursor:pointer; font-size:14px; }
+    .modal-frame { flex:1; width:100%; border:none; }
+    @@media(max-width:600px){ .lang-grid,.score-grid{grid-template-columns:1fr;} }
+</style>
+}
+
+<div class="container">
+    <div class="page-header fade-in">
+        <h1><i class="fas fa-chart-line" style="color:var(--primary)"></i> Part 2: Advanced Scenarios</h1>
+        <p>Anti-Bribery &amp; Corruption Training — @DateTime.Now.Year</p>
+    </div>
+
+    <div class="alert alert-success fade-in">
+        <i class="fas fa-check-circle"></i>
+        <span><strong>Part 1 Completed!</strong> You have unlocked Part 2 Advanced training.</span>
+    </div>
+
+    <!-- User Info -->
+    <div class="user-info-card fade-in">
+        <div class="info-item">
+            <label>Employee ID</label>
+            <span>@Session["EmployeeID"]</span>
+        </div>
+        <div class="info-item">
+            <label>Name</label>
+            <span>@Session["UserName"]</span>
+        </div>
+        <div class="info-item">
+            <label>Department</label>
+            <span>@Session["Department"]</span>
+        </div>
+        <div class="info-item">
+            <label>Training Year</label>
+            <span>@DateTime.Now.Year</span>
+        </div>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-card fade-in">
+        <div class="progress-head">
+            <span>Training Progress</span>
+            <span id="progressPct">0%</span>
+        </div>
+        <div class="progress-bar-wrap">
+            <div class="progress-bar-fill" id="progressFill" style="width:0%"></div>
+        </div>
+        <p style="font-size:13px;color:var(--text-light);text-align:center;margin-top:8px;" id="progressLabel">
+            Select a language and start the advanced training module.
+        </p>
+    </div>
+
+    <!-- Language Selection -->
+    <div class="card fade-in" style="margin-bottom:24px;">
+        <h3 style="font-size:17px;font-weight:600;margin-bottom:16px;"><i class="fas fa-language" style="color:var(--primary)"></i> Select Training Language</h3>
+        <div class="lang-grid">
+            <div class="lang-option active" id="optEN" onclick="selectLang('english')">
+                <i class="fas fa-flag-usa"></i>
+                <h3>English</h3>
+                <p>IOI Group ABC in the Workplace – Part Two</p>
+            </div>
+            <div class="lang-option" id="optBM" onclick="selectLang('malay')">
+                <i class="fas fa-flag"></i>
+                <h3>Bahasa Malaysia</h3>
+                <p>IOI Group ABC di Tempat Kerja – Bahagian Dua</p>
+            </div>
+        </div>
+        <button class="btn btn-primary btn-full" id="startBtn" onclick="startTraining()">
+            <i class="fas fa-play-circle"></i> Start Advanced Training in English
+        </button>
+    </div>
+
+    <!-- Score Display -->
+    <div class="card fade-in" id="scoreDisplay" style="display:none;margin-bottom:24px;">
+        <h3 style="font-size:17px;font-weight:600;margin-bottom:16px;"><i class="fas fa-chart-bar" style="color:var(--primary)"></i> Your Quiz Results</h3>
+        <div class="score-grid">
+            <div class="score-box">
+                <label>Score</label>
+                <div class="score-val" id="scoreVal">—</div>
+            </div>
+            <div class="score-box">
+                <label>Status</label>
+                <div class="score-val" id="statusVal">Not Submitted</div>
+            </div>
+        </div>
+
+        <div id="alertArea"></div>
+
+        <button class="btn btn-primary btn-full" id="submitBtn" onclick="submitScore()" disabled>
+            <i class="fas fa-paper-plane"></i> Submit Part 2 Results
+        </button>
+    </div>
+
+    <a href="@Url.Action("Index","Home")" class="btn btn-secondary">
+        <i class="fas fa-arrow-left"></i> Back to Dashboard
+    </a>
+</div>
+
+<!-- Training Modal -->
+<div class="modal-overlay" id="trainingModal">
+    <div class="modal-toolbar">
+        <h3 id="modalTitle">ABC Advanced Training</h3>
+        <button class="modal-close" onclick="closeTraining()"><i class="fas fa-times"></i> Close</button>
+    </div>
+    <iframe class="modal-frame" id="trainingFrame" src="about:blank"></iframe>
+</div>
+
+@section Scripts {
+<script>
+    var selectedLang  = 'english';
+    var currentScore  = '';
+    var currentStatus = '';
+
+    var TRAINING_URLS = {
+        english: '/Content/Training/Part2_EN/story.html',
+        malay:   '/Content/Training/Part2_BM/story.html'
+    };
+
+    function selectLang(lang) {
+        selectedLang = lang;
+        document.getElementById('optEN').classList.toggle('active', lang === 'english');
+        document.getElementById('optBM').classList.toggle('active', lang === 'malay');
+        document.getElementById('startBtn').innerHTML =
+            '<i class="fas fa-play-circle"></i> Start Advanced Training in ' +
+            (lang === 'english' ? 'English' : 'Bahasa Malaysia');
+    }
+
+    function startTraining() {
+        document.getElementById('modalTitle').textContent =
+            selectedLang === 'english'
+                ? 'ABC Advanced Training – English Version'
+                : 'ABC Advanced Training – Bahasa Malaysia Version';
+        document.getElementById('trainingFrame').src = TRAINING_URLS[selectedLang];
+        document.getElementById('trainingModal').classList.add('active');
+        document.getElementById('scoreDisplay').style.display = 'block';
+    }
+
+    function closeTraining() {
+        document.getElementById('trainingModal').classList.remove('active');
+        document.getElementById('trainingFrame').src = 'about:blank';
+    }
+
+    window.addEventListener('message', function (event) {
+        if (!event.data) return;
+        var parts = event.data.split('|');
+        if (parts.length < 2) return;
+
+        if (parts[0] === 'ScorePercentage') {
+            currentScore = parts[1];
+            updateProgress(currentScore);
+        } else if (parts[0] === 'ScoreStatus') {
+            currentStatus = parts[1];
+        }
+
+        if (currentScore && currentStatus) {
+            updateDisplay(currentScore, currentStatus);
+        }
+    });
+
+    function updateProgress(score) {
+        var pct = parseInt(score) || 0;
+        document.getElementById('progressFill').style.width = pct + '%';
+        document.getElementById('progressPct').textContent  = pct + '%';
+        document.getElementById('progressLabel').textContent =
+            pct >= 100 ? 'Training Completed! Ready to submit.' :
+            pct > 0    ? 'Training in progress...' :
+                         'Select a language and start the training module.';
+    }
+
+    function updateDisplay(score, status) {
+        var sv = document.getElementById('scoreVal');
+        var st = document.getElementById('statusVal');
+        sv.textContent = score + '%';
+        st.textContent = status;
+        sv.className = 'score-val ' + status.toLowerCase();
+        st.className = 'score-val ' + status.toLowerCase();
+        document.getElementById('submitBtn').disabled = false;
+    }
+
+    function showAlert(type, msg) {
+        document.getElementById('alertArea').innerHTML =
+            '<div class="alert alert-' + type + '" style="margin-bottom:14px">' +
+            '<i class="fas fa-' + (type==='success'?'check-circle':'exclamation-triangle') + '"></i>' +
+            '<span>' + msg + '</span></div>';
+    }
+
+    function submitScore() {
+        if (!currentScore || !currentStatus) {
+            showAlert('danger', 'Please complete the training quiz first before submitting.');
+            return;
+        }
+
+        var btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner"></span> Submitting...';
+
+        var token = document.querySelector('input[name="__RequestVerificationToken"]') ?
+                    document.querySelector('input[name="__RequestVerificationToken"]').value : '';
+
+        fetch('@Url.Action("SubmitPart2","Training")', {
+            method:  'POST',
+            headers: { 'Content-Type':'application/x-www-form-urlencoded' },
+            body:    '__RequestVerificationToken=' + encodeURIComponent(token) +
+                     '&EmpID='           + encodeURIComponent('@Session["EmployeeID"]') +
+                     '&UserName='        + encodeURIComponent('@Session["UserName"]') +
+                     '&ScorePercentage=' + encodeURIComponent(currentScore) +
+                     '&ScoreStatus='     + encodeURIComponent(currentStatus)
+        })
+        .then(function(r){ return r.json(); })
+        .then(function(d){
+            if (d.success) {
+                btn.innerHTML = '<i class="fas fa-check"></i> Submitted Successfully';
+                btn.style.background = 'var(--success)';
+                showAlert('success', d.message + ' Submitted at ' + d.timestamp);
+                updateProgress('100');
+            } else {
+                showAlert('danger', d.message);
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Part 2 Results';
+            }
+        })
+        .catch(function(){
+            showAlert('danger', 'Network error. Please try again.');
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Part 2 Results';
+        });
+    }
+</script>
+@Html.AntiForgeryToken()
+}
