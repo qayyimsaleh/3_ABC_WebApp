@@ -373,6 +373,9 @@
                 <span class="row-count" id="reportCount"></span>
             </div>
             <div class="tbar-right">
+                <select class="filter-sel" id="rYear" onchange="changeYear()" style="font-weight:600;color:var(--blue);border-color:rgba(79,142,247,.25)">
+                    <option value="">Loading years...</option>
+                </select>
                 <div class="search-box">
                     <i class="fas fa-magnifying-glass"></i>
                     <input type="text" id="rSearch" placeholder="Search name or ID…" oninput="filterReport()">
@@ -539,7 +542,7 @@
 @section Scripts {
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <script>
-var CY=@Model.CurrentYear, allScores=[], allEmps=[], filteredScores=[], filteredEmps=[], editMode=false, editID='', delTargetID='';
+var CY=@Model.CurrentYear, allScores=[], allEmps=[], filteredScores=[], filteredEmps=[], editMode=false, editID='', delTargetID='', selectedYear=@Model.CurrentYear;
 var tok=function(){var t=document.querySelector('input[name="__RequestVerificationToken"]');return t?t.value:'';};
 
 // ── TABS ────────────────────────────────────────────────────────────────────
@@ -549,18 +552,51 @@ function showTab(id){
     document.getElementById('tab-'+id).classList.add('on');
 }
 
+// ── LOAD YEARS ───────────────────────────────────────────────────────────────
+function loadYears(){
+    fetch('@Url.Action("GetYearsJson","Admin")').then(function(r){return r.json();}).then(function(years){
+        var sel=document.getElementById('rYear');
+        sel.innerHTML='';
+        years.forEach(function(y){
+            var o=document.createElement('option');
+            o.value=y;
+            o.textContent=y+(y===CY?' (Current)':'');
+            if(y===CY) o.selected=true;
+            sel.appendChild(o);
+        });
+        selectedYear=CY;
+        loadReport();
+    });
+}
+
 // ── LOAD DATA ────────────────────────────────────────────────────────────────
-function loadAll(){
-    fetch('@Url.Action("GetScoresJson","Admin")').then(function(r){return r.json();}).then(function(d){
+function loadReport(){
+    var yr=document.getElementById('rYear').value||CY;
+    selectedYear=parseInt(yr);
+    document.getElementById('reportBody').innerHTML='<tr><td colspan="8" style="text-align:center;padding:32px"><span class="spin" style="border-top-color:var(--blue)"></span></td></tr>';
+    fetch('@Url.Action("GetScoresJson","Admin")?year='+yr).then(function(r){return r.json();}).then(function(d){
         allScores=d; filteredScores=d;
         populateDepts(d.map(function(e){return e.Department;}), 'rDept');
-        renderReport();
+        filterReport();
+        updateStats(d);
     });
+}
+
+function changeYear(){
+    // reset filters when year changes
+    document.getElementById('rSearch').value='';
+    document.getElementById('rDept').value='';
+    document.getElementById('rType').value='';
+    document.getElementById('rStatus').value='';
+    loadReport();
+}
+
+function loadAll(){
+    loadYears();
     fetch('@Url.Action("GetEmployeesJson","Admin")').then(function(r){return r.json();}).then(function(d){
         allEmps=d; filteredEmps=d;
         populateDepts(d.map(function(e){return e.Department;}), 'eDept');
         renderEmployees();
-        updateStats(allScores);
     });
 }
 
@@ -753,13 +789,13 @@ function exportExcel(){
     if(!allScores.length){alert('No data.');return;}
     var rows=allScores.map(function(e){return{'Employee ID':e.EmployeeID,'Name':e.UserName,'Department':e.Department,'Company':e.CompanyID,'Type':e.Local==='1'?'Local':'Foreign','Part 1':e.Part1,'Part 1 Date':e.Part1Timestamp?fmtDT(e.Part1Timestamp):'','Part 2':e.Part2,'Part 2 Date':e.Part2Timestamp?fmtDT(e.Part2Timestamp):''};});
     var wb=XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),'Training '+CY);
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),'Training '+selectedYear);
     // summary
     var dm={};allScores.forEach(function(e){if(!dm[e.Department])dm[e.Department]={total:0,p1:0,p2:0};dm[e.Department].total++;if(e.Part1==='pass')dm[e.Department].p1++;if(e.Part2==='pass')dm[e.Department].p2++;});
     var sum=[['Department','Total','P1 Passed','P1 %','P2 Passed','P2 %']];
     Object.keys(dm).sort().forEach(function(k){var d=dm[k];sum.push([k,d.total,d.p1,(d.p1/d.total*100).toFixed(1)+'%',d.p2,(d.p2/d.total*100).toFixed(1)+'%']);});
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(sum),'Dept Summary');
-    XLSX.writeFile(wb,'ABC_Training_Report_'+CY+'_'+new Date().toISOString().slice(0,10)+'.xlsx');
+    XLSX.writeFile(wb,'ABC_Training_Report_'+selectedYear+'_'+new Date().toISOString().slice(0,10)+'.xlsx');
 }
 
 function exportCSV(){
@@ -767,7 +803,7 @@ function exportCSV(){
     var h=['Employee ID','Name','Department','Company','Type','Part 1','Part 1 Date','Part 2','Part 2 Date'];
     var rows=allScores.map(function(e){return[e.EmployeeID,'"'+e.UserName+'"','"'+e.Department+'"',e.CompanyID,e.Local==='1'?'Local':'Foreign',e.Part1,e.Part1Timestamp?fmtDT(e.Part1Timestamp):'',e.Part2,e.Part2Timestamp?fmtDT(e.Part2Timestamp):''].join(',');});
     var blob=new Blob([[h.join(',')].concat(rows).join('\n')],{type:'text/csv'});
-    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ABC_Training_'+CY+'.csv';a.click();
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ABC_Training_'+selectedYear+'.csv';a.click();
 }
 
 // ── HELPERS ──────────────────────────────────────────────────────────────────

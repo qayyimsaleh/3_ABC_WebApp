@@ -139,6 +139,47 @@ namespace ABC_WebApp.Helpers
             return list;
         }
 
+        /// <summary>
+        /// Returns all employees with their latest Part1/Part2 score filtered to a specific training year.
+        /// Employees with no score in that year show 'not pass'.
+        /// </summary>
+        public static List<EmployeeScore> GetAllScoresForYear(int year)
+        {
+            const string sql = @"SELECT e.EmployeeID,e.UserName,e.Department,e.CompanyID,e.Local,
+                COALESCE(a.Part1,'not pass') AS Part1, COALESCE(a.Part1Ts,NULL) AS Part1Timestamp,
+                COALESCE(b.Part2,'not pass') AS Part2, COALESCE(b.Part2Ts,NULL) AS Part2Timestamp
+                FROM empMaster_lists e
+                LEFT JOIN(SELECT EmployeeID,UserName,ScoreStatus AS Part1,Timestamp AS Part1Ts,
+                    ROW_NUMBER() OVER(PARTITION BY EmployeeID ORDER BY Timestamp DESC) rn
+                    FROM partOne_scores WHERE TrainingYear=@Year
+                ) a ON e.EmployeeID=a.EmployeeID AND e.UserName=a.UserName AND a.rn=1
+                LEFT JOIN(SELECT EmployeeID,UserName,ScoreStatus AS Part2,Timestamp AS Part2Ts,
+                    ROW_NUMBER() OVER(PARTITION BY EmployeeID ORDER BY Timestamp DESC) rn
+                    FROM partTwo_scores WHERE TrainingYear=@Year
+                ) b ON e.EmployeeID=b.EmployeeID AND e.UserName=b.UserName AND b.rn=1
+                WHERE e.Active='1' ORDER BY e.UserName ASC";
+            var list = new List<EmployeeScore>();
+            using (var con = Open()) using (var cmd = Cmd(sql, con))
+            {
+                cmd.Parameters.AddWithValue("@Year", year);
+                using (var r = cmd.ExecuteReader()) while (r.Read()) list.Add(MapScore(r));
+            }
+            return list;
+        }
+
+        /// <summary>Returns distinct training years that have score data, for filter dropdowns.</summary>
+        public static List<int> GetTrainingYears()
+        {
+            const string sql = @"SELECT DISTINCT TrainingYear FROM partOne_scores
+                                 UNION
+                                 SELECT DISTINCT TrainingYear FROM partTwo_scores
+                                 ORDER BY 1 DESC";
+            var list = new List<int>();
+            using (var con = Open()) using (var cmd = Cmd(sql, con)) using (var r = cmd.ExecuteReader())
+                while (r.Read()) list.Add(Convert.ToInt32(r[0]));
+            return list;
+        }
+
         public static void SaveScore(string tableName, TrainingSubmitModel m)
         {
             if (tableName != "partOne_scores" && tableName != "partTwo_scores") throw new ArgumentException("Invalid table.");

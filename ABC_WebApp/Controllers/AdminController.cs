@@ -34,23 +34,39 @@ namespace ABC_WebApp.Controllers
         }
 
         [HttpGet]
-        public JsonResult GetScoresJson()
+        public JsonResult GetScoresJson(int? year)
         {
             if (!SessionHelper.IsLoggedIn || !SessionHelper.IsAdmin)
                 return Json(new { error = "Unauthorised" }, JsonRequestBehavior.AllowGet);
-            int year = DateTime.Now.Year;
-            var result = DbHelper.GetAllScores().Select(s => new {
+
+            int selectedYear = year ?? DateTime.Now.Year;
+            var scores = DbHelper.GetAllScoresForYear(selectedYear);
+
+            var result = scores.Select(s => new {
                 s.EmployeeID,
                 s.UserName,
                 s.Department,
                 s.CompanyID,
                 s.Local,
-                Part1 = DbHelper.IsPassedInYear(s.Part1, s.Part1Timestamp, year) ? "pass" : "not pass",
-                Part2 = DbHelper.IsPassedInYear(s.Part2, s.Part2Timestamp, year) ? "pass" : "not pass",
+                Part1 = s.Part1 ?? "not pass",
+                Part2 = s.Part2 ?? "not pass",
                 s.Part1Timestamp,
-                s.Part2Timestamp
+                s.Part2Timestamp,
+                Year = selectedYear
             });
             return Json(result, JsonRequestBehavior.AllowGet);
+        }
+
+        [HttpGet]
+        public JsonResult GetYearsJson()
+        {
+            if (!SessionHelper.IsLoggedIn || !SessionHelper.IsAdmin)
+                return Json(new { error = "Unauthorised" }, JsonRequestBehavior.AllowGet);
+            var years = DbHelper.GetTrainingYears();
+            // Always include current year even if no data yet
+            int cy = DateTime.Now.Year;
+            if (!years.Contains(cy)) years.Insert(0, cy);
+            return Json(years, JsonRequestBehavior.AllowGet);
         }
 
         [HttpGet]
