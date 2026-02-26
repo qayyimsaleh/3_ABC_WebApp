@@ -1,368 +1,532 @@
 @model ABC_WebApp.Models.AdminDashboardViewModel
-@{
-    ViewBag.Title = "Admin Dashboard";
-}
+@{ ViewBag.Title = "Admin"; ViewBag.ActivePage = "admin"; }
 
 @section Styles {
 <style>
-    .dash-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:28px; flex-wrap:wrap; gap:14px; }
-    .dash-header h1 { font-size:28px; font-weight:600; }
-    .dash-header p  { color:var(--text-light); margin-top:4px; }
-    /* Stat Cards */
-    .stats-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:20px; margin-bottom:28px; }
-    .stat-card  { background:#fff; border-radius:var(--radius-lg); box-shadow:var(--shadow-md); padding:22px; border-top:4px solid var(--primary); }
-    .stat-card.green { border-color:var(--success); }
-    .stat-card.red   { border-color:var(--error); }
-    .stat-card.blue  { border-color:var(--info); }
-    .stat-head  { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
-    .stat-icon  { width:44px; height:44px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:20px; }
-    .stat-icon.p  { background:var(--primary-light); color:var(--primary); }
-    .stat-icon.g  { background:rgba(40,167,69,.12); color:var(--success); }
-    .stat-icon.r  { background:rgba(220,53,69,.12); color:var(--error); }
-    .stat-icon.b  { background:rgba(23,162,184,.12); color:var(--info); }
-    .stat-num   { font-size:32px; font-weight:700; }
-    .stat-label { font-size:14px; color:var(--text-light); margin-bottom:10px; }
-    /* Filter Bar */
-    .filter-bar { background:#fff; border-radius:var(--radius-lg); box-shadow:var(--shadow-md); padding:20px; margin-bottom:24px; display:flex; gap:14px; flex-wrap:wrap; align-items:flex-end; }
-    .filter-group { display:flex; flex-direction:column; gap:5px; flex:1; min-width:160px; }
-    .filter-group label { font-size:13px; font-weight:500; }
-    .filter-group select, .filter-group input { padding:9px 12px; border:1px solid var(--gray-300); border-radius:var(--radius); font-size:14px; }
-    /* Table */
-    .table-card { background:#fff; border-radius:var(--radius-lg); box-shadow:var(--shadow-md); overflow:hidden; }
-    .table-toolbar { padding:18px 20px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--gray-200); flex-wrap:wrap; gap:12px; }
-    .table-toolbar h3 { font-size:17px; font-weight:600; }
-    .table-wrap { overflow-x:auto; }
-    table { width:100%; border-collapse:collapse; font-size:14px; }
-    thead th { background:var(--gray-100); padding:12px 14px; text-align:left; font-weight:600; border-bottom:2px solid var(--gray-200); white-space:nowrap; }
-    tbody td { padding:11px 14px; border-bottom:1px solid var(--gray-200); }
-    tbody tr:last-child td { border-bottom:none; }
-    tbody tr:hover { background:var(--gray-100); }
-    .emp-id { font-family:monospace; font-weight:600; color:var(--primary); }
-    .dept-cell { max-width:180px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-    .status-badge { display:inline-flex; align-items:center; gap:5px; padding:4px 12px; border-radius:14px; font-size:12px; font-weight:600; }
-    .s-pass { background:rgba(40,167,69,.12); color:var(--success); }
-    .s-fail { background:rgba(220,53,69,.12); color:var(--error); }
-    .ts-date { display:block; font-size:11px; color:var(--text-light); margin-top:3px; }
-    .empty-state { text-align:center; padding:50px; color:var(--text-light); }
-    .empty-state i { font-size:48px; margin-bottom:14px; display:block; opacity:.4; }
-    @@media(max-width:768px){ .stats-grid{grid-template-columns:1fr 1fr;} }
-    @@media(max-width:480px){ .stats-grid{grid-template-columns:1fr;} }
+/* ─ TABS ─ */
+.tabs{display:flex;gap:2px;background:var(--s2);border:1px solid var(--bd);border-radius:var(--rl);padding:4px;width:fit-content;margin-bottom:28px}
+.tab{padding:7px 18px;border-radius:var(--r);font-size:13px;font-weight:500;cursor:pointer;transition:var(--tr);color:var(--t3);border:none;background:none;font-family:inherit}
+.tab.on{background:var(--s1);color:var(--t1);border:1px solid var(--bd2);box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.tab-panel{display:none}.tab-panel.on{display:block}
+
+/* ─ STATS ─ */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:28px}
+.stat{background:var(--s1);border:1px solid var(--bd);border-radius:var(--rl);padding:18px 20px}
+.stat-num{font-size:30px;font-weight:700;letter-spacing:-1px;line-height:1}
+.stat-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.4px;color:var(--t3);margin-top:4px;font-weight:600}
+.stat-bar{height:3px;border-radius:2px;margin-top:12px;background:var(--s4);overflow:hidden}
+.stat-bar-fill{height:100%;border-radius:2px;transition:width .7s ease}
+
+/* ─ TABLE TOOLBAR ─ */
+.tbar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:14px}
+.tbar h3{font-size:14px;font-weight:600}
+.tbar-right{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.search-box{position:relative}
+.search-box i{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:12px;pointer-events:none}
+.search-box input{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);padding:7px 10px 7px 30px;font-size:13px;color:var(--t1);font-family:inherit;width:200px;transition:var(--tr)}
+.search-box input:focus{outline:none;border-color:rgba(79,142,247,.3);width:240px}
+.filter-sel{background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);padding:7px 10px;font-size:13px;color:var(--t2);font-family:inherit;cursor:pointer}
+.filter-sel:focus{outline:none;border-color:rgba(79,142,247,.3)}
+.filter-sel option{background:var(--s2)}
+.row-count{font-size:12px;color:var(--t3);font-family:'JetBrains Mono',monospace}
+
+/* ─ TABLE ─ */
+.action-btns{display:flex;gap:5px}
+.icon-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--bd);background:var(--s2);color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:11px;transition:var(--tr)}
+.icon-btn:hover{border-color:var(--bd2);color:var(--t1);background:var(--s3)}
+.icon-btn.del:hover{border-color:rgba(248,113,113,.3);color:var(--red);background:var(--red-g)}
+.icon-btn.edit:hover{border-color:rgba(79,142,247,.3);color:var(--blue);background:var(--blue-g)}
+.toggle-sw{position:relative;width:34px;height:18px;cursor:pointer}
+.toggle-sw input{opacity:0;width:0;height:0}
+.slider{position:absolute;inset:0;background:var(--s4);border-radius:9px;transition:.3s}
+.slider:before{content:'';position:absolute;width:12px;height:12px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
+.toggle-sw input:checked+.slider{background:var(--green)}
+.toggle-sw input:checked+.slider:before{transform:translateX(16px)}
+
+/* ─ SECTION HEADER ─ */
+.sec-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:20px}
+.sec-head h2{font-size:16px;font-weight:600}
+
+/* ─ EMPTY STATE ─ */
+.empty{padding:48px;text-align:center;color:var(--t3)}
+.empty i{font-size:32px;margin-bottom:12px;opacity:.4;display:block}
+
+/* ─ CONFIRM DELETE ─ */
+.del-info{background:var(--red-g);border:1px solid rgba(248,113,113,.2);border-radius:var(--r);padding:14px;font-size:13px;color:#fca5a5;margin-bottom:16px}
+
+@@media(max-width:768px){.stats-row{grid-template-columns:1fr 1fr}.tbar{flex-direction:column;align-items:flex-start}.search-box input{width:100%}.tbar-right{width:100%}.filter-sel{flex:1}}
+@@media(max-width:480px){.stats-row{grid-template-columns:1fr}}
 </style>
 }
 
-<div class="container-wide">
-
-    <div class="dash-header fade-in">
-        <div>
-            <h1><i class="fas fa-chart-bar" style="color:var(--primary)"></i> Training Status Dashboard</h1>
-            <p>ABC Training Analytics — @Model.CurrentYear &bull; Total active employees: @Model.TotalEmployees</p>
-        </div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap;">
-            <button class="btn btn-success" onclick="exportExcel()"><i class="fas fa-file-excel"></i> Export Excel</button>
-            <button class="btn btn-secondary" onclick="exportCSV()"><i class="fas fa-file-csv"></i> Export CSV</button>
-            <a href="@Url.Action("Index","Home")" class="btn btn-outline"><i class="fas fa-arrow-left"></i> Back</a>
-        </div>
-    </div>
-
-    <!-- Stat Cards -->
-    <div class="stats-grid fade-in">
-        <div class="stat-card">
-            <div class="stat-head">
-                <div>
-                    <div class="stat-num">@Model.TotalEmployees</div>
-                    <div class="stat-label">Total Employees</div>
-                </div>
-                <div class="stat-icon p"><i class="fas fa-users"></i></div>
+<div class="wrap-xl">
+    <!-- Page Header -->
+    <div style="padding:32px 0 24px;border-bottom:1px solid var(--bd);margin-bottom:28px" class="fade-up">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap">
+            <div>
+                <div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--t3);font-weight:600;margin-bottom:6px">Administration</div>
+                <h1 style="font-size:22px;font-weight:700;letter-spacing:-.3px;margin-bottom:4px">Admin Dashboard</h1>
+                <p style="font-size:13px;color:var(--t3)">Training Year @Model.CurrentYear &nbsp;·&nbsp; @Model.TotalActive active employees</p>
             </div>
-            <div class="progress-bar-wrap">
-                <div class="progress-bar-fill" style="width:100%"></div>
-            </div>
-        </div>
-        <div class="stat-card green">
-            <div class="stat-head">
-                <div>
-                    <div class="stat-num" id="stat-p1-pass">@Model.PassedPart1</div>
-                    <div class="stat-label">Passed Part 1 (@Model.CurrentYear)</div>
-                </div>
-                <div class="stat-icon g"><i class="fas fa-check-circle"></i></div>
-            </div>
-            <div class="progress-bar-wrap">
-                <div class="progress-bar-fill" id="bar-p1" style="width:@(Model.TotalEmployees > 0 ? (Model.PassedPart1 * 100 / Model.TotalEmployees) : 0)%;background:var(--success)"></div>
-            </div>
-            <small class="stat-label" id="pct-p1">@(Model.TotalEmployees > 0 ? Math.Round((double)Model.PassedPart1 / Model.TotalEmployees * 100, 1) : 0)%</small>
-        </div>
-        <div class="stat-card green">
-            <div class="stat-head">
-                <div>
-                    <div class="stat-num" id="stat-p2-pass">@Model.PassedPart2</div>
-                    <div class="stat-label">Passed Part 2 (@Model.CurrentYear)</div>
-                </div>
-                <div class="stat-icon g"><i class="fas fa-award"></i></div>
-            </div>
-            <div class="progress-bar-wrap">
-                <div class="progress-bar-fill" id="bar-p2" style="width:@(Model.TotalEmployees > 0 ? (Model.PassedPart2 * 100 / Model.TotalEmployees) : 0)%;background:var(--success)"></div>
-            </div>
-            <small class="stat-label" id="pct-p2">@(Model.TotalEmployees > 0 ? Math.Round((double)Model.PassedPart2 / Model.TotalEmployees * 100, 1) : 0)%</small>
-        </div>
-        <div class="stat-card red">
-            <div class="stat-head">
-                <div>
-                    <div class="stat-num" id="stat-p1-fail">@Model.NotPassedPart1</div>
-                    <div class="stat-label">Not Completed Part 1</div>
-                </div>
-                <div class="stat-icon r"><i class="fas fa-exclamation-circle"></i></div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn btn-ghost btn-sm" onclick="exportExcel()"><i class="fas fa-file-excel"></i> Export Excel</button>
+                <button class="btn btn-ghost btn-sm" onclick="exportCSV()"><i class="fas fa-download"></i> Export CSV</button>
             </div>
         </div>
     </div>
 
-    <!-- Filter Bar -->
-    <div class="filter-bar fade-in">
-        <div class="filter-group">
-            <label>Search Name / ID</label>
-            <input type="text" id="searchInput" placeholder="Search..." oninput="applyFilters()" />
+    <!-- Stats -->
+    <div class="stats-row fade-up">
+        <div class="stat">
+            <div class="stat-num" style="color:var(--t1)">@Model.TotalActive</div>
+            <div class="stat-lbl">Active Employees</div>
+            <div class="stat-bar"><div class="stat-bar-fill" style="width:100%;background:var(--blue)"></div></div>
         </div>
-        <div class="filter-group">
-            <label>Department</label>
-            <select id="deptFilter" onchange="applyFilters()">
-                <option value="">All Departments</option>
-            </select>
+        <div class="stat">
+            <div class="stat-num" style="color:var(--green)" id="s-p1">@Model.PassedPart1</div>
+            <div class="stat-lbl">Passed Part 1</div>
+            <div class="stat-bar"><div class="stat-bar-fill" id="sb-p1" style="width:@(Model.TotalActive>0?(Model.PassedPart1*100/Model.TotalActive):0)%;background:var(--green)"></div></div>
         </div>
-        <div class="filter-group">
-            <label>Employee Type</label>
-            <select id="typeFilter" onchange="applyFilters()">
-                <option value="">All Types</option>
-                <option value="1">Local</option>
-                <option value="0">Foreign</option>
-            </select>
+        <div class="stat">
+            <div class="stat-num" style="color:var(--purple)" id="s-p2">@Model.PassedPart2</div>
+            <div class="stat-lbl">Passed Part 2</div>
+            <div class="stat-bar"><div class="stat-bar-fill" id="sb-p2" style="width:@(Model.TotalActive>0?(Model.PassedPart2*100/Model.TotalActive):0)%;background:var(--purple)"></div></div>
         </div>
-        <div class="filter-group">
-            <label>Status</label>
-            <select id="statusFilter" onchange="applyFilters()">
-                <option value="">All</option>
-                <option value="both-pass">Both Parts Passed</option>
-                <option value="p1-pass">Part 1 Passed</option>
-                <option value="p2-pass">Part 2 Passed</option>
-                <option value="not-pass">Not Completed</option>
-            </select>
+        <div class="stat">
+            <div class="stat-num" style="color:var(--red)" id="s-np">@Model.NotPassedPart1</div>
+            <div class="stat-lbl">Not Completed P1</div>
+            <div class="stat-bar"><div class="stat-bar-fill" id="sb-np" style="width:@(Model.TotalActive>0?(Model.NotPassedPart1*100/Model.TotalActive):0)%;background:var(--red)"></div></div>
         </div>
-        <button class="btn btn-secondary" onclick="clearFilters()"><i class="fas fa-times"></i> Clear</button>
+        <div class="stat">
+            @{ double bothPct = Model.TotalActive>0 ? Math.Round((double)Model.PassedPart2/Model.TotalActive*100,1) : 0; }
+            <div class="stat-num" style="color:var(--amber)">@bothPct%</div>
+            <div class="stat-lbl">Full Completion</div>
+            <div class="stat-bar"><div class="stat-bar-fill" style="width:@bothPct%;background:var(--amber)"></div></div>
+        </div>
     </div>
 
-    <!-- Data Table -->
-    <div class="table-card fade-in">
-        <div class="table-toolbar">
-            <h3><i class="fas fa-table"></i> Employee Training Records</h3>
-            <span id="rowCount" style="font-size:14px;color:var(--text-light);">Loading...</span>
+    <!-- Tabs -->
+    <div class="tabs fade-up">
+        <button class="tab on" onclick="showTab('report')"><i class="fas fa-chart-bar" style="margin-right:5px"></i>Training Report</button>
+        <button class="tab" onclick="showTab('employees')"><i class="fas fa-users" style="margin-right:5px"></i>Employees</button>
+    </div>
+
+    <!-- ═══ TAB: REPORT ═══ -->
+    <div class="tab-panel on" id="tab-report">
+        <div class="tbar">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <h3>Training Status</h3>
+                <span class="row-count" id="reportCount"></span>
+            </div>
+            <div class="tbar-right">
+                <div class="search-box">
+                    <i class="fas fa-magnifying-glass"></i>
+                    <input type="text" id="rSearch" placeholder="Search name or ID…" oninput="filterReport()">
+                </div>
+                <select class="filter-sel" id="rDept" onchange="filterReport()"><option value="">All Departments</option></select>
+                <select class="filter-sel" id="rType" onchange="filterReport()">
+                    <option value="">All Types</option>
+                    <option value="1">Local</option>
+                    <option value="0">Foreign</option>
+                </select>
+                <select class="filter-sel" id="rStatus" onchange="filterReport()">
+                    <option value="">All Status</option>
+                    <option value="both">Both Passed</option>
+                    <option value="p1">Part 1 Only</option>
+                    <option value="none">Not Started</option>
+                </select>
+            </div>
         </div>
-        <div class="table-wrap">
-            <table id="mainTable">
+        <div class="tbl-wrap">
+            <table>
                 <thead>
                     <tr>
                         <th>Employee ID</th>
                         <th>Name</th>
                         <th>Department</th>
                         <th>Company</th>
-                        <th>Part 1 Status</th>
-                        <th>Part 2 Status</th>
                         <th>Type</th>
+                        <th>Part 1</th>
+                        <th>Part 2</th>
                         <th>Last Activity</th>
                     </tr>
                 </thead>
-                <tbody id="tableBody">
-                    <tr><td colspan="8" class="empty-state"><span class="spinner spinner-dark"></span> Loading data...</td></tr>
-                </tbody>
+                <tbody id="reportBody"><tr><td colspan="8" class="empty"><span class="spin" style="border-top-color:var(--blue)"></span></td></tr></tbody>
             </table>
         </div>
     </div>
 
+    <!-- ═══ TAB: EMPLOYEES ═══ -->
+    <div class="tab-panel" id="tab-employees">
+        <div class="tbar">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <h3>Employee Management</h3>
+                <span class="row-count" id="empCount"></span>
+            </div>
+            <div class="tbar-right">
+                <div class="search-box">
+                    <i class="fas fa-magnifying-glass"></i>
+                    <input type="text" id="eSearch" placeholder="Search name or ID…" oninput="filterEmployees()">
+                </div>
+                <select class="filter-sel" id="eDept" onchange="filterEmployees()"><option value="">All Departments</option></select>
+                <button class="btn btn-primary btn-sm" onclick="openCreate()"><i class="fas fa-plus"></i> Add Employee</button>
+            </div>
+        </div>
+        <div class="tbl-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Employee ID</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Company</th>
+                        <th>Type</th>
+                        <th>Access</th>
+                        <th>Admin</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="empBody"><tr><td colspan="8" class="empty"><span class="spin" style="border-top-color:var(--blue)"></span></td></tr></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ MODAL: Create / Edit Employee ═══ -->
+<div class="modal" id="empModal">
+    <div class="modal-box">
+        <div class="modal-head">
+            <h3 id="empModalTitle">Add Employee</h3>
+            <button class="modal-close" onclick="closeEmpModal()"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+            <div id="empModalAlert"></div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Employee ID *</label>
+                    <input type="text" class="form-input" id="fEmpID" placeholder="e.g. E1240">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">IC Number (Password) *</label>
+                    <input type="text" class="form-input" id="fIC" placeholder="e.g. 5057">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Full Name *</label>
+                <input type="text" class="form-input" id="fName" placeholder="e.g. JOHN DOE">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Department</label>
+                    <input type="text" class="form-input" id="fDept" placeholder="e.g. HUMAN RESOURCES">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Company ID</label>
+                    <input type="text" class="form-input" id="fCo" placeholder="e.g. PCEO">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Employee Type</label>
+                    <select class="form-input" id="fLocal">
+                        <option value="1">Local</option>
+                        <option value="0">Foreign</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select class="form-input" id="fActive">
+                        <option value="1">Active</option>
+                        <option value="0">Inactive</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Portal Access</label>
+                    <select class="form-input" id="fAccess">
+                        <option value="1">Granted</option>
+                        <option value="0">Restricted</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Admin (SuperUser)</label>
+                    <select class="form-input" id="fSU">
+                        <option value="0">No</option>
+                        <option value="1">Yes</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-ghost" onclick="closeEmpModal()">Cancel</button>
+            <button class="btn btn-primary" id="empSaveBtn" onclick="saveEmployee()">Save Employee</button>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ MODAL: Confirm Delete ═══ -->
+<div class="modal" id="delModal">
+    <div class="modal-box" style="max-width:400px">
+        <div class="modal-head">
+            <h3>Delete Employee</h3>
+            <button class="modal-close" onclick="closeDelModal()"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+            <div class="del-info">
+                <i class="fas fa-triangle-exclamation" style="margin-right:6px"></i>
+                This will permanently delete <strong id="delName"></strong> (<span id="delID" style="font-family:'JetBrains Mono',monospace"></span>) and all their training records.
+            </div>
+            <p style="font-size:13px;color:var(--t3)">This action cannot be undone.</p>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-ghost" onclick="closeDelModal()">Cancel</button>
+            <button class="btn btn-danger" id="delConfirmBtn" onclick="confirmDelete()"><i class="fas fa-trash"></i> Delete</button>
+        </div>
+    </div>
 </div>
 
 @section Scripts {
 <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 <script>
-    var allData      = [];
-    var filteredData = [];
-    var currentYear  = @Model.CurrentYear;
+var CY=@Model.CurrentYear, allScores=[], allEmps=[], filteredScores=[], filteredEmps=[], editMode=false, editID='', delTargetID='';
+var tok=function(){var t=document.querySelector('input[name="__RequestVerificationToken"]');return t?t.value:'';};
 
-    // ── Load data from server ───────────────────────────────────────────────────
-    fetch('@Url.Action("GetScoresJson","Admin")')
-        .then(function(r){ return r.json(); })
-        .then(function(d){
-            allData      = d;
-            filteredData = d;
-            populateDeptFilter(d);
-            applyFilters();
-        })
-        .catch(function(){
-            document.getElementById('tableBody').innerHTML =
-                '<tr><td colspan="8" class="empty-state"><i class="fas fa-exclamation-triangle"></i> Failed to load data.</td></tr>';
-        });
+// ── TABS ────────────────────────────────────────────────────────────────────
+function showTab(id){
+    document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('on',['report','employees'][i]===id);});
+    document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('on');});
+    document.getElementById('tab-'+id).classList.add('on');
+}
 
-    function populateDeptFilter(data) {
-        var depts = [...new Set(data.map(function(e){ return e.Department; }))].sort();
-        var sel   = document.getElementById('deptFilter');
-        depts.forEach(function(d){
-            var opt = document.createElement('option');
-            opt.value = d; opt.textContent = d;
-            sel.appendChild(opt);
-        });
-    }
+// ── LOAD DATA ────────────────────────────────────────────────────────────────
+function loadAll(){
+    fetch('@Url.Action("GetScoresJson","Admin")').then(function(r){return r.json();}).then(function(d){
+        allScores=d; filteredScores=d;
+        populateDepts(d.map(function(e){return e.Department;}), 'rDept');
+        renderReport();
+    });
+    fetch('@Url.Action("GetEmployeesJson","Admin")').then(function(r){return r.json();}).then(function(d){
+        allEmps=d; filteredEmps=d;
+        populateDepts(d.map(function(e){return e.Department;}), 'eDept');
+        renderEmployees();
+        updateStats(allScores);
+    });
+}
 
-    function applyFilters() {
-        var search = document.getElementById('searchInput').value.toLowerCase();
-        var dept   = document.getElementById('deptFilter').value;
-        var type   = document.getElementById('typeFilter').value;
-        var status = document.getElementById('statusFilter').value;
+function populateDepts(depts, selId){
+    var unique=[...new Set(depts)].sort();
+    var sel=document.getElementById(selId);
+    // keep first option
+    while(sel.options.length>1) sel.remove(1);
+    unique.forEach(function(d){var o=document.createElement('option');o.value=d;o.textContent=d;sel.appendChild(o);});
+}
 
-        filteredData = allData.filter(function(e){
-            if (search && !(e.EmployeeID.toLowerCase().includes(search) || e.UserName.toLowerCase().includes(search))) return false;
-            if (dept && e.Department !== dept) return false;
-            if (type !== '' && e.Local !== type) return false;
-            if (status === 'both-pass' && !(e.Part1==='pass' && e.Part2==='pass')) return false;
-            if (status === 'p1-pass'   && e.Part1 !== 'pass') return false;
-            if (status === 'p2-pass'   && e.Part2 !== 'pass') return false;
-            if (status === 'not-pass'  && (e.Part1==='pass' || e.Part2==='pass')) return false;
-            return true;
-        });
+// ── STATS ────────────────────────────────────────────────────────────────────
+function updateStats(data){
+    var total=data.length, p1=data.filter(function(e){return e.Part1==='pass';}).length, p2=data.filter(function(e){return e.Part2==='pass';}).length;
+    document.getElementById('s-p1').textContent=p1;
+    document.getElementById('s-p2').textContent=p2;
+    document.getElementById('s-np').textContent=(total-p1);
+    document.getElementById('sb-p1').style.width=(total>0?p1/total*100:0)+'%';
+    document.getElementById('sb-p2').style.width=(total>0?p2/total*100:0)+'%';
+    document.getElementById('sb-np').style.width=(total>0?(total-p1)/total*100:0)+'%';
+}
 
-        renderTable(filteredData);
-        updateStats(filteredData);
-    }
+// ── REPORT TAB ───────────────────────────────────────────────────────────────
+function filterReport(){
+    var s=document.getElementById('rSearch').value.toLowerCase();
+    var d=document.getElementById('rDept').value;
+    var ty=document.getElementById('rType').value;
+    var st=document.getElementById('rStatus').value;
+    filteredScores=allScores.filter(function(e){
+        if(s&&!(e.EmployeeID.toLowerCase().includes(s)||e.UserName.toLowerCase().includes(s))) return false;
+        if(d&&e.Department!==d) return false;
+        if(ty!==''&&e.Local!==ty) return false;
+        if(st==='both'&&!(e.Part1==='pass'&&e.Part2==='pass')) return false;
+        if(st==='p1'&&!(e.Part1==='pass'&&e.Part2!=='pass')) return false;
+        if(st==='none'&&(e.Part1==='pass'||e.Part2==='pass')) return false;
+        return true;
+    });
+    renderReport();
+}
 
-    function clearFilters() {
-        document.getElementById('searchInput').value = '';
-        document.getElementById('deptFilter').value  = '';
-        document.getElementById('typeFilter').value  = '';
-        document.getElementById('statusFilter').value= '';
-        applyFilters();
-    }
+function renderReport(){
+    document.getElementById('reportCount').textContent=filteredScores.length+' records';
+    var tb=document.getElementById('reportBody');
+    if(!filteredScores.length){tb.innerHTML='<tr><td colspan="8"><div class="empty"><i class="fas fa-database"></i>No records found</div></td></tr>';return;}
+    tb.innerHTML=filteredScores.map(function(e){
+        var latest=e.Part1Timestamp&&e.Part2Timestamp?(new Date(e.Part1Timestamp)>new Date(e.Part2Timestamp)?e.Part1Timestamp:e.Part2Timestamp):(e.Part1Timestamp||e.Part2Timestamp||null);
+        return '<tr>'+
+            '<td class="mono">'+esc(e.EmployeeID)+'</td>'+
+            '<td style="font-weight:500">'+esc(e.UserName)+'</td>'+
+            '<td style="color:var(--t2)">'+esc(e.Department)+'</td>'+
+            '<td style="color:var(--t3)">'+esc(e.CompanyID)+'</td>'+
+            '<td>'+typeBadge(e.Local)+'</td>'+
+            '<td>'+statusCell(e.Part1,e.Part1Timestamp)+'</td>'+
+            '<td>'+statusCell(e.Part2,e.Part2Timestamp)+'</td>'+
+            '<td style="font-size:12px;color:var(--t3);font-family:\'JetBrains Mono\',monospace">'+(latest?fmtDT(latest):'—')+'</td>'+
+            '</tr>';
+    }).join('');
+}
 
-    function updateStats(data) {
-        var total = data.length;
-        var p1    = data.filter(function(e){ return e.Part1 === 'pass'; }).length;
-        var p2    = data.filter(function(e){ return e.Part2 === 'pass'; }).length;
-        document.getElementById('stat-p1-pass').textContent = p1;
-        document.getElementById('stat-p2-pass').textContent = p2;
-        document.getElementById('stat-p1-fail').textContent = total - p1;
-        document.getElementById('bar-p1').style.width = (total > 0 ? (p1/total*100).toFixed(1) : 0) + '%';
-        document.getElementById('bar-p2').style.width = (total > 0 ? (p2/total*100).toFixed(1) : 0) + '%';
-        document.getElementById('pct-p1').textContent = (total > 0 ? (p1/total*100).toFixed(1) : 0) + '%';
-        document.getElementById('pct-p2').textContent = (total > 0 ? (p2/total*100).toFixed(1) : 0) + '%';
-        document.getElementById('rowCount').textContent = 'Showing ' + total + ' of ' + allData.length + ' employees';
-    }
+function statusCell(st, ts){
+    var cls=st==='pass'?'badge-pass':'badge-fail';
+    var ico=st==='pass'?'check':'xmark';
+    var out='<span class="badge '+cls+'"><i class="fas fa-'+ico+'"></i> '+esc(st)+'</span>';
+    if(ts) out+='<div style="font-size:11px;color:var(--t3);margin-top:3px;font-family:\'JetBrains Mono\',monospace">'+fmtD(ts)+'</div>';
+    return out;
+}
+function typeBadge(l){return l==='1'?'<span class="badge badge-blue">Local</span>':'<span class="badge badge-amber">Foreign</span>';}
 
-    function renderTable(data) {
-        var tbody = document.getElementById('tableBody');
-        if (!data.length) {
-            tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><i class="fas fa-database"></i><p>No records match the current filters.</p></div></td></tr>';
-            return;
-        }
+// ── EMPLOYEE TAB ─────────────────────────────────────────────────────────────
+function filterEmployees(){
+    var s=document.getElementById('eSearch').value.toLowerCase();
+    var d=document.getElementById('eDept').value;
+    filteredEmps=allEmps.filter(function(e){
+        if(s&&!(e.EmployeeID.toLowerCase().includes(s)||e.UserName.toLowerCase().includes(s))) return false;
+        if(d&&e.Department!==d) return false;
+        return true;
+    });
+    renderEmployees();
+}
 
-        var rows = data.map(function(e){
-            var p1cls  = e.Part1 === 'pass' ? 's-pass' : 's-fail';
-            var p2cls  = e.Part2 === 'pass' ? 's-pass' : 's-fail';
-            var p1icon = e.Part1 === 'pass' ? 'check-circle' : 'times-circle';
-            var p2icon = e.Part2 === 'pass' ? 'check-circle' : 'times-circle';
-            var latest = latestDate(e.Part1Timestamp, e.Part2Timestamp);
-            return '<tr>' +
-                '<td class="emp-id">' + esc(e.EmployeeID) + '</td>' +
-                '<td>' + esc(e.UserName) + '</td>' +
-                '<td class="dept-cell" title="' + esc(e.Department) + '">' + esc(e.Department) + '</td>' +
-                '<td>' + esc(e.CompanyID) + '</td>' +
-                '<td><span class="status-badge ' + p1cls + '"><i class="fas fa-' + p1icon + '"></i>' + e.Part1 + '</span>' +
-                    (e.Part1Timestamp ? '<span class="ts-date">' + fmtDate(e.Part1Timestamp) + '</span>' : '') + '</td>' +
-                '<td><span class="status-badge ' + p2cls + '"><i class="fas fa-' + p2icon + '"></i>' + e.Part2 + '</span>' +
-                    (e.Part2Timestamp ? '<span class="ts-date">' + fmtDate(e.Part2Timestamp) + '</span>' : '') + '</td>' +
-                '<td>' + (e.Local === '1' ? 'Local' : 'Foreign') + '</td>' +
-                '<td>' + (latest ? fmtDateTime(latest) : '<span style="color:var(--text-light);font-style:italic">None</span>') + '</td>' +
-                '</tr>';
-        });
-        tbody.innerHTML = rows.join('');
-    }
+function renderEmployees(){
+    document.getElementById('empCount').textContent=filteredEmps.length+' employees';
+    var tb=document.getElementById('empBody');
+    if(!filteredEmps.length){tb.innerHTML='<tr><td colspan="8"><div class="empty"><i class="fas fa-users"></i>No employees found</div></td></tr>';return;}
+    tb.innerHTML=filteredEmps.map(function(e){
+        var acc=e.Access==='1';
+        var su=e.SuperUser==='1';
+        return '<tr>'+
+            '<td class="mono">'+esc(e.EmployeeID)+'</td>'+
+            '<td style="font-weight:500">'+esc(e.UserName)+'</td>'+
+            '<td style="color:var(--t2)">'+esc(e.Department)+'</td>'+
+            '<td style="color:var(--t3)">'+esc(e.CompanyID)+'</td>'+
+            '<td>'+typeBadge(e.Local)+'</td>'+
+            '<td><label class="toggle-sw" title="Toggle access"><input type="checkbox" '+(acc?'checked':'')+' onchange="toggleAccess(\''+esc(e.EmployeeID)+'\',this.checked)"><span class="slider"></span></label></td>'+
+            '<td>'+(su?'<span class="badge badge-purple">Admin</span>':'<span style="color:var(--t3);font-size:12px">—</span>')+'</td>'+
+            '<td><div class="action-btns">'+
+                '<button class="icon-btn edit" onclick="openEdit(\''+esc(e.EmployeeID)+'\')" title="Edit"><i class="fas fa-pen"></i></button>'+
+                '<button class="icon-btn del" onclick="openDelete(\''+esc(e.EmployeeID)+'\',\''+esc(e.UserName)+'\')" title="Delete"><i class="fas fa-trash"></i></button>'+
+            '</div></td>'+
+            '</tr>';
+    }).join('');
+}
 
-    function latestDate(d1, d2) {
-        if (!d1 && !d2) return null;
-        if (!d1) return d2;
-        if (!d2) return d1;
-        return new Date(d1) > new Date(d2) ? d1 : d2;
-    }
+// ── ACCESS TOGGLE ─────────────────────────────────────────────────────────────
+function toggleAccess(id, grant){
+    fetch('@Url.Action("ToggleAccess","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:'__RequestVerificationToken='+encodeURIComponent(tok())+'&employeeId='+encodeURIComponent(id)+'&grant='+(grant?'true':'false')})
+    .then(function(r){return r.json();}).then(function(d){
+        if(!d.success) alert('Failed: '+d.message);
+        else{ var e=allEmps.find(function(x){return x.EmployeeID===id;});if(e)e.Access=grant?'1':'0'; }
+    });
+}
 
-    function fmtDate(s) {
-        if (!s) return '';
-        try { return new Date(s).toLocaleDateString('en-MY',{day:'2-digit',month:'2-digit',year:'numeric'}); } catch(e){ return s; }
-    }
+// ── CREATE / EDIT MODAL ───────────────────────────────────────────────────────
+function openCreate(){
+    editMode=false;editID='';
+    document.getElementById('empModalTitle').textContent='Add Employee';
+    document.getElementById('fEmpID').disabled=false;
+    ['fEmpID','fIC','fName','fDept','fCo'].forEach(function(id){document.getElementById(id).value='';});
+    document.getElementById('fLocal').value='1';
+    document.getElementById('fActive').value='1';
+    document.getElementById('fAccess').value='1';
+    document.getElementById('fSU').value='0';
+    document.getElementById('empModalAlert').innerHTML='';
+    document.getElementById('empSaveBtn').innerHTML='Save Employee';
+    document.getElementById('empModal').classList.add('open');
+}
 
-    function fmtDateTime(s) {
-        if (!s) return '';
-        try {
-            return new Date(s).toLocaleDateString('en-MY',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});
-        } catch(e){ return s; }
-    }
+function openEdit(id){
+    editMode=true;editID=id;
+    document.getElementById('empModalTitle').textContent='Edit Employee';
+    document.getElementById('fEmpID').disabled=true;
+    document.getElementById('empModalAlert').innerHTML='';
+    fetch('@Url.Action("GetEmployeeJson","Admin")?id='+encodeURIComponent(id))
+    .then(function(r){return r.json();}).then(function(d){
+        document.getElementById('fEmpID').value=d.EmployeeID||'';
+        document.getElementById('fIC').value=d.EmployeeIC||'';
+        document.getElementById('fName').value=d.UserName||'';
+        document.getElementById('fDept').value=d.Department||'';
+        document.getElementById('fCo').value=d.CompanyID||'';
+        document.getElementById('fLocal').value=d.Local||'1';
+        document.getElementById('fActive').value=d.Active||'1';
+        document.getElementById('fAccess').value=d.Access||'1';
+        document.getElementById('fSU').value=d.SuperUser||'0';
+        document.getElementById('empSaveBtn').innerHTML='Save Changes';
+        document.getElementById('empModal').classList.add('open');
+    });
+}
 
-    function esc(s) {
-        if (!s) return '';
-        return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-    }
+function closeEmpModal(){document.getElementById('empModal').classList.remove('open');}
 
-    // ── Export functions ────────────────────────────────────────────────────────
-    function exportExcel() {
-        if (!filteredData.length) { alert('No data to export.'); return; }
+function saveEmployee(){
+    var btn=document.getElementById('empSaveBtn');
+    btn.disabled=true;btn.innerHTML='<span class="spin"></span> Saving…';
+    var model={EmployeeID:document.getElementById('fEmpID').value.trim(),UserName:document.getElementById('fName').value.trim(),EmployeeIC:document.getElementById('fIC').value.trim(),Department:document.getElementById('fDept').value.trim(),CompanyID:document.getElementById('fCo').value.trim(),Local:document.getElementById('fLocal').value,Active:document.getElementById('fActive').value,Access:document.getElementById('fAccess').value,SuperUser:document.getElementById('fSU').value};
+    var url='@Url.Action("CreateEmployee","Admin")';
+    if(editMode){url='@Url.Action("UpdateEmployee","Admin")';}
+    var body='__RequestVerificationToken='+encodeURIComponent(tok());
+    Object.keys(model).forEach(function(k){body+='&'+k+'='+encodeURIComponent(model[k]);});
+    fetch(url,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body})
+    .then(function(r){return r.json();}).then(function(d){
+        btn.disabled=false;btn.innerHTML=editMode?'Save Changes':'Save Employee';
+        if(d.success){closeEmpModal();loadAll();}
+        else{document.getElementById('empModalAlert').innerHTML='<div class="alert alert-error"><i class="fas fa-circle-exclamation"></i><span>'+esc(d.message)+'</span></div>';}
+    });
+}
 
-        var rows = filteredData.map(function(e){ return {
-            'Employee ID'         : e.EmployeeID,
-            'Name'                : e.UserName,
-            'Department'          : e.Department,
-            'Company ID'          : e.CompanyID,
-            'Employee Type'       : e.Local === '1' ? 'Local' : 'Foreign',
-            'Part 1 Status'       : e.Part1,
-            'Part 1 Date'         : e.Part1Timestamp ? fmtDateTime(e.Part1Timestamp) : '',
-            'Part 2 Status'       : e.Part2,
-            'Part 2 Date'         : e.Part2Timestamp ? fmtDateTime(e.Part2Timestamp) : '',
-            'Last Activity'       : latestDate(e.Part1Timestamp,e.Part2Timestamp) ? fmtDateTime(latestDate(e.Part1Timestamp,e.Part2Timestamp)) : ''
-        }; });
+// ── DELETE MODAL ─────────────────────────────────────────────────────────────
+function openDelete(id, name){
+    delTargetID=id;
+    document.getElementById('delName').textContent=name;
+    document.getElementById('delID').textContent=id;
+    document.getElementById('delModal').classList.add('open');
+}
+function closeDelModal(){document.getElementById('delModal').classList.remove('open');}
 
-        var wb  = XLSX.utils.book_new();
-        var ws  = XLSX.utils.json_to_sheet(rows);
-        XLSX.utils.book_append_sheet(wb, ws, 'Training Data');
+function confirmDelete(){
+    var btn=document.getElementById('delConfirmBtn');
+    btn.disabled=true;btn.innerHTML='<span class="spin"></span> Deleting…';
+    fetch('@Url.Action("DeleteEmployee","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:'__RequestVerificationToken='+encodeURIComponent(tok())+'&employeeId='+encodeURIComponent(delTargetID)})
+    .then(function(r){return r.json();}).then(function(d){
+        btn.disabled=false;btn.innerHTML='<i class="fas fa-trash"></i> Delete';
+        if(d.success){closeDelModal();loadAll();}
+        else{alert('Error: '+d.message);}
+    });
+}
 
-        // Department summary sheet
-        var deptMap = {};
-        filteredData.forEach(function(e){
-            if (!deptMap[e.Department]) deptMap[e.Department] = {total:0,p1:0,p2:0};
-            deptMap[e.Department].total++;
-            if (e.Part1==='pass') deptMap[e.Department].p1++;
-            if (e.Part2==='pass') deptMap[e.Department].p2++;
-        });
-        var sumRows = [['Department','Total','Part 1 Passed','Part 1 %','Part 2 Passed','Part 2 %']];
-        Object.keys(deptMap).sort().forEach(function(k){
-            var d = deptMap[k];
-            sumRows.push([k, d.total, d.p1, (d.p1/d.total*100).toFixed(1)+'%', d.p2, (d.p2/d.total*100).toFixed(1)+'%']);
-        });
-        var ws2 = XLSX.utils.aoa_to_sheet(sumRows);
-        XLSX.utils.book_append_sheet(wb, ws2, 'Department Summary');
+// ── EXPORT ───────────────────────────────────────────────────────────────────
+function exportExcel(){
+    if(!allScores.length){alert('No data.');return;}
+    var rows=allScores.map(function(e){return{'Employee ID':e.EmployeeID,'Name':e.UserName,'Department':e.Department,'Company':e.CompanyID,'Type':e.Local==='1'?'Local':'Foreign','Part 1':e.Part1,'Part 1 Date':e.Part1Timestamp?fmtDT(e.Part1Timestamp):'','Part 2':e.Part2,'Part 2 Date':e.Part2Timestamp?fmtDT(e.Part2Timestamp):''};});
+    var wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),'Training '+CY);
+    // summary
+    var dm={};allScores.forEach(function(e){if(!dm[e.Department])dm[e.Department]={total:0,p1:0,p2:0};dm[e.Department].total++;if(e.Part1==='pass')dm[e.Department].p1++;if(e.Part2==='pass')dm[e.Department].p2++;});
+    var sum=[['Department','Total','P1 Passed','P1 %','P2 Passed','P2 %']];
+    Object.keys(dm).sort().forEach(function(k){var d=dm[k];sum.push([k,d.total,d.p1,(d.p1/d.total*100).toFixed(1)+'%',d.p2,(d.p2/d.total*100).toFixed(1)+'%']);});
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(sum),'Dept Summary');
+    XLSX.writeFile(wb,'ABC_Training_Report_'+CY+'_'+new Date().toISOString().slice(0,10)+'.xlsx');
+}
 
-        var ts = new Date().toISOString().slice(0,10);
-        XLSX.writeFile(wb, 'ABC_Training_Report_' + currentYear + '_' + ts + '.xlsx');
-    }
+function exportCSV(){
+    if(!allScores.length){alert('No data.');return;}
+    var h=['Employee ID','Name','Department','Company','Type','Part 1','Part 1 Date','Part 2','Part 2 Date'];
+    var rows=allScores.map(function(e){return[e.EmployeeID,'"'+e.UserName+'"','"'+e.Department+'"',e.CompanyID,e.Local==='1'?'Local':'Foreign',e.Part1,e.Part1Timestamp?fmtDT(e.Part1Timestamp):'',e.Part2,e.Part2Timestamp?fmtDT(e.Part2Timestamp):''].join(',');});
+    var blob=new Blob([[h.join(',')].concat(rows).join('\n')],{type:'text/csv'});
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ABC_Training_'+CY+'.csv';a.click();
+}
 
-    function exportCSV() {
-        if (!filteredData.length) { alert('No data to export.'); return; }
-        var headers = ['Employee ID','Name','Department','Company ID','Employee Type','Part 1 Status','Part 1 Date','Part 2 Status','Part 2 Date'];
-        var csvRows = [headers.join(',')];
-        filteredData.forEach(function(e){
-            csvRows.push([
-                e.EmployeeID, e.UserName, '"'+e.Department+'"', e.CompanyID,
-                e.Local==='1'?'Local':'Foreign', e.Part1,
-                e.Part1Timestamp ? fmtDateTime(e.Part1Timestamp) : '',
-                e.Part2,
-                e.Part2Timestamp ? fmtDateTime(e.Part2Timestamp) : ''
-            ].join(','));
-        });
-        var blob = new Blob([csvRows.join('\n')], {type:'text/csv'});
-        var a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'ABC_Training_' + currentYear + '.csv';
-        a.click();
-    }
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+function fmtD(s){try{return new Date(s).toLocaleDateString('en-MY',{day:'2-digit',month:'2-digit',year:'numeric'});}catch(e){return s;}}
+function fmtDT(s){try{return new Date(s).toLocaleDateString('en-MY',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});}catch(e){return s;}}
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+loadAll();
 </script>
+@Html.AntiForgeryToken()
 }
