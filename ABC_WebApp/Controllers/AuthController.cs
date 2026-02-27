@@ -60,6 +60,17 @@ namespace ABC_WebApp.Controllers
             }
         }
 
+        // ── GET /Auth/Ping  (session keepalive — called every 4 min by JS) ──
+        [HttpGet]
+        public JsonResult Ping()
+        {
+            // Simply touching the session extends its sliding expiry.
+            // Returns 200 if logged in, 401 if session has already expired.
+            if (!SessionHelper.IsLoggedIn)
+                return Json(new { ok = false }, JsonRequestBehavior.AllowGet);
+            return Json(new { ok = true }, JsonRequestBehavior.AllowGet);
+        }
+
         // ── GET /Auth/Logout ─────────────────────────────────────────────────
         public ActionResult Logout()
         {
