@@ -170,42 +170,6 @@
                 color: var(--red)
             }
 
-        .tmodal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,.9);
-            z-index: 500;
-            flex-direction: column
-        }
-
-            .tmodal.open {
-                display: flex
-            }
-
-        .tmodal-bar {
-            background: var(--s1);
-            border-bottom: 1px solid var(--bd);
-            padding: 0 20px;
-            height: 52px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-shrink: 0
-        }
-
-            .tmodal-bar h3 {
-                font-size: 14px;
-                font-weight: 600
-            }
-
-        .tmodal iframe {
-            flex: 1;
-            width: 100%;
-            border: none;
-            background: #fff
-        }
-
         .back-link {
             display: inline-flex;
             align-items: center;
@@ -288,13 +252,6 @@
         </button>
     </div>
 </div>
-<div class="tmodal" id="tModal">
-    <div class="tmodal-bar">
-        <h3 id="modalTitle">ABC Advanced Training</h3>
-        <button class="btn btn-ghost btn-sm" onclick="closeTraining()"><i class="fas fa-xmark"></i> Close</button>
-    </div>
-    <iframe id="tFrame" src="about:blank"></iframe>
-</div>
 @section Scripts {
     <script>
 var lang='english', score='', status='';
@@ -313,16 +270,11 @@ function selLang(l) {
 }
 
 function startTraining() {
-    document.getElementById('modalTitle').textContent = 'Part 2 - ' + (lang === 'english' ? 'English' : 'Bahasa Malaysia');
-    document.getElementById('tFrame').src = URLS[lang];
-    document.getElementById('tModal').classList.add('open');
-    document.getElementById('resultCard').style.display = 'block';
+    var url = URLS[lang];
+    window.open(url, '_blank');
 }
 
-function closeTraining() {
-    document.getElementById('tModal').classList.remove('open');
-    document.getElementById('tFrame').src = 'about:blank';
-}
+function closeTraining() {} // no-op, kept for compatibility
 
 window.addEventListener('message', function(e) {
     // Security: only accept messages from our own server (same origin)
@@ -332,6 +284,8 @@ window.addEventListener('message', function(e) {
     if (p.length < 2) return;
     if (p[0] === 'ScorePercentage') { score = p[1]; updateProg(score); }
     else if (p[0] === 'ScoreStatus') { status = p[1]; }
+    // Show result card as soon as any score data arrives from the training tab
+    if (score || status) document.getElementById('resultCard').style.display = 'block';
     if (score && status) updateDisplay(score, status);
 });
 
