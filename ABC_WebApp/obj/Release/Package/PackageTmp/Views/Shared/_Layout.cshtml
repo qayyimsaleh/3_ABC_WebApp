@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+    <title>@ViewBag.Title — ABC Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <style>
+        :root {
+            --bg:       #07090f;
+            --s1:       #0d1117;
+            --s2:       #161b27;
+            --s3:       #1e2535;
+            --s4:       #28334a;
+            --bd:       rgba(255,255,255,.06);
+            --bd2:      rgba(255,255,255,.11);
+            --blue:     #4f8ef7;
+            --blue-d:   #3b7de8;
+            --blue-g:   rgba(79,142,247,.12);
+            --blue-g2:  rgba(79,142,247,.06);
+            --teal:     #2dd4bf;
+            --purple:   #a78bfa;
+            --green:    #34d399;
+            --green-g:  rgba(52,211,153,.1);
+            --red:      #f87171;
+            --red-g:    rgba(248,113,113,.1);
+            --amber:    #fbbf24;
+            --amber-g:  rgba(251,191,36,.1);
+            --t1: #f0f4ff;
+            --t2: #8b9ab8;
+            --t3: #4e5d78;
+            --r:  8px;
+            --rl: 12px;
+            --rxl:18px;
+            --tr: all .15s ease;
+        }
+        *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+        html{scroll-behavior:smooth}
+        body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(--t1);line-height:1.6;min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
+        ::-webkit-scrollbar{width:4px;height:4px}
+        ::-webkit-scrollbar-track{background:transparent}
+        ::-webkit-scrollbar-thumb{background:var(--s4);border-radius:2px}
+        .wrap{max-width:1200px;margin:0 auto;padding:0 24px}
+        .wrap-xl{max-width:1500px;margin:0 auto;padding:0 24px}
+        main{flex:1;padding:40px 0 80px}
+
+        /* NAV */
+        nav{background:rgba(7,9,15,.85);backdrop-filter:blur(24px);border-bottom:1px solid var(--bd);padding:0;position:sticky;top:0;z-index:300}
+        .nav-inner{max-width:1500px;margin:0 auto;height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 24px}
+        .nav-brand{display:flex;align-items:center;gap:10px;text-decoration:none}
+        .brand-icon{width:32px;height:32px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;box-shadow:0 0 16px rgba(79,142,247,.3)}
+        .brand-text{line-height:1.2}
+        .brand-name{font-size:13px;font-weight:700;color:var(--t1);letter-spacing:-.1px}
+        .brand-sub{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:.5px}
+        .nav-center{display:flex;align-items:center;gap:2px}
+        .nav-link{display:flex;align-items:center;gap:6px;padding:6px 11px;border-radius:var(--r);font-size:13px;font-weight:500;color:var(--t3);text-decoration:none;transition:var(--tr)}
+        .nav-link:hover,.nav-link.active{color:var(--t1);background:var(--s2)}
+        .nav-link.active{color:var(--blue);background:var(--blue-g)}
+        .nav-right{display:flex;align-items:center;gap:8px}
+        .user-chip{display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--bd);border-radius:40px;padding:4px 12px 4px 4px;cursor:default}
+        .user-av{width:26px;height:26px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+        .user-info{line-height:1.2}
+        .user-name{font-size:12px;font-weight:600;max-width:130px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+        .user-id{font-size:10px;color:var(--t3);font-family:'JetBrains Mono',monospace}
+        .btn-nav{display:flex;align-items:center;gap:5px;padding:6px 12px;border-radius:var(--r);font-size:12px;font-weight:500;cursor:pointer;text-decoration:none;transition:var(--tr);border:1px solid var(--bd);background:transparent;color:var(--t2)}
+        .btn-nav:hover{border-color:rgba(248,113,113,.3);color:var(--red);background:var(--red-g)}
+
+        /* BUTTONS */
+        .btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:9px 18px;border:none;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;transition:var(--tr);text-decoration:none;white-space:nowrap;font-family:inherit}
+        .btn-primary{background:var(--blue);color:#fff}
+        .btn-primary:hover{background:var(--blue-d);box-shadow:0 0 20px rgba(79,142,247,.3)}
+        .btn-ghost{background:var(--s2);color:var(--t2);border:1px solid var(--bd)}
+        .btn-ghost:hover{border-color:var(--bd2);color:var(--t1);background:var(--s3)}
+        .btn-danger{background:var(--red-g);color:var(--red);border:1px solid rgba(248,113,113,.2)}
+        .btn-danger:hover{background:rgba(248,113,113,.2)}
+        .btn-success{background:var(--green-g);color:var(--green);border:1px solid rgba(52,211,153,.2)}
+        .btn-success:hover{background:rgba(52,211,153,.2)}
+        .btn-sm{padding:6px 12px;font-size:12px}
+        .btn-full{width:100%}
+        .btn:disabled{opacity:.4;cursor:not-allowed;transform:none!important;box-shadow:none!important}
+
+        /* CARDS */
+        .card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--rxl);padding:24px}
+
+        /* BADGES */
+        .badge{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+        .badge-pass{background:var(--green-g);color:var(--green);border:1px solid rgba(52,211,153,.15)}
+        .badge-fail{background:var(--red-g);color:var(--red);border:1px solid rgba(248,113,113,.15)}
+        .badge-blue{background:var(--blue-g);color:var(--blue);border:1px solid rgba(79,142,247,.15)}
+        .badge-amber{background:var(--amber-g);color:var(--amber);border:1px solid rgba(251,191,36,.15)}
+        .badge-purple{background:rgba(167,139,250,.1);color:var(--purple);border:1px solid rgba(167,139,250,.15)}
+
+        /* FORM */
+        .form-group{margin-bottom:16px}
+        .form-label{display:block;font-size:12px;font-weight:600;color:var(--t2);margin-bottom:6px;text-transform:uppercase;letter-spacing:.3px}
+        .form-input{width:100%;padding:10px 14px;background:var(--s2);border:1px solid var(--bd);border-radius:var(--r);font-size:14px;color:var(--t1);font-family:inherit;transition:var(--tr)}
+        .form-input:focus{outline:none;border-color:rgba(79,142,247,.4);background:var(--s3);box-shadow:0 0 0 3px rgba(79,142,247,.08)}
+        .form-input::placeholder{color:var(--t3)}
+        select.form-input{cursor:pointer}
+        select.form-input option{background:var(--s2)}
+        .form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+        /* MODAL */
+        .modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(6px);z-index:500;align-items:center;justify-content:center;padding:24px}
+        .modal.open{display:flex}
+        .modal-box{background:var(--s1);border:1px solid var(--bd2);border-radius:var(--rxl);width:100%;max-width:520px;max-height:90vh;overflow-y:auto;animation:modalIn .2s ease}
+        .modal-box.wide{max-width:700px}
+        .modal-head{padding:20px 24px 0;display:flex;justify-content:space-between;align-items:center}
+        .modal-head h3{font-size:16px;font-weight:600}
+        .modal-body{padding:20px 24px 24px}
+        .modal-foot{padding:0 24px 20px;display:flex;justify-content:flex-end;gap:10px}
+        .modal-close{width:28px;height:28px;border-radius:6px;background:var(--s3);border:none;color:var(--t2);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:13px;transition:var(--tr)}
+        .modal-close:hover{color:var(--t1);background:var(--s4)}
+
+        /* ALERTS */
+        .alert{padding:12px 16px;border-radius:var(--r);font-size:13px;display:flex;align-items:flex-start;gap:10px;margin-bottom:16px;border:1px solid}
+        .alert-error{background:var(--red-g);border-color:rgba(248,113,113,.2);color:#fca5a5}
+        .alert-success{background:var(--green-g);border-color:rgba(52,211,153,.2);color:#6ee7b7}
+        .alert-info{background:var(--blue-g2);border-color:rgba(79,142,247,.15);color:#93c5fd}
+
+        /* SPINNER */
+        .spin{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-radius:50%;border-top-color:currentColor;animation:spinning .7s linear infinite}
+        @@keyframes spinning{to{transform:rotate(360deg)}}
+        @@keyframes modalIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+        @@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+        .fade-up{animation:fadeUp .3s ease forwards}
+
+        /* DIVIDER */
+        .divider{height:1px;background:var(--bd);margin:20px 0}
+
+        /* TABLE */
+        .tbl-wrap{overflow-x:auto;border-radius:var(--rl);border:1px solid var(--bd)}
+        table{width:100%;border-collapse:collapse;font-size:13px}
+        thead th{padding:11px 14px;text-align:left;font-size:11px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:.4px;background:var(--s2);border-bottom:1px solid var(--bd);white-space:nowrap}
+        tbody td{padding:12px 14px;border-bottom:1px solid var(--bd);vertical-align:middle}
+        tbody tr:last-child td{border-bottom:none}
+        tbody tr:hover{background:var(--s2)}
+        .mono{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--blue)}
+
+        /* FOOTER */
+        footer{background:var(--s1);border-top:1px solid var(--bd);padding:16px 0;margin-top:auto}
+        .footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--t3)}
+
+        @@media(max-width:768px){
+            .nav-center{display:none}
+            .form-row{grid-template-columns:1fr}
+            .wrap,.wrap-xl{padding:0 16px}
+            main{padding:24px 0 60px}
+        }
+    </style>
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+
+@if (Session["EmployeeID"] != null)
+{
+<nav>
+    <div class="nav-inner">
+        <a href="@Url.Action("Index","Home")" class="nav-brand">
+            <div class="brand-icon"><i class="fas fa-shield-halved"></i></div>
+            <div class="brand-text">
+                <div class="brand-name">ABC Portal</div>
+                <div class="brand-sub">IOI Oleochemical</div>
+            </div>
+        </a>
+        <div class="nav-center">
+            <a href="@Url.Action("Index","Home")" class="nav-link @(ViewBag.ActivePage == "home" ? "active" : "")">
+                <i class="fas fa-house"></i> Dashboard
+            </a>
+            @if (Session["SuperUser"]?.ToString() == "1")
+            {
+            <a href="@Url.Action("Dashboard","Admin")" class="nav-link @(ViewBag.ActivePage == "admin" ? "active" : "")">
+                <i class="fas fa-gauge"></i> Admin
+            </a>
+            }
+        </div>
+        <div class="nav-right">
+            <div class="user-chip">
+                <div class="user-av" id="navAvatar"></div>
+                <div class="user-info">
+                    <div class="user-name">@Session["UserName"]</div>
+                    <div class="user-id">@Session["EmployeeID"]</div>
+                </div>
+            </div>
+            <a href="@Url.Action("Logout","Auth")" class="btn-nav">
+                <i class="fas fa-arrow-right-from-bracket"></i> Logout
+            </a>
+        </div>
+    </div>
+</nav>
+<script>
+(function(){var n='@Session["UserName"]';var i=n.split(' ').map(function(x){return x[0]||'';}).join('').toUpperCase().substring(0,2);document.getElementById('navAvatar').textContent=i;})();
+</script>
+}
+
+<main>@RenderBody()</main>
+
+<footer>
+    <div class="wrap">
+        <div class="footer-inner">
+            <span><i class="fas fa-shield-halved" style="color:var(--blue);margin-right:6px"></i>ABC Compliance Training Portal</span>
+            <span>IOI Oleochemical &copy; @DateTime.Now.Year — Proprietary &amp; Confidential</span>
+        </div>
+    </div>
+</footer>
+
+@RenderSection("Scripts", required: false)
+</body>
+</html>

@@ -1,0 +1,323 @@
+@model ABC_WebApp.Models.DashboardViewModel
+@{
+    ViewBag.Title = "Dashboard";
+    ViewBag.ActivePage = "home";
+    string firstName = (Model.CurrentEmployee != null && !string.IsNullOrEmpty(Model.CurrentEmployee.UserName))
+        ? Model.CurrentEmployee.UserName.Split(new char[] { ' ' })[0]
+        : "there";
+}
+@section Styles {
+    <style>
+
+        .hero {
+            padding: 36px 0 28px;
+            border-bottom: 1px solid var(--bd);
+            margin-bottom: 32px
+        }
+
+        .hero-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 20px;
+            flex-wrap: wrap
+        }
+
+        .hero h1 {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -.3px;
+            margin-bottom: 4px
+        }
+
+        .hero p {
+            font-size: 14px;
+            color: var(--t3)
+        }
+
+        .year-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--blue-g);
+            border: 1px solid rgba(79,142,247,.2);
+            color: var(--blue);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 10px
+        }
+
+        .progress-ring {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: var(--s2);
+            border: 1px solid var(--bd);
+            border-radius: var(--rl);
+            padding: 14px 20px
+        }
+
+        .ring-label {
+            font-size: 12px;
+            color: var(--t3);
+            margin-bottom: 2px
+        }
+
+        .ring-val {
+            font-size: 13px;
+            font-weight: 600
+        }
+
+        .progress-bar {
+            height: 6px;
+            background: var(--s4);
+            border-radius: 3px;
+            overflow: hidden;
+            width: 100px
+        }
+
+        .progress-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width .6s ease
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .5px;
+            color: var(--t3);
+            margin-bottom: 14px
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill,minmax(300px,1fr));
+            gap: 16px;
+            margin-bottom: 32px
+        }
+
+        .mod-card {
+            background: var(--s1);
+            border: 1px solid var(--bd);
+            border-radius: var(--rxl);
+            padding: 24px;
+            transition: var(--tr);
+            position: relative;
+            overflow: hidden
+        }
+
+            .mod-card:hover {
+                border-color: var(--bd2);
+                transform: translateY(-2px)
+            }
+
+            .mod-card .accent {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 2px;
+                opacity: 0;
+                transition: var(--tr)
+            }
+
+            .mod-card:hover .accent {
+                opacity: 1
+            }
+
+        .mod-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px
+        }
+
+        .mod-icon {
+            width: 42px;
+            height: 42px;
+            border-radius: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0
+        }
+
+            .mod-icon.blue {
+                background: var(--blue-g);
+                color: var(--blue)
+            }
+
+            .mod-icon.purple {
+                background: rgba(167,139,250,.1);
+                color: var(--purple)
+            }
+
+            .mod-icon.teal {
+                background: rgba(45,212,191,.1);
+                color: var(--teal)
+            }
+
+        .mod-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            letter-spacing: -.1px
+        }
+
+        .mod-desc {
+            font-size: 13px;
+            color: var(--t3);
+            line-height: 1.55;
+            margin-bottom: 18px
+        }
+
+        .lock-note {
+            font-size: 12px;
+            color: var(--t3);
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px
+        }
+
+        .admin-card {
+            background: linear-gradient(135deg,rgba(79,142,247,.08),rgba(167,139,250,.06));
+            border: 1px solid rgba(79,142,247,.15);
+            border-radius: var(--rxl);
+            padding: 24px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 24px
+        }
+
+        .admin-card-text h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px
+        }
+
+        .admin-card-text p {
+            font-size: 13px;
+            color: var(--t3)
+        }
+
+        @@media(max-width:640px) {
+            .cards-grid {
+                grid-template-columns: 1fr
+            }
+
+            .progress-ring {
+                display: none
+            }
+        }
+    </style>
+}
+<div class="wrap">
+    @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+    {
+        <div class="alert alert-error"><i class="fas fa-circle-exclamation"></i><span>@Model.ErrorMessage</span></div>
+    }
+    <div class="hero fade-up">
+        <div class="hero-row">
+            <div>
+                <div class="year-tag"><i class="fas fa-calendar-check"></i> Training Year @Model.CurrentYear</div>
+                <h1>Welcome, @firstName</h1>
+                <p>Complete your mandatory ABC training modules below.</p>
+            </div>
+            <div class="progress-ring">
+                @{
+                    int done = (Model.Part1Status == "pass" ? 1 : 0) + (Model.Part2Status == "pass" ? 1 : 0);
+                    int pct = done * 50;
+                }
+                <div>
+                    <div class="ring-label">Overall Progress</div>
+                    <div class="ring-val">@done / 2 modules</div>
+                    <div style="margin-top:8px">
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width:@pct%;background:linear-gradient(90deg,var(--blue),var(--purple))"></div>
+                        </div>
+                    </div>
+                </div>
+                <div style="font-size:26px;font-weight:700;color:var(--blue)">@pct%</div>
+            </div>
+        </div>
+    </div>
+    <div class="section-title">Training Modules</div>
+    <div class="cards-grid">
+        <!-- Part 1 -->
+        <div class="mod-card fade-up">
+            <div class="accent" style="background:linear-gradient(90deg,var(--blue),var(--teal))"></div>
+            <div class="mod-top">
+                <div class="mod-icon blue"><i class="fas fa-book-open"></i></div>
+                @if (Model.Part1Status == "pass")
+                {<span class="badge badge-pass"><i class="fas fa-check"></i> Completed</span>}
+                else
+                {<span class="badge badge-amber"><i class="fas fa-clock"></i> Pending</span>}
+            </div>
+            <div class="mod-title">Part 1 &mdash; ABC Introduction</div>
+            <div class="mod-desc">Fundamentals of Anti-Bribery &amp; Corruption, legal requirements, and company policy.</div>
+            <a href="@Url.Action("Part1","Training")" class="btn btn-primary btn-full">
+                <i class="fas fa-play"></i> @(Model.Part1Status == "pass" ? "Retake Module" : "Start Training")
+            </a>
+        </div>
+        <!-- Part 2 -->
+        <div class="mod-card fade-up" style="animation-delay:.06s">
+            <div class="accent" style="background:linear-gradient(90deg,var(--purple),var(--blue))"></div>
+            <div class="mod-top">
+                <div class="mod-icon purple"><i class="fas fa-chart-line"></i></div>
+                @if (Model.Part2Status == "pass")
+                {<span class="badge badge-pass"><i class="fas fa-check"></i> Completed</span>}
+                else if (Model.IsPart2Unlocked)
+                {<span class="badge badge-blue"><i class="fas fa-unlock"></i> Unlocked</span>}
+                else
+                {<span class="badge" style="background:var(--s3);color:var(--t3);border:1px solid var(--bd)"><i class="fas fa-lock"></i> Locked</span>}
+            </div>
+            <div class="mod-title">Part 2 &mdash; Advanced Scenarios</div>
+            <div class="mod-desc">Case studies, real-world applications, and practical ABC compliance scenarios.</div>
+            @if (Model.IsPart2Unlocked)
+            {
+                <a href="@Url.Action("Part2","Training")" class="btn btn-primary btn-full">
+                    <i class="fas fa-play"></i> @(Model.Part2Status == "pass" ? "Retake Module" : "Start Training")
+                </a>
+            }
+            else
+            {
+                <button class="btn btn-ghost btn-full" disabled><i class="fas fa-lock"></i> Complete Part 1 First</button>
+                <p class="lock-note"><i class="fas fa-info-circle"></i> Pass Part 1 in @Model.CurrentYear to unlock</p>
+            }
+        </div>
+        <!-- Guidelines -->
+        <div class="mod-card fade-up" style="animation-delay:.12s">
+            <div class="accent" style="background:linear-gradient(90deg,var(--teal),var(--green))"></div>
+            <div class="mod-top">
+                <div class="mod-icon teal"><i class="fas fa-file-lines"></i></div>
+                <span class="badge badge-purple">PDF</span>
+            </div>
+            <div class="mod-title">ABC Guidelines</div>
+            <div class="mod-desc">Full policy document, reference materials, and ABC compliance guidelines.</div>
+            <a href="~/Content/ABC_Simple_Guideline.pdf" target="_blank" class="btn btn-ghost btn-full">
+                <i class="fas fa-arrow-up-right-from-square"></i> View Document
+            </a>
+        </div>
+    </div>
+    @if (Model.IsSuperUser)
+    {
+        <div class="admin-card fade-up">
+            <div class="admin-card-text">
+                <h3><i class="fas fa-gauge" style="color:var(--blue);margin-right:8px"></i>Admin Dashboard</h3>
+                <p>Manage employees, view compliance reports, and export training data.</p>
+            </div>
+            <a href="@Url.Action("Dashboard","Admin")" class="btn btn-primary">
+                <i class="fas fa-arrow-right"></i> Open Admin Panel
+            </a>
+        </div>
+    }
+</div>
