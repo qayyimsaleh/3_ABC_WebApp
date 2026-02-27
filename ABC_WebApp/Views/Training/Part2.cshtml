@@ -298,7 +298,10 @@
 @section Scripts {
     <script>
 var lang='english', score='', status='';
-var URLS = { english: '/Content/Training/Part2_EN/story.html', malay: '/Content/Training/Part2_BM/story.html' };
+var URLS = {
+    english: '@Url.Content("~/Content/Training/Part2_EN/story.html")',
+    malay:   '@Url.Content("~/Content/Training/Part2_BM/story.html")'
+};
 // Allowed origin for postMessage — only accept from same server
 var ALLOWED_ORIGIN = window.location.origin;
 
