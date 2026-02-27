@@ -1,39 +1,160 @@
 @model ABC_WebApp.Models.LoginViewModel
 @{ ViewBag.Title = "Sign In"; Layout = "~/Views/Shared/_Layout.cshtml"; }
-
 @section Styles {
-<style>
-body{background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(79,142,247,.12) 0%,transparent 70%),var(--bg)}
-main{display:flex;align-items:center;justify-content:center;min-height:calc(100vh - 60px);padding:24px}
-.login-wrap{width:100%;max-width:420px}
-.login-logo{text-align:center;margin-bottom:32px}
-.login-logo .icon{width:52px;height:52px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 14px;box-shadow:0 0 30px rgba(79,142,247,.35)}
-.login-logo h1{font-size:22px;font-weight:700;letter-spacing:-.3px}
-.login-logo p{font-size:13px;color:var(--t3);margin-top:4px}
-.login-card{background:var(--s1);border:1px solid var(--bd);border-radius:var(--rxl);padding:28px}
-.lookup-chip{padding:10px 14px;border-radius:var(--r);font-size:13px;display:none;margin-bottom:14px;border:1px solid}
-.lookup-chip.found{background:var(--green-g);border-color:rgba(52,211,153,.2);color:#6ee7b7}
-.lookup-chip.denied{background:var(--red-g);border-color:rgba(248,113,113,.2);color:#fca5a5}
-.lookup-chip.miss{background:var(--amber-g);border-color:rgba(251,191,36,.2);color:#fcd34d}
-.input-wrap{position:relative}
-.input-wrap .input-icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:13px;pointer-events:none}
-.input-wrap .form-input{padding-left:36px}
-.divider-text{text-align:center;font-size:12px;color:var(--t3);margin:20px 0;position:relative}
-.divider-text::before,.divider-text::after{content:'';position:absolute;top:50%;width:calc(50% - 30px);height:1px;background:var(--bd)}
-.divider-text::before{left:0}.divider-text::after{right:0}
-.login-footer{text-align:center;margin-top:16px;font-size:12px;color:var(--t3)}
-.login-footer a{color:var(--blue);text-decoration:none}
-.val-error{font-size:12px;color:var(--red);margin-top:5px;display:flex;align-items:center;gap:5px}
-</style>
-}
+    <style>
 
+        body {
+            background: radial-gradient(ellipse 80% 60% at 50% -10%,rgba(79,142,247,.12) 0%,transparent 70%),var(--bg)
+        }
+
+        main {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 60px);
+            padding: 24px
+        }
+
+        .login-wrap {
+            width: 100%;
+            max-width: 420px
+        }
+
+        .login-logo {
+            text-align: center;
+            margin-bottom: 32px
+        }
+
+            .login-logo .icon {
+                width: 52px;
+                height: 52px;
+                background: linear-gradient(135deg,var(--blue),var(--purple));
+                border-radius: 14px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 22px;
+                margin: 0 auto 14px;
+                box-shadow: 0 0 30px rgba(79,142,247,.35)
+            }
+
+            .login-logo h1 {
+                font-size: 22px;
+                font-weight: 700;
+                letter-spacing: -.3px
+            }
+
+            .login-logo p {
+                font-size: 13px;
+                color: var(--t3);
+                margin-top: 4px
+            }
+
+        .login-card {
+            background: var(--s1);
+            border: 1px solid var(--bd);
+            border-radius: var(--rxl);
+            padding: 28px
+        }
+
+        .lookup-chip {
+            padding: 10px 14px;
+            border-radius: var(--r);
+            font-size: 13px;
+            display: none;
+            margin-bottom: 14px;
+            border: 1px solid
+        }
+
+            .lookup-chip.found {
+                background: var(--green-g);
+                border-color: rgba(52,211,153,.2);
+                color: #6ee7b7
+            }
+
+            .lookup-chip.denied {
+                background: var(--red-g);
+                border-color: rgba(248,113,113,.2);
+                color: #fca5a5
+            }
+
+            .lookup-chip.miss {
+                background: var(--amber-g);
+                border-color: rgba(251,191,36,.2);
+                color: #fcd34d
+            }
+
+        .input-wrap {
+            position: relative
+        }
+
+            .input-wrap .input-icon {
+                position: absolute;
+                left: 12px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--t3);
+                font-size: 13px;
+                pointer-events: none
+            }
+
+            .input-wrap .form-input {
+                padding-left: 36px
+            }
+
+        .divider-text {
+            text-align: center;
+            font-size: 12px;
+            color: var(--t3);
+            margin: 20px 0;
+            position: relative
+        }
+
+            .divider-text::before, .divider-text::after {
+                content: '';
+                position: absolute;
+                top: 50%;
+                width: calc(50% - 30px);
+                height: 1px;
+                background: var(--bd)
+            }
+
+            .divider-text::before {
+                left: 0
+            }
+
+            .divider-text::after {
+                right: 0
+            }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 12px;
+            color: var(--t3)
+        }
+
+            .login-footer a {
+                color: var(--blue);
+                text-decoration: none
+            }
+
+        .val-error {
+            font-size: 12px;
+            color: var(--red);
+            margin-top: 5px;
+            display: flex;
+            align-items: center;
+            gap: 5px
+        }
+    </style>
+}
 <div class="login-wrap fade-up">
     <div class="login-logo">
         <div class="icon"><i class="fas fa-shield-halved"></i></div>
         <h1>ABC Training Portal</h1>
         <p>Sign in to access your compliance training</p>
     </div>
-
     @if (!ViewData.ModelState.IsValid)
     {
         <div class="alert alert-error" style="margin-bottom:16px">
@@ -41,9 +162,8 @@ main{display:flex;align-items:center;justify-content:center;min-height:calc(100v
             <span>@Html.ValidationSummary(true)</span>
         </div>
     }
-
     <div class="login-card">
-        @using (Html.BeginForm("Login","Auth",FormMethod.Post))
+        @using (Html.BeginForm("Login", "Auth", FormMethod.Post))
         {
             @Html.AntiForgeryToken()
 
@@ -70,14 +190,13 @@ main{display:flex;align-items:center;justify-content:center;min-height:calc(100v
             </button>
         }
     </div>
-
     <div class="login-footer">
         Forgot password? Contact <a href="mailto:it-support@ioi.com">IT Support</a>
     </div>
 </div>
-
 @section Scripts {
-<script>
+    <script>
+function escHtml(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');}
 var t=null,inp=document.getElementById('empInput'),chip=document.getElementById('lookupChip'),btn=document.getElementById('loginBtn');
 inp.addEventListener('input',function(){
     clearTimeout(t);chip.style.display='none';chip.className='lookup-chip';btn.disabled=true;
@@ -87,10 +206,10 @@ inp.addEventListener('input',function(){
         .then(function(r){return r.json()}).then(function(d){
             chip.style.display='block';
             if(!d.found){chip.className='lookup-chip miss';chip.innerHTML='<i class="fas fa-circle-question"></i> Employee ID not found';}
-            else if(d.access==='0'){chip.className='lookup-chip denied';chip.innerHTML='<i class="fas fa-ban"></i> Access restricted — contact Admin';}
-            else{chip.className='lookup-chip found';chip.innerHTML='<i class="fas fa-circle-check"></i> <strong>'+d.name+'</strong> &nbsp;·&nbsp; '+d.department;btn.disabled=false;}
+            else if(d.access==='0'){chip.className='lookup-chip denied';chip.innerHTML='<i class="fas fa-ban"></i> Access restricted &mdash; contact Admin';}
+            else{chip.className='lookup-chip found';chip.innerHTML='<i class="fas fa-circle-check"></i> <strong>'+escHtml(d.name)+'</strong>';btn.disabled=false;}
         }).catch(function(){btn.disabled=false;});
     },380);
 });
-</script>
+    </script>
 }

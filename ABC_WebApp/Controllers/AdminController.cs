@@ -77,6 +77,7 @@ namespace ABC_WebApp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public JsonResult SaveEmployee(EmployeeFormModel model)
         {
             if (!SessionHelper.IsLoggedIn || !SessionHelper.IsAdmin)
@@ -94,6 +95,7 @@ namespace ABC_WebApp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public JsonResult ToggleActive(string empID)
         {
             if (!SessionHelper.IsLoggedIn || !SessionHelper.IsAdmin)
@@ -107,6 +109,7 @@ namespace ABC_WebApp.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public JsonResult DeleteEmployee(string empID)
         {
             if (!SessionHelper.IsLoggedIn || !SessionHelper.IsAdmin)

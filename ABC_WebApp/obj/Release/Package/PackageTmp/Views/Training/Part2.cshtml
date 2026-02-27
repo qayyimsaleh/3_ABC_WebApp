@@ -5,6 +5,7 @@
 @section Styles {
     <style>
 
+
         .page-head {
             padding: 32px 0 24px;
             border-bottom: 1px solid var(--bd);
@@ -298,6 +299,8 @@
     <script>
 var lang='english', score='', status='';
 var URLS = { english: '/Content/Training/Part2_EN/story.html', malay: '/Content/Training/Part2_BM/story.html' };
+// Allowed origin for postMessage — only accept from same server
+var ALLOWED_ORIGIN = window.location.origin;
 
 function selLang(l) {
     lang = l;
@@ -319,6 +322,8 @@ function closeTraining() {
 }
 
 window.addEventListener('message', function(e) {
+    // Security: only accept messages from our own server (same origin)
+    if (!e.origin || e.origin !== ALLOWED_ORIGIN) return;
     if (!e.data) return;
     var p = e.data.split('|');
     if (p.length < 2) return;

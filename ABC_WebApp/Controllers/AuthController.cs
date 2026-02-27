@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using System.Web.Mvc;
 using ABC_WebApp.Helpers;
 using ABC_WebApp.Models;
@@ -37,12 +38,14 @@ namespace ABC_WebApp.Controllers
 
                 if (emp.Access == "0")
                 {
+                    Thread.Sleep(1500);
                     ModelState.AddModelError("", "Your account does not have portal access. Please contact Admin.");
                     return View(model);
                 }
 
                 if (emp.EmployeeIC != model.Password)
                 {
+                    Thread.Sleep(1500);
                     ModelState.AddModelError("", "Incorrect password. Please try again.");
                     return View(model);
                 }
@@ -78,12 +81,13 @@ namespace ABC_WebApp.Controllers
                 if (emp == null)
                     return Json(new { found = false }, JsonRequestBehavior.AllowGet);
 
+                // Return only minimum info needed for UX — do NOT expose department
+                // or other details that could be harvested for social engineering
                 return Json(new
                 {
-                    found      = true,
-                    name       = emp.UserName,
-                    department = emp.Department,
-                    access     = emp.Access
+                    found = true,
+                    name = emp.UserName,
+                    access = emp.Access
                 }, JsonRequestBehavior.AllowGet);
             }
             catch
