@@ -46,7 +46,7 @@
         /* ─ STATS ─ */
         .stats-row {
             display: grid;
-            grid-template-columns: repeat(auto-fill,minmax(200px,1fr));
+            grid-template-columns: repeat(auto-fill,minmax(190px,1fr));
             gap: 14px;
             margin-bottom: 28px
         }
@@ -88,7 +88,72 @@
             transition: width .7s ease
         }
 
-        /* ─ TABLE TOOLBAR ─ */
+        /* ─ DEPT CHART ─ */
+        .dept-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill,minmax(260px,1fr));
+            gap: 12px;
+            margin-top: 16px
+        }
+
+        .dept-card {
+            background: var(--s1);
+            border: 1px solid var(--bd);
+            border-radius: var(--rl);
+            padding: 14px 16px
+        }
+
+        .dept-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--t2);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: .3px
+        }
+
+        .dept-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            font-size: 12px
+        }
+
+        .dept-bar-label {
+            color: var(--t3);
+            width: 42px;
+            flex-shrink: 0
+        }
+
+        .dept-bar-track {
+            flex: 1;
+            height: 6px;
+            background: var(--s4);
+            border-radius: 3px;
+            overflow: hidden
+        }
+
+        .dept-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width .6s ease
+        }
+
+        .dept-bar-pct {
+            color: var(--t2);
+            width: 36px;
+            text-align: right;
+            flex-shrink: 0
+        }
+
+        .dept-total {
+            font-size: 11px;
+            color: var(--t3);
+            margin-top: 4px
+        }
+
+        /* ─ TOOLBAR ─ */
         .tbar {
             display: flex;
             justify-content: space-between;
@@ -168,6 +233,36 @@
             font-family: 'JetBrains Mono',monospace
         }
 
+        /* ─ BULK BAR ─ */
+        .bulk-bar {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            background: rgba(79,142,247,.08);
+            border: 1px solid rgba(79,142,247,.2);
+            border-radius: var(--r);
+            padding: 8px 14px;
+            margin-bottom: 12px;
+            flex-wrap: wrap
+        }
+
+            .bulk-bar.show {
+                display: flex
+            }
+
+        .bulk-count {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--blue)
+        }
+
+        .bulk-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-left: auto
+        }
+
         /* ─ TABLE ─ */
         .action-btns {
             display: flex;
@@ -207,6 +302,23 @@
                 background: var(--blue-g)
             }
 
+        .cb-cell {
+            width: 36px;
+            padding-left: 14px !important
+        }
+
+        .row-sel {
+            width: 15px;
+            height: 15px;
+            cursor: pointer;
+            accent-color: var(--blue)
+        }
+
+        tr.selected {
+            background: rgba(79,142,247,.05) !important
+        }
+
+        /* ─ TOGGLE ─ */
         .toggle-sw {
             position: relative;
             width: 34px;
@@ -248,19 +360,6 @@
                 transform: translateX(16px)
             }
 
-        /* ─ SECTION HEADER ─ */
-        .sec-head {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px
-        }
-
-            .sec-head h2 {
-                font-size: 16px;
-                font-weight: 600
-            }
-
         /* ─ DATE RANGE ─ */
         .date-range-wrap {
             display: flex;
@@ -275,7 +374,6 @@
         .date-input {
             background: transparent;
             border: none;
-            border-radius: 0;
             padding: 2px 4px;
             font-size: 13px;
             color: var(--t1);
@@ -284,10 +382,7 @@
         }
 
             .date-input:focus {
-                outline: none;
-                box-shadow: none;
-                border: none;
-                background: transparent
+                outline: none
             }
 
             .date-input::-webkit-calendar-picker-indicator {
@@ -296,9 +391,28 @@
                 opacity: .7
             }
 
-                .date-input::-webkit-calendar-picker-indicator:hover {
-                    opacity: 1
-                }
+        /* ─ MODALS ─ */
+        .sec-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px
+        }
+
+            .sec-head h2 {
+                font-size: 16px;
+                font-weight: 600
+            }
+
+        .del-info {
+            background: var(--red-g);
+            border: 1px solid rgba(248,113,113,.2);
+            border-radius: var(--r);
+            padding: 14px;
+            font-size: 13px;
+            color: #fca5a5;
+            margin-bottom: 16px
+        }
 
         .empty {
             padding: 48px;
@@ -313,15 +427,183 @@
                 display: block
             }
 
-        /* ─ CONFIRM DELETE ─ */
-        .del-info {
-            background: var(--red-g);
-            border: 1px solid rgba(248,113,113,.2);
+        /* ─ IMPORT ─ */
+        .import-drop {
+            border: 2px dashed var(--bd);
+            border-radius: var(--rl);
+            padding: 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--tr);
+            color: var(--t3)
+        }
+
+            .import-drop:hover, .import-drop.drag {
+                border-color: var(--blue);
+                color: var(--blue);
+                background: var(--blue-g2)
+            }
+
+            .import-drop i {
+                font-size: 28px;
+                margin-bottom: 10px;
+                display: block
+            }
+
+        .import-preview {
+            margin-top: 14px;
+            max-height: 260px;
+            overflow-y: auto
+        }
+
+        .import-result {
+            background: var(--s2);
+            border: 1px solid var(--bd);
             border-radius: var(--r);
-            padding: 14px;
+            padding: 12px 16px;
             font-size: 13px;
-            color: #fca5a5;
-            margin-bottom: 16px
+            margin-top: 10px
+        }
+
+        /* ─ QUICK FILTER PILLS ─ */
+        .filter-pills {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 14px
+        }
+
+        .pill {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid var(--bd);
+            background: var(--s2);
+            color: var(--t3);
+            transition: var(--tr)
+        }
+
+            .pill:hover {
+                border-color: var(--bd2);
+                color: var(--t1)
+            }
+
+            .pill.on {
+                background: var(--blue);
+                border-color: var(--blue);
+                color: #fff
+            }
+
+            .pill.red.on {
+                background: var(--red);
+                border-color: var(--red)
+            }
+
+            .pill.green.on {
+                background: var(--green);
+                border-color: var(--green);
+                color: #0d1117
+            }
+
+            .pill.amber.on {
+                background: var(--amber);
+                border-color: var(--amber);
+                color: #0d1117
+            }
+
+        /* ─ INLINE EDIT ─ */
+        .editable-cell {
+            cursor: pointer;
+            border-radius: 4px;
+            padding: 2px 4px;
+            transition: background .15s
+        }
+
+            .editable-cell:hover {
+                background: var(--s3)
+            }
+
+        .inline-input {
+            background: var(--s2);
+            border: 1px solid var(--blue);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 13px;
+            color: var(--t1);
+            font-family: inherit;
+            width: 100%;
+            min-width: 80px
+        }
+
+            .inline-input:focus {
+                outline: none
+            }
+
+        /* ─ TOAST ─ */
+        #toastArea {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none
+        }
+
+        .toast {
+            background: var(--s1);
+            border: 1px solid var(--bd);
+            border-radius: var(--r);
+            padding: 10px 16px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 220px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.4);
+            animation: toastIn .2s ease;
+            pointer-events: all
+        }
+
+            .toast.success {
+                border-color: rgba(52,211,153,.3);
+                color: var(--green)
+            }
+
+            .toast.error {
+                border-color: rgba(248,113,113,.3);
+                color: var(--red)
+            }
+
+            .toast.info {
+                border-color: rgba(79,142,247,.3);
+                color: var(--blue)
+            }
+
+        @@keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        /* ─ SHORTCUTS BADGE ─ */
+        .kbd {
+            background: var(--s3);
+            border: 1px solid var(--bd2);
+            border-radius: 4px;
+            padding: 1px 5px;
+            font-size: 11px;
+            font-family: 'JetBrains Mono',monospace;
+            color: var(--t2)
         }
 
         @@media(max-width:768px) {
@@ -355,21 +637,27 @@
     </style>
 }
 <div class="wrap-xl">
-    <!-- Page Header -->
+    <!-- ─ PAGE HEADER ─ -->
     <div style="padding:32px 0 24px;border-bottom:1px solid var(--bd);margin-bottom:28px" class="fade-up">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap">
             <div>
                 <div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--t3);font-weight:600;margin-bottom:6px">Administration</div>
                 <h1 style="font-size:22px;font-weight:700;letter-spacing:-.3px;margin-bottom:4px">Admin Dashboard</h1>
-                <p style="font-size:13px;color:var(--t3)">Training Year @Model.CurrentYear &nbsp;·&nbsp; @Model.TotalActive active employees</p>
+                <p style="font-size:13px;color:var(--t3)">
+                    Training Year @Model.CurrentYear &nbsp;&middot;&nbsp; @Model.TotalActive active employees
+                    &nbsp;<span style="color:var(--t3)">|</span>&nbsp;
+                    <span style="color:var(--t3)">Shortcuts: <span class="kbd">N</span> new &nbsp;<span class="kbd">/</span> search &nbsp;<span class="kbd">E</span> export &nbsp;<span class="kbd">I</span> import</span>
+                </p>
             </div>
             <div style="display:flex;gap:8px;flex-wrap:wrap">
                 <button class="btn btn-ghost btn-sm" onclick="exportExcel()"><i class="fas fa-file-excel"></i> Export Excel</button>
                 <button class="btn btn-ghost btn-sm" onclick="exportCSV()"><i class="fas fa-download"></i> Export CSV</button>
+                <button class="btn btn-ghost btn-sm" onclick="openImport()"><i class="fas fa-file-import"></i> Import</button>
+                <button class="btn btn-primary btn-sm" onclick="openCreate()"><i class="fas fa-plus"></i> Add Employee</button>
             </div>
         </div>
     </div>
-    <!-- Stats -->
+    <!-- ─ STATS ─ -->
     <div class="stats-row fade-up">
         <div class="stat">
             <div class="stat-num" style="color:var(--t1)">@Model.TotalActive</div>
@@ -397,29 +685,41 @@
             <div class="stat-lbl">Full Completion</div>
             <div class="stat-bar"><div class="stat-bar-fill" style="width:@bothPct%;background:var(--amber)"></div></div>
         </div>
+        <div class="stat">
+            <div class="stat-num" style="color:var(--t3)">@Model.TotalInactive</div>
+            <div class="stat-lbl">Inactive Accounts</div>
+            <div class="stat-bar"><div class="stat-bar-fill" style="width:@(Model.TotalActive+Model.TotalInactive>0?(Model.TotalInactive*100/(Model.TotalActive+Model.TotalInactive)):0)%;background:var(--s4)"></div></div>
+        </div>
     </div>
-    <!-- Tabs -->
+    <!-- ─ TABS ─ -->
     <div class="tabs fade-up">
         <button class="tab on" onclick="showTab('report')"><i class="fas fa-chart-bar" style="margin-right:5px"></i>Training Report</button>
         <button class="tab" onclick="showTab('employees')"><i class="fas fa-users" style="margin-right:5px"></i>Employees</button>
+        <button class="tab" onclick="showTab('departments')"><i class="fas fa-building" style="margin-right:5px"></i>By Department</button>
     </div>
     <!-- ═══ TAB: REPORT ═══ -->
     <div class="tab-panel on" id="tab-report">
+        <!-- Quick filter pills -->
+        <div class="filter-pills">
+            <span class="pill on" onclick="quickFilter('all',this)">All</span>
+            <span class="pill green" onclick="quickFilter('both',this)"><i class="fas fa-check-double"></i> Both Passed</span>
+            <span class="pill amber" onclick="quickFilter('p1only',this)">Part 1 Only</span>
+            <span class="pill red" onclick="quickFilter('none',this)"><i class="fas fa-xmark"></i> Not Started</span>
+            <span class="pill" onclick="quickFilter('local',this)">Local</span>
+            <span class="pill" onclick="quickFilter('foreign',this)">Foreign</span>
+        </div>
         <div class="tbar">
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
                 <h3>Training Status</h3>
                 <span class="row-count" id="reportCount"></span>
             </div>
             <div class="tbar-right">
-                <!-- Date range -->
                 <div class="date-range-wrap">
                     <i class="fas fa-calendar-days" style="color:var(--t3);font-size:12px"></i>
                     <input type="date" class="form-input date-input" id="rDateFrom" onchange="onDateChange()">
                     <span style="color:var(--t3);font-size:12px;padding:0 2px">to</span>
                     <input type="date" class="form-input date-input" id="rDateTo" onchange="onDateChange()">
-                    <button class="btn btn-ghost btn-sm" onclick="resetDateRange()" title="Reset to current year">
-                        <i class="fas fa-rotate-left"></i>
-                    </button>
+                    <button class="btn btn-ghost btn-sm" onclick="resetDateRange()" title="Reset to current year"><i class="fas fa-rotate-left"></i></button>
                 </div>
                 <div class="search-box">
                     <i class="fas fa-magnifying-glass"></i>
@@ -431,12 +731,7 @@
                     <option value="1">Local</option>
                     <option value="0">Foreign</option>
                 </select>
-                <select class="filter-sel" id="rStatus" onchange="filterReport()">
-                    <option value="">All Status</option>
-                    <option value="both">Both Passed</option>
-                    <option value="p1">Part 1 Only</option>
-                    <option value="none">Not Started</option>
-                </select>
+                <button class="btn btn-ghost btn-sm" title="Copy incomplete list to clipboard" onclick="copyIncomplete()"><i class="fas fa-copy"></i> Copy Incomplete</button>
             </div>
         </div>
         <div class="tbl-wrap">
@@ -459,6 +754,29 @@
     </div>
     <!-- ═══ TAB: EMPLOYEES ═══ -->
     <div class="tab-panel" id="tab-employees">
+        <!-- Bulk action bar -->
+        <div class="bulk-bar" id="bulkBar">
+            <i class="fas fa-check-square" style="color:var(--blue)"></i>
+            <span class="bulk-count" id="bulkCount">0 selected</span>
+            <div class="bulk-actions">
+                <button class="btn btn-ghost btn-sm" onclick="bulkAction('enable')"><i class="fas fa-toggle-on"></i> Enable</button>
+                <button class="btn btn-ghost btn-sm" onclick="bulkAction('disable')"><i class="fas fa-toggle-off"></i> Disable</button>
+                <button class="btn btn-ghost btn-sm" onclick="bulkAction('grant')"><i class="fas fa-unlock"></i> Grant Access</button>
+                <button class="btn btn-ghost btn-sm" onclick="bulkAction('revoke')"><i class="fas fa-ban"></i> Revoke Access</button>
+                <button class="btn btn-danger btn-sm" onclick="bulkAction('delete')"><i class="fas fa-trash"></i> Delete Selected</button>
+                <button class="btn btn-ghost btn-sm" onclick="clearSelection()"><i class="fas fa-xmark"></i> Clear</button>
+            </div>
+        </div>
+        <!-- Quick filter pills -->
+        <div class="filter-pills">
+            <span class="pill on" onclick="empQuickFilter('all',this)">All</span>
+            <span class="pill green" onclick="empQuickFilter('active',this)">Active</span>
+            <span class="pill red" onclick="empQuickFilter('inactive',this)">Inactive</span>
+            <span class="pill amber" onclick="empQuickFilter('noaccess',this)">No Access</span>
+            <span class="pill" onclick="empQuickFilter('admin',this)"><i class="fas fa-shield"></i> Admins</span>
+            <span class="pill" onclick="empQuickFilter('local',this)">Local</span>
+            <span class="pill" onclick="empQuickFilter('foreign',this)">Foreign</span>
+        </div>
         <div class="tbar">
             <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
                 <h3>Employee Management</h3>
@@ -467,9 +785,11 @@
             <div class="tbar-right">
                 <div class="search-box">
                     <i class="fas fa-magnifying-glass"></i>
-                    <input type="text" id="eSearch" placeholder="Search name or ID…" oninput="filterEmployees()">
+                    <input type="text" id="eSearch" placeholder="Search name, ID, dept…" oninput="filterEmployees()" id="eSearch">
                 </div>
                 <select class="filter-sel" id="eDept" onchange="filterEmployees()"><option value="">All Departments</option></select>
+                <button class="btn btn-ghost btn-sm" onclick="selectAllVisible()" title="Select all visible rows"><i class="fas fa-check-double"></i> Select All</button>
+                <button class="btn btn-ghost btn-sm" onclick="openImport()"><i class="fas fa-file-import"></i> Import</button>
                 <button class="btn btn-primary btn-sm" onclick="openCreate()"><i class="fas fa-plus"></i> Add Employee</button>
             </div>
         </div>
@@ -477,6 +797,7 @@
             <table>
                 <thead>
                     <tr>
+                        <th class="cb-cell"><input type="checkbox" class="row-sel" id="selectAllCb" onchange="toggleSelectAll(this.checked)" title="Select all"></th>
                         <th>Employee ID</th>
                         <th>Name</th>
                         <th>Department</th>
@@ -487,74 +808,84 @@
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody id="empBody"><tr><td colspan="8" class="empty"><span class="spin" style="border-top-color:var(--blue)"></span></td></tr></tbody>
+                <tbody id="empBody"><tr><td colspan="9" class="empty"><span class="spin" style="border-top-color:var(--blue)"></span></td></tr></tbody>
             </table>
         </div>
     </div>
+    <!-- ═══ TAB: DEPARTMENTS ═══ -->
+    <div class="tab-panel" id="tab-departments">
+        <div class="tbar">
+            <div style="display:flex;align-items:center;gap:10px">
+                <h3>Department Progress</h3>
+                <span class="row-count" id="deptCount"></span>
+            </div>
+            <div class="tbar-right">
+                <select class="filter-sel" id="deptType" onchange="renderDepts()">
+                    <option value="">All Types</option>
+                    <option value="1">Local</option>
+                    <option value="0">Foreign</option>
+                </select>
+                <button class="btn btn-ghost btn-sm" onclick="exportDeptExcel()"><i class="fas fa-file-excel"></i> Export Dept Report</button>
+            </div>
+        </div>
+        <div class="dept-grid" id="deptGrid"><div class="empty"><span class="spin" style="border-top-color:var(--blue)"></span></div></div>
+    </div>
 </div>
-<!-- ═══ MODAL: Create / Edit Employee ═══ -->
+<!-- ═══ MODAL: Create/Edit Employee ═══ -->
 <div class="modal" id="empModal">
-    <div class="modal-box">
+    <div class="modal-box" style="max-width:560px">
         <div class="modal-head">
             <h3 id="empModalTitle">Add Employee</h3>
             <button class="modal-close" onclick="closeEmpModal()"><i class="fas fa-xmark"></i></button>
         </div>
         <div class="modal-body">
             <div id="empModalAlert"></div>
+            <div id="dupWarning" style="display:none;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);border-radius:var(--r);padding:10px 14px;font-size:13px;color:var(--amber);margin-bottom:12px">
+                <i class="fas fa-triangle-exclamation"></i> <span id="dupMsg"></span>
+            </div>
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label">Employee ID *</label>
-                    <input type="text" class="form-input" id="fEmpID" placeholder="e.g. E1240">
+                    <input type="text" class="form-input" id="fEmpID" placeholder="e.g. E1240" oninput="this.value=this.value.toUpperCase()">
                 </div>
                 <div class="form-group">
                     <label class="form-label">IC Number (Password) *</label>
-                    <input type="text" class="form-input" id="fIC" placeholder="e.g. 5057">
+                    <input type="text" class="form-input" id="fIC" placeholder="e.g. 5057" onblur="checkDupIC()">
                 </div>
             </div>
             <div class="form-group">
                 <label class="form-label">Full Name *</label>
-                <input type="text" class="form-input" id="fName" placeholder="e.g. JOHN DOE">
+                <input type="text" class="form-input" id="fName" placeholder="e.g. JOHN DOE" oninput="this.value=this.value.toUpperCase()">
             </div>
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label">Department</label>
-                    <input type="text" class="form-input" id="fDept" placeholder="e.g. HUMAN RESOURCES">
+                    <input type="text" class="form-input" id="fDept" placeholder="e.g. HUMAN RESOURCES" list="deptSuggestions" oninput="this.value=this.value.toUpperCase()">
+                    <datalist id="deptSuggestions"></datalist>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Company ID</label>
-                    <input type="text" class="form-input" id="fCo" placeholder="e.g. PCEO">
+                    <input type="text" class="form-input" id="fCo" placeholder="e.g. PCEO" oninput="this.value=this.value.toUpperCase()">
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label">Employee Type</label>
-                    <select class="form-input" id="fLocal">
-                        <option value="1">Local</option>
-                        <option value="0">Foreign</option>
-                    </select>
+                    <select class="form-input" id="fLocal"><option value="1">Local</option><option value="0">Foreign</option></select>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Status</label>
-                    <select class="form-input" id="fActive">
-                        <option value="1">Active</option>
-                        <option value="0">Inactive</option>
-                    </select>
+                    <select class="form-input" id="fActive"><option value="1">Active</option><option value="0">Inactive</option></select>
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label">Portal Access</label>
-                    <select class="form-input" id="fAccess">
-                        <option value="1">Granted</option>
-                        <option value="0">Restricted</option>
-                    </select>
+                    <select class="form-input" id="fAccess"><option value="1">Granted</option><option value="0">Restricted</option></select>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Admin (SuperUser)</label>
-                    <select class="form-input" id="fSU">
-                        <option value="0">No</option>
-                        <option value="1">Yes</option>
-                    </select>
+                    <select class="form-input" id="fSU"><option value="0">No</option><option value="1">Yes</option></select>
                 </div>
             </div>
         </div>
@@ -574,7 +905,7 @@
         <div class="modal-body">
             <div class="del-info">
                 <i class="fas fa-triangle-exclamation" style="margin-right:6px"></i>
-                This will permanently delete <strong id="delName"></strong> (<span id="delID" style="font-family:'JetBrains Mono',monospace"></span>) and all their training records.
+                This will permanently delete <strong id="delName"></strong> (<span id="delID" class="mono"></span>) and all their training records.
             </div>
             <p style="font-size:13px;color:var(--t3)">This action cannot be undone.</p>
         </div>
@@ -584,87 +915,156 @@
         </div>
     </div>
 </div>
+<!-- ═══ MODAL: Bulk Delete Confirm ═══ -->
+<div class="modal" id="bulkDelModal">
+    <div class="modal-box" style="max-width:420px">
+        <div class="modal-head"><h3>Confirm Bulk Delete</h3><button class="modal-close" onclick="document.getElementById('bulkDelModal').classList.remove('open')"><i class="fas fa-xmark"></i></button></div>
+        <div class="modal-body">
+            <div class="del-info">
+                <i class="fas fa-triangle-exclamation" style="margin-right:6px"></i>
+                You are about to delete <strong id="bulkDelCount"></strong> employees and all their training records.
+            </div>
+            <p style="font-size:13px;color:var(--t3)">This action cannot be undone.</p>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-ghost" onclick="document.getElementById('bulkDelModal').classList.remove('open')">Cancel</button>
+            <button class="btn btn-danger" id="bulkDelConfirmBtn" onclick="executeBulkDelete()"><i class="fas fa-trash"></i> Delete All</button>
+        </div>
+    </div>
+</div>
+<!-- ═══ MODAL: Import ═══ -->
+<div class="modal" id="importModal">
+    <div class="modal-box" style="max-width:680px">
+        <div class="modal-head">
+            <h3><i class="fas fa-file-import" style="margin-right:8px;color:var(--blue)"></i>Bulk Import Employees</h3>
+            <button class="modal-close" onclick="closeImport()"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+            <div id="importStep1">
+                <p style="font-size:13px;color:var(--t2);margin-bottom:14px">
+                    Upload an Excel/CSV file or paste tab-separated data below.<br>
+                    <strong>Required columns:</strong> EmployeeID, UserName, EmployeeIC<br>
+                    <span style="color:var(--t3)">Optional: Department, CompanyID, Local (1/0), Active (1/0), Access (1/0), SuperUser (1/0)</span>
+                </p>
+                <div class="import-drop" id="importDrop" onclick="document.getElementById('importFile').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleFileDrop(event)">
+                    <i class="fas fa-cloud-arrow-up"></i>
+                    <div>Drop Excel/CSV here or click to browse</div>
+                    <div style="font-size:12px;margin-top:6px;color:var(--t3)">.xlsx, .xls, .csv supported</div>
+                </div>
+                <input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFileSelect(this)">
+                <div style="text-align:center;color:var(--t3);margin:14px 0;font-size:13px">— or paste data —</div>
+                <textarea id="importPaste" class="form-input" rows="5" placeholder="EmployeeID&#9;UserName&#9;EmployeeIC&#9;Department&#10;E9001&#9;JOHN DOE&#9;12345&#9;FINANCE&#10;E9002&#9;JANE LEE&#9;67890&#9;HR" style="font-family:'JetBrains Mono',monospace;font-size:12px;resize:vertical" oninput="parsePaste()"></textarea>
+                <div class="import-preview" id="importPreview"></div>
+            </div>
+            <div id="importStep2" style="display:none">
+                <div class="import-result" id="importResult"></div>
+            </div>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-ghost" onclick="closeImport()">Cancel</button>
+            <button class="btn btn-primary" id="importBtn" onclick="runImport()" disabled><i class="fas fa-upload"></i> Import <span id="importBtnCount"></span></button>
+        </div>
+    </div>
+</div>
+<!-- Toast container -->
+<div id="toastArea"></div>
 @section Scripts {
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <script>
-var CY=@Model.CurrentYear, allScores=[], allEmps=[], filteredScores=[], filteredEmps=[], editMode=false, editID='', delTargetID='';
+var CY=@Model.CurrentYear, allScores=[], allEmps=[], filteredScores=[], filteredEmps=[];
+var editMode=false, editID='', delTargetID='', selectedIDs=new Set(), pendingBulkAction='';
+var importRows=[];
 var tok=function(){var t=document.querySelector('input[name="__RequestVerificationToken"]');return t?t.value:'';};
 
-// ── TABS ────────────────────────────────────────────────────────────────────
+// ── TOAST ────────────────────────────────────────────────────────────────────
+function toast(msg, type){
+    type=type||'info';
+    var el=document.createElement('div');
+    el.className='toast '+type;
+    el.innerHTML='<i class="fas fa-'+(type==='success'?'circle-check':type==='error'?'circle-exclamation':'circle-info')+'"></i><span>'+esc(msg)+'</span>';
+    document.getElementById('toastArea').appendChild(el);
+    setTimeout(function(){el.style.opacity='0';el.style.transition='opacity .3s';setTimeout(function(){el.remove();},300);},3000);
+}
+
+// ── TABS ─────────────────────────────────────────────────────────────────────
 function showTab(id){
-    document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('on',['report','employees'][i]===id);});
+    document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('on',['report','employees','departments'][i]===id);});
     document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('on');});
     document.getElementById('tab-'+id).classList.add('on');
+    if(id==='departments') renderDepts();
 }
 
 // ── DATE HELPERS ─────────────────────────────────────────────────────────────
-function toInputDate(d){ return d.toISOString().slice(0,10); }
-function defaultFrom(){ return toInputDate(new Date(CY, 0, 1)); }   // 1 Jan current year
-function defaultTo()  { return toInputDate(new Date()); }            // today
+function toInputDate(d){return d.toISOString().slice(0,10);}
+function defaultFrom(){return toInputDate(new Date(CY,0,1));}
+function defaultTo(){return toInputDate(new Date());}
 
 function initDateRange(){
-    document.getElementById('rDateFrom').value = defaultFrom();
-    document.getElementById('rDateTo').value   = defaultTo();
+    document.getElementById('rDateFrom').value=defaultFrom();
+    document.getElementById('rDateTo').value=defaultTo();
 }
 
 function resetDateRange(){
-    document.getElementById('rDateFrom').value = defaultFrom();
-    document.getElementById('rDateTo').value   = defaultTo();
-    document.getElementById('rSearch').value = '';
-    document.getElementById('rDept').value   = '';
-    document.getElementById('rType').value   = '';
-    document.getElementById('rStatus').value = '';
+    document.getElementById('rDateFrom').value=defaultFrom();
+    document.getElementById('rDateTo').value=defaultTo();
+    document.getElementById('rSearch').value='';
+    document.getElementById('rDept').value='';
+    document.getElementById('rType').value='';
+    document.querySelectorAll('.filter-pills .pill').forEach(function(p,i){p.classList.toggle('on',i===0);});
     loadReport();
 }
 
-var dateChangeTimer = null;
+var dateChangeTimer=null;
 function onDateChange(){
     clearTimeout(dateChangeTimer);
-    dateChangeTimer = setTimeout(function(){
-        var from = document.getElementById('rDateFrom').value;
-        var to   = document.getElementById('rDateTo').value;
-        if(from && to && from <= to) loadReport();
-    }, 400);
+    dateChangeTimer=setTimeout(function(){
+        var from=document.getElementById('rDateFrom').value;
+        var to=document.getElementById('rDateTo').value;
+        if(from&&to&&from<=to) loadReport();
+    },400);
 }
 
-// ── LOAD REPORT ───────────────────────────────────────────────────────────────
+// ── LOAD ─────────────────────────────────────────────────────────────────────
 function loadReport(){
-    var from = document.getElementById('rDateFrom').value;
-    var to   = document.getElementById('rDateTo').value;
-    if(!from || !to){ return; }
+    var from=document.getElementById('rDateFrom').value;
+    var to=document.getElementById('rDateTo').value;
+    if(!from||!to) return;
     document.getElementById('reportBody').innerHTML='<tr><td colspan="8" style="text-align:center;padding:32px"><span class="spin" style="border-top-color:var(--blue)"></span></td></tr>';
     fetch('@Url.Action("GetScoresJson","Admin")?dateFrom='+encodeURIComponent(from)+'&dateTo='+encodeURIComponent(to))
     .then(function(r){return r.json();}).then(function(d){
         allScores=d; filteredScores=d;
-        populateDepts(d.map(function(e){return e.Department;}), 'rDept');
-        // keep existing dept filter selected if still valid
-        filterReport();
-        updateStats(d);
+        populateDepts(d.map(function(e){return e.Department;}),'rDept');
+        filterReport(); updateStats(d);
     });
 }
 
-// ── LOAD ALL ─────────────────────────────────────────────────────────────────
-function loadAll(){
-    initDateRange();
-    loadReport();
+function loadEmployees(){
     fetch('@Url.Action("GetEmployeesJson","Admin")').then(function(r){return r.json();}).then(function(d){
         allEmps=d; filteredEmps=d;
-        populateDepts(d.map(function(e){return e.Department;}), 'eDept');
+        populateDepts(d.map(function(e){return e.Department;}),'eDept');
+        // populate dept autocomplete
+        var dl=document.getElementById('deptSuggestions');
+        dl.innerHTML='';
+        [...new Set(d.map(function(e){return e.Department;}))].sort().forEach(function(dep){
+            if(!dep) return;
+            var o=document.createElement('option'); o.value=dep; dl.appendChild(o);
+        });
         renderEmployees();
     });
 }
 
-function populateDepts(depts, selId){
-    var unique=[...new Set(depts)].sort();
+function loadAll(){initDateRange();loadReport();loadEmployees();}
+
+function populateDepts(depts,selId){
+    var unique=[...new Set(depts)].filter(Boolean).sort();
     var sel=document.getElementById(selId);
-    // keep first option
     while(sel.options.length>1) sel.remove(1);
     unique.forEach(function(d){var o=document.createElement('option');o.value=d;o.textContent=d;sel.appendChild(o);});
 }
 
-// ── STATS ────────────────────────────────────────────────────────────────────
+// ── STATS ─────────────────────────────────────────────────────────────────────
 function updateStats(data){
-    var total=data.length, p1=data.filter(function(e){return e.Part1==='pass';}).length, p2=data.filter(function(e){return e.Part2==='pass';}).length;
+    var total=data.length,p1=data.filter(function(e){return e.Part1==='pass';}).length,p2=data.filter(function(e){return e.Part2==='pass';}).length;
     document.getElementById('s-p1').textContent=p1;
     document.getElementById('s-p2').textContent=p2;
     document.getElementById('s-np').textContent=(total-p1);
@@ -673,19 +1073,39 @@ function updateStats(data){
     document.getElementById('sb-np').style.width=(total>0?(total-p1)/total*100:0)+'%';
 }
 
-// ── REPORT TAB ───────────────────────────────────────────────────────────────
+// ── QUICK FILTERS ─────────────────────────────────────────────────────────────
+var activeReportPill='all', activeEmpPill='all';
+
+function quickFilter(type, el){
+    activeReportPill=type;
+    document.querySelectorAll('#tab-report .filter-pills .pill').forEach(function(p){p.classList.remove('on');});
+    el.classList.add('on');
+    var rType=document.getElementById('rType');
+    if(rType) rType.value='';
+    filterReport();
+}
+
+function empQuickFilter(type, el){
+    activeEmpPill=type;
+    document.querySelectorAll('#tab-employees .filter-pills .pill').forEach(function(p){p.classList.remove('on');});
+    el.classList.add('on');
+    filterEmployees();
+}
+
+// ── REPORT FILTER ─────────────────────────────────────────────────────────────
 function filterReport(){
     var s=document.getElementById('rSearch').value.toLowerCase();
     var d=document.getElementById('rDept').value;
     var ty=document.getElementById('rType').value;
-    var st=document.getElementById('rStatus').value;
     filteredScores=allScores.filter(function(e){
-        if(s&&!(e.EmployeeID.toLowerCase().includes(s)||e.UserName.toLowerCase().includes(s))) return false;
+        if(s&&!(e.EmployeeID.toLowerCase().includes(s)||e.UserName.toLowerCase().includes(s)||e.Department.toLowerCase().includes(s))) return false;
         if(d&&e.Department!==d) return false;
         if(ty!==''&&e.Local!==ty) return false;
-        if(st==='both'&&!(e.Part1==='pass'&&e.Part2==='pass')) return false;
-        if(st==='p1'&&!(e.Part1==='pass'&&e.Part2!=='pass')) return false;
-        if(st==='none'&&(e.Part1==='pass'||e.Part2==='pass')) return false;
+        if(activeReportPill==='both'&&!(e.Part1==='pass'&&e.Part2==='pass')) return false;
+        if(activeReportPill==='p1only'&&!(e.Part1==='pass'&&e.Part2!=='pass')) return false;
+        if(activeReportPill==='none'&&(e.Part1==='pass'||e.Part2==='pass')) return false;
+        if(activeReportPill==='local'&&e.Local!=='1') return false;
+        if(activeReportPill==='foreign'&&e.Local!=='0') return false;
         return true;
     });
     renderReport();
@@ -710,22 +1130,19 @@ function renderReport(){
     }).join('');
 }
 
-function statusCell(st, ts){
-    var cls=st==='pass'?'badge-pass':'badge-fail';
-    var ico=st==='pass'?'check':'xmark';
-    var out='<span class="badge '+cls+'"><i class="fas fa-'+ico+'"></i> '+esc(st)+'</span>';
-    if(ts) out+='<div style="font-size:11px;color:var(--t3);margin-top:3px;font-family:\'JetBrains Mono\',monospace">'+fmtD(ts)+'</div>';
-    return out;
-}
-function typeBadge(l){return l==='1'?'<span class="badge badge-blue">Local</span>':'<span class="badge badge-amber">Foreign</span>';}
-
-// ── EMPLOYEE TAB ─────────────────────────────────────────────────────────────
+// ── EMPLOYEE FILTER ───────────────────────────────────────────────────────────
 function filterEmployees(){
     var s=document.getElementById('eSearch').value.toLowerCase();
     var d=document.getElementById('eDept').value;
     filteredEmps=allEmps.filter(function(e){
-        if(s&&!(e.EmployeeID.toLowerCase().includes(s)||e.UserName.toLowerCase().includes(s))) return false;
+        if(s&&!(e.EmployeeID.toLowerCase().includes(s)||e.UserName.toLowerCase().includes(s)||e.Department.toLowerCase().includes(s))) return false;
         if(d&&e.Department!==d) return false;
+        if(activeEmpPill==='active'&&e.Active!=='1') return false;
+        if(activeEmpPill==='inactive'&&e.Active==='1') return false;
+        if(activeEmpPill==='noaccess'&&e.Access==='1') return false;
+        if(activeEmpPill==='admin'&&e.SuperUser!=='1') return false;
+        if(activeEmpPill==='local'&&e.Local!=='1') return false;
+        if(activeEmpPill==='foreign'&&e.Local!=='0') return false;
         return true;
     });
     renderEmployees();
@@ -734,39 +1151,141 @@ function filterEmployees(){
 function renderEmployees(){
     document.getElementById('empCount').textContent=filteredEmps.length+' employees';
     var tb=document.getElementById('empBody');
-    if(!filteredEmps.length){tb.innerHTML='<tr><td colspan="8"><div class="empty"><i class="fas fa-users"></i>No employees found</div></td></tr>';return;}
+    if(!filteredEmps.length){tb.innerHTML='<tr><td colspan="9"><div class="empty"><i class="fas fa-users"></i>No employees found</div></td></tr>';return;}
     tb.innerHTML=filteredEmps.map(function(e){
-        var acc=e.Access==='1';
-        var su=e.SuperUser==='1';
-        return '<tr>'+
+        var acc=e.Access==='1', su=e.SuperUser==='1', sel=selectedIDs.has(e.EmployeeID);
+        return '<tr class="'+(sel?'selected':'')+'" id="row-'+esc(e.EmployeeID)+'">'+
+            '<td class="cb-cell"><input type="checkbox" class="row-sel" '+(sel?'checked':'')+' onchange="toggleRowSel(\''+esc(e.EmployeeID)+'\',this.checked)"></td>'+
             '<td class="mono">'+esc(e.EmployeeID)+'</td>'+
-            '<td style="font-weight:500">'+esc(e.UserName)+'</td>'+
-            '<td style="color:var(--t2)">'+esc(e.Department)+'</td>'+
-            '<td style="color:var(--t3)">'+esc(e.CompanyID)+'</td>'+
+            '<td style="font-weight:500" class="editable-cell" ondblclick="inlineEdit(this,\''+esc(e.EmployeeID)+'\',\'UserName\',\''+esc(e.UserName)+'\')">'+esc(e.UserName)+'</td>'+
+            '<td class="editable-cell" ondblclick="inlineEdit(this,\''+esc(e.EmployeeID)+'\',\'Department\',\''+esc(e.Department)+'\')" style="color:var(--t2)">'+esc(e.Department||'—')+'</td>'+
+            '<td class="editable-cell" ondblclick="inlineEdit(this,\''+esc(e.EmployeeID)+'\',\'CompanyID\',\''+esc(e.CompanyID)+'\')" style="color:var(--t3)">'+esc(e.CompanyID||'—')+'</td>'+
             '<td>'+typeBadge(e.Local)+'</td>'+
-            '<td><label class="toggle-sw" title="Toggle active status"><input type="checkbox" '+(acc?'checked':'')+' onchange="toggleAccess(\''+esc(e.EmployeeID)+'\',this.checked)"><span class="slider"></span></label></td>'+
+            '<td><label class="toggle-sw" title="Toggle access"><input type="checkbox" '+(acc?'checked':'')+' onchange="toggleAccess(\''+esc(e.EmployeeID)+'\',this.checked)"><span class="slider"></span></label></td>'+
             '<td>'+(su?'<span class="badge badge-purple">Admin</span>':'<span style="color:var(--t3);font-size:12px">—</span>')+'</td>'+
             '<td><div class="action-btns">'+
-                '<button class="icon-btn edit" onclick="openEdit(\''+esc(e.EmployeeID)+'\')" title="Edit"><i class="fas fa-pen"></i></button>'+
+                '<button class="icon-btn edit" onclick="openEdit(\''+esc(e.EmployeeID)+'\')" title="Edit (E)"><i class="fas fa-pen"></i></button>'+
                 '<button class="icon-btn del" onclick="openDelete(\''+esc(e.EmployeeID)+'\',\''+esc(e.UserName)+'\')" title="Delete"><i class="fas fa-trash"></i></button>'+
             '</div></td>'+
             '</tr>';
     }).join('');
 }
 
+// ── INLINE EDIT ───────────────────────────────────────────────────────────────
+function inlineEdit(cell, empID, field, currentVal){
+    if(cell.querySelector('input')) return;
+    var orig=cell.innerHTML;
+    cell.innerHTML='<input class="inline-input" type="text" value="'+esc(currentVal)+'">';
+    var inp=cell.querySelector('input');
+    inp.focus(); inp.select();
+
+    function save(){
+        var val=inp.value.trim().toUpperCase();
+        if(val===currentVal.toUpperCase()){cell.innerHTML=orig;return;}
+        // Find the employee and update the field
+        var emp=allEmps.find(function(e){return e.EmployeeID===empID;});
+        if(!emp){cell.innerHTML=orig;return;}
+        var model=Object.assign({},emp);
+        model[field]=val;
+        cell.innerHTML='<span class="spin" style="border-top-color:var(--blue);width:14px;height:14px;border-width:2px"></span>';
+        var body='__RequestVerificationToken='+encodeURIComponent(tok());
+        Object.keys(model).forEach(function(k){body+='&'+k+'='+encodeURIComponent(model[k]||'');});
+        fetch('@Url.Action("SaveEmployee","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body})
+        .then(function(r){return r.json();}).then(function(d){
+            if(d.success){emp[field]=val;toast('Updated '+field+' for '+empID,'success');loadEmployees();}
+            else{cell.innerHTML=orig;toast('Failed: '+d.message,'error');}
+        }).catch(function(){cell.innerHTML=orig;toast('Network error','error');});
+    }
+
+    inp.addEventListener('blur',save);
+    inp.addEventListener('keydown',function(ev){
+        if(ev.key==='Enter'){inp.blur();}
+        if(ev.key==='Escape'){cell.innerHTML=orig;}
+    });
+}
+
+// ── SELECTION ─────────────────────────────────────────────────────────────────
+function toggleRowSel(id, checked){
+    if(checked) selectedIDs.add(id); else selectedIDs.delete(id);
+    var row=document.getElementById('row-'+id);
+    if(row) row.classList.toggle('selected',checked);
+    updateBulkBar();
+}
+
+function toggleSelectAll(checked){
+    filteredEmps.forEach(function(e){
+        if(checked) selectedIDs.add(e.EmployeeID); else selectedIDs.delete(e.EmployeeID);
+    });
+    renderEmployees();
+    updateBulkBar();
+}
+
+function selectAllVisible(){
+    filteredEmps.forEach(function(e){selectedIDs.add(e.EmployeeID);});
+    document.getElementById('selectAllCb').checked=true;
+    renderEmployees(); updateBulkBar();
+}
+
+function clearSelection(){
+    selectedIDs.clear();
+    document.getElementById('selectAllCb').checked=false;
+    renderEmployees(); updateBulkBar();
+}
+
+function updateBulkBar(){
+    var n=selectedIDs.size;
+    var bar=document.getElementById('bulkBar');
+    bar.classList.toggle('show',n>0);
+    document.getElementById('bulkCount').textContent=n+' selected';
+}
+
+// ── BULK ACTIONS ──────────────────────────────────────────────────────────────
+function bulkAction(action){
+    if(!selectedIDs.size){toast('No employees selected','error');return;}
+    var ids=[...selectedIDs];
+
+    if(action==='delete'){
+        document.getElementById('bulkDelCount').textContent=ids.length;
+        pendingBulkAction='delete';
+        document.getElementById('bulkDelModal').classList.add('open');
+        return;
+    }
+
+    var labels={enable:'Enable',disable:'Disable',grant:'Grant Access',revoke:'Revoke Access'};
+    if(!confirm('Apply "'+labels[action]+'" to '+ids.length+' employees?')) return;
+    executeBulk(action, ids);
+}
+
+function executeBulkDelete(){
+    document.getElementById('bulkDelModal').classList.remove('open');
+    executeBulk('delete',[...selectedIDs]);
+}
+
+function executeBulk(action, ids){
+    var body='__RequestVerificationToken='+encodeURIComponent(tok())+'&action='+encodeURIComponent(action);
+    ids.forEach(function(id){body+='&empIDs='+encodeURIComponent(id);});
+    fetch('@Url.Action("BulkAction","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body})
+    .then(function(r){return r.json();}).then(function(d){
+        if(d.success){
+            toast(d.done+' employees updated','success');
+            clearSelection(); loadAll();
+        } else { toast('Error: '+d.message,'error'); }
+    }).catch(function(){toast('Network error','error');});
+}
+
 // ── ACCESS TOGGLE ─────────────────────────────────────────────────────────────
-function toggleAccess(id, currentlyActive){
+function toggleAccess(id){
     fetch('@Url.Action("ToggleActive","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
         body:'__RequestVerificationToken='+encodeURIComponent(tok())+'&empID='+encodeURIComponent(id)})
     .then(function(r){return r.json();}).then(function(d){
-        if(!d.success){alert('Failed: '+d.message);loadAll();}
-        // no reload needed - toggle already reflects UI state
-    }).catch(function(){alert('Network error.');loadAll();});
+        if(!d.success){toast('Failed: '+d.message,'error');loadEmployees();}
+        else toast('Access updated','success');
+    }).catch(function(){toast('Network error','error');loadEmployees();});
 }
 
 // ── CREATE / EDIT MODAL ───────────────────────────────────────────────────────
 function openCreate(){
-    editMode=false;editID='';
+    editMode=false; editID='';
     document.getElementById('empModalTitle').textContent='Add Employee';
     document.getElementById('fEmpID').disabled=false;
     ['fEmpID','fIC','fName','fDept','fCo'].forEach(function(id){document.getElementById(id).value='';});
@@ -775,15 +1294,18 @@ function openCreate(){
     document.getElementById('fAccess').value='1';
     document.getElementById('fSU').value='0';
     document.getElementById('empModalAlert').innerHTML='';
+    document.getElementById('dupWarning').style.display='none';
     document.getElementById('empSaveBtn').innerHTML='Save Employee';
     document.getElementById('empModal').classList.add('open');
+    setTimeout(function(){document.getElementById('fEmpID').focus();},100);
 }
 
 function openEdit(id){
-    editMode=true;editID=id;
+    editMode=true; editID=id;
     document.getElementById('empModalTitle').textContent='Edit Employee';
     document.getElementById('fEmpID').disabled=true;
     document.getElementById('empModalAlert').innerHTML='';
+    document.getElementById('dupWarning').style.display='none';
     fetch('@Url.Action("GetEmployee","Admin")?id='+encodeURIComponent(id))
     .then(function(r){return r.json();}).then(function(d){
         document.getElementById('fEmpID').value=d.EmployeeID||'';
@@ -797,27 +1319,44 @@ function openEdit(id){
         document.getElementById('fSU').value=d.SuperUser||'0';
         document.getElementById('empSaveBtn').innerHTML='Save Changes';
         document.getElementById('empModal').classList.add('open');
+        setTimeout(function(){document.getElementById('fName').focus();},100);
     });
 }
 
 function closeEmpModal(){document.getElementById('empModal').classList.remove('open');}
 
+function checkDupIC(){
+    var ic=document.getElementById('fIC').value.trim();
+    var excl=editMode?editID:'';
+    if(!ic) return;
+    fetch('@Url.Action("CheckIC","Admin")?ic='+encodeURIComponent(ic)+'&excludeEmpID='+encodeURIComponent(excl))
+    .then(function(r){return r.json();}).then(function(d){
+        var dw=document.getElementById('dupWarning');
+        if(d.duplicate&&d.existing){
+            document.getElementById('dupMsg').textContent='This IC is already used by '+d.existing.UserName+' ('+d.existing.EmployeeID+')';
+            dw.style.display='block';
+        } else { dw.style.display='none'; }
+    });
+}
+
 function saveEmployee(){
     var btn=document.getElementById('empSaveBtn');
-    btn.disabled=true;btn.innerHTML='<span class="spin"></span> Saving…';
-    var model={EmployeeID:document.getElementById('fEmpID').value.trim(),UserName:document.getElementById('fName').value.trim(),EmployeeIC:document.getElementById('fIC').value.trim(),Department:document.getElementById('fDept').value.trim(),CompanyID:document.getElementById('fCo').value.trim(),Local:document.getElementById('fLocal').value,Active:document.getElementById('fActive').value,Access:document.getElementById('fAccess').value,SuperUser:document.getElementById('fSU').value};
-    var url='@Url.Action("SaveEmployee","Admin")';
+    btn.disabled=true; btn.innerHTML='<span class="spin"></span> Saving…';
+    var model={EmployeeID:document.getElementById('fEmpID').value.trim(),UserName:document.getElementById('fName').value.trim(),
+        EmployeeIC:document.getElementById('fIC').value.trim(),Department:document.getElementById('fDept').value.trim(),
+        CompanyID:document.getElementById('fCo').value.trim(),Local:document.getElementById('fLocal').value,
+        Active:document.getElementById('fActive').value,Access:document.getElementById('fAccess').value,SuperUser:document.getElementById('fSU').value};
     var body='__RequestVerificationToken='+encodeURIComponent(tok());
     Object.keys(model).forEach(function(k){body+='&'+k+'='+encodeURIComponent(model[k]);});
-    fetch(url,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body})
+    fetch('@Url.Action("SaveEmployee","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body})
     .then(function(r){return r.json();}).then(function(d){
-        btn.disabled=false;btn.innerHTML=editMode?'Save Changes':'Save Employee';
-        if(d.success){closeEmpModal();loadAll();}
+        btn.disabled=false; btn.innerHTML=editMode?'Save Changes':'Save Employee';
+        if(d.success){closeEmpModal();toast(d.message,'success');loadAll();}
         else{document.getElementById('empModalAlert').innerHTML='<div class="alert alert-error"><i class="fas fa-circle-exclamation"></i><span>'+esc(d.message)+'</span></div>';}
     });
 }
 
-// ── DELETE MODAL ─────────────────────────────────────────────────────────────
+// ── DELETE ────────────────────────────────────────────────────────────────────
 function openDelete(id, name){
     delTargetID=id;
     document.getElementById('delName').textContent=name;
@@ -828,46 +1367,263 @@ function closeDelModal(){document.getElementById('delModal').classList.remove('o
 
 function confirmDelete(){
     var btn=document.getElementById('delConfirmBtn');
-    btn.disabled=true;btn.innerHTML='<span class="spin"></span> Deleting…';
+    btn.disabled=true; btn.innerHTML='<span class="spin"></span> Deleting…';
     fetch('@Url.Action("DeleteEmployee","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
         body:'__RequestVerificationToken='+encodeURIComponent(tok())+'&empID='+encodeURIComponent(delTargetID)})
     .then(function(r){return r.json();}).then(function(d){
-        btn.disabled=false;btn.innerHTML='<i class="fas fa-trash"></i> Delete';
-        if(d.success){closeDelModal();loadAll();}
-        else{alert('Error: '+d.message);}
+        btn.disabled=false; btn.innerHTML='<i class="fas fa-trash"></i> Delete';
+        if(d.success){closeDelModal();toast('Employee deleted','success');loadAll();}
+        else{toast('Error: '+d.message,'error');}
     });
 }
 
-// ── EXPORT ───────────────────────────────────────────────────────────────────
+// ── IMPORT ────────────────────────────────────────────────────────────────────
+function openImport(){
+    importRows=[];
+    document.getElementById('importStep1').style.display='block';
+    document.getElementById('importStep2').style.display='none';
+    document.getElementById('importPaste').value='';
+    document.getElementById('importPreview').innerHTML='';
+    document.getElementById('importBtn').disabled=true;
+    document.getElementById('importBtnCount').textContent='';
+    document.getElementById('importModal').classList.add('open');
+}
+function closeImport(){document.getElementById('importModal').classList.remove('open');}
+
+function handleFileDrop(ev){
+    ev.preventDefault();
+    document.getElementById('importDrop').classList.remove('drag');
+    var f=ev.dataTransfer.files[0];
+    if(f) processImportFile(f);
+}
+function handleFileSelect(inp){if(inp.files[0]) processImportFile(inp.files[0]);}
+
+function processImportFile(file){
+    var reader=new FileReader();
+    reader.onload=function(e){
+        var data=new Uint8Array(e.target.result);
+        var wb=XLSX.read(data,{type:'array'});
+        var ws=wb.Sheets[wb.SheetNames[0]];
+        var json=XLSX.utils.sheet_to_json(ws,{defval:''});
+        importRows=json.map(function(r){
+            return {
+                EmployeeID: String(r.EmployeeID||r['Employee ID']||r['EmpID']||'').trim().toUpperCase(),
+                UserName:   String(r.UserName||r['Name']||r['Full Name']||'').trim().toUpperCase(),
+                EmployeeIC: String(r.EmployeeIC||r['IC']||r['IC Number']||'').trim(),
+                Department: String(r.Department||r['Dept']||'').trim().toUpperCase(),
+                CompanyID:  String(r.CompanyID||r['Company']||'').trim().toUpperCase(),
+                Local:      String(r.Local||'1').trim(),
+                Active:     String(r.Active||'1').trim(),
+                Access:     String(r.Access||'1').trim(),
+                SuperUser:  String(r.SuperUser||'0').trim()
+            };
+        }).filter(function(r){return r.EmployeeID&&r.UserName;});
+        showImportPreview();
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+function parsePaste(){
+    var text=document.getElementById('importPaste').value.trim();
+    if(!text){importRows=[];document.getElementById('importPreview').innerHTML='';document.getElementById('importBtn').disabled=true;return;}
+    var lines=text.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+    var headers=lines[0].split('\t').map(function(h){return h.trim();});
+    // Check if first line is header
+    var isHeader=isNaN(headers[0])&&headers[0].toLowerCase().includes('id')||headers[0].toLowerCase().includes('emp');
+    var dataLines=isHeader?lines.slice(1):lines;
+    var COLS=['EmployeeID','UserName','EmployeeIC','Department','CompanyID','Local','Active','Access','SuperUser'];
+    importRows=dataLines.map(function(line){
+        var cells=line.split('\t');
+        var row={};
+        if(isHeader){
+            headers.forEach(function(h,i){row[h]=cells[i]||'';});
+        } else {
+            COLS.forEach(function(c,i){row[c]=cells[i]||'';});
+        }
+        return {
+            EmployeeID: String(row.EmployeeID||row['Employee ID']||'').trim().toUpperCase(),
+            UserName:   String(row.UserName||row['Name']||'').trim().toUpperCase(),
+            EmployeeIC: String(row.EmployeeIC||row['IC']||'').trim(),
+            Department: String(row.Department||'').trim().toUpperCase(),
+            CompanyID:  String(row.CompanyID||'').trim().toUpperCase(),
+            Local:'1', Active:'1', Access:'1', SuperUser:'0'
+        };
+    }).filter(function(r){return r.EmployeeID&&r.UserName;});
+    showImportPreview();
+}
+
+function showImportPreview(){
+    var valid=importRows.filter(function(r){return r.EmployeeID&&r.UserName&&r.EmployeeIC;});
+    var invalid=importRows.filter(function(r){return !r.EmployeeIC;});
+    var html='<div style="font-size:13px;color:var(--t2);margin-bottom:8px"><strong>'+importRows.length+'</strong> rows found'+(invalid.length?' &mdash; <span style="color:var(--amber)">'+invalid.length+' missing IC</span>':'')+'</div>';
+    html+='<div class="tbl-wrap" style="max-height:200px"><table><thead><tr><th>ID</th><th>Name</th><th>IC</th><th>Department</th><th>Status</th></tr></thead><tbody>';
+    html+=importRows.slice(0,20).map(function(r){
+        var ok=r.EmployeeID&&r.UserName&&r.EmployeeIC;
+        var exists=allEmps.find(function(e){return e.EmployeeID===r.EmployeeID;});
+        return '<tr><td class="mono">'+esc(r.EmployeeID)+'</td><td>'+esc(r.UserName)+'</td><td class="mono">'+esc(r.EmployeeIC)+'</td><td>'+esc(r.Department)+'</td>'+
+            '<td><span class="badge '+(ok?'badge-pass':'badge-fail')+'">'+(!ok?'Missing IC':exists?'Update':'New')+'</span></td></tr>';
+    }).join('');
+    if(importRows.length>20) html+='<tr><td colspan="5" style="text-align:center;color:var(--t3);font-size:12px">… and '+(importRows.length-20)+' more</td></tr>';
+    html+='</tbody></table></div>';
+    document.getElementById('importPreview').innerHTML=html;
+    document.getElementById('importBtn').disabled=importRows.length===0;
+    document.getElementById('importBtnCount').textContent='('+importRows.length+')';
+}
+
+function runImport(){
+    var btn=document.getElementById('importBtn');
+    btn.disabled=true; btn.innerHTML='<span class="spin"></span> Importing…';
+    var body='__RequestVerificationToken='+encodeURIComponent(tok());
+    importRows.forEach(function(r,i){
+        Object.keys(r).forEach(function(k){body+='&employees['+i+'].'+k+'='+encodeURIComponent(r[k]||'');});
+    });
+    fetch('@Url.Action("ImportEmployees","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body})
+    .then(function(r){return r.json();}).then(function(d){
+        btn.disabled=false; btn.innerHTML='<i class="fas fa-upload"></i> Import';
+        document.getElementById('importStep1').style.display='none';
+        document.getElementById('importStep2').style.display='block';
+        if(d.success){
+            document.getElementById('importResult').innerHTML=
+                '<div style="color:var(--green);font-size:14px;font-weight:600;margin-bottom:8px"><i class="fas fa-circle-check"></i> Import Complete</div>'+
+                '<div style="font-size:13px;color:var(--t2);line-height:1.8">'+
+                '  <span style="color:var(--green)">&#10003;</span> Added: <strong>'+d.added+'</strong><br>'+
+                '  <span style="color:var(--blue)">&#8635;</span> Updated: <strong>'+d.updated+'</strong><br>'+
+                (d.skipped?'  <span style="color:var(--amber)">&#33;</span> Skipped: <strong>'+d.skipped+'</strong><br>':'')+
+                (d.errors&&d.errors.length?'  <span style="color:var(--red)">&#10007;</span> Errors: '+d.errors.join(', '):'')+'</div>';
+            loadAll();
+        } else {
+            document.getElementById('importResult').innerHTML='<div style="color:var(--red)"><i class="fas fa-circle-exclamation"></i> '+esc(d.message)+'</div>';
+        }
+    }).catch(function(){
+        btn.disabled=false; btn.innerHTML='<i class="fas fa-upload"></i> Import';
+        toast('Network error during import','error');
+    });
+}
+
+// ── DEPARTMENTS TAB ───────────────────────────────────────────────────────────
+function renderDepts(){
+    var ty=document.getElementById('deptType').value;
+    var data=allScores.filter(function(e){return ty===''||e.Local===ty;});
+    var dm={};
+    data.forEach(function(e){
+        var d=e.Department||'(No Department)';
+        if(!dm[d]) dm[d]={total:0,p1:0,p2:0,both:0,none:0};
+        dm[d].total++;
+        var hasp1=e.Part1==='pass', hasp2=e.Part2==='pass';
+        if(hasp1) dm[d].p1++;
+        if(hasp2) dm[d].p2++;
+        if(hasp1&&hasp2) dm[d].both++;
+        if(!hasp1&&!hasp2) dm[d].none++;
+    });
+    var depts=Object.keys(dm).sort();
+    document.getElementById('deptCount').textContent=depts.length+' departments';
+    if(!depts.length){document.getElementById('deptGrid').innerHTML='<div class="empty"><i class="fas fa-building"></i>No data</div>';return;}
+    document.getElementById('deptGrid').innerHTML=depts.map(function(name){
+        var d=dm[name];
+        var p1pct=d.total>0?(d.p1/d.total*100):0;
+        var p2pct=d.total>0?(d.p2/d.total*100):0;
+        var bothpct=d.total>0?(d.both/d.total*100):0;
+        return '<div class="dept-card">'+
+            '<div class="dept-name">'+esc(name)+'</div>'+
+            '<div class="dept-bar-row"><span class="dept-bar-label" style="color:var(--green)">Part 1</span><div class="dept-bar-track"><div class="dept-bar-fill" style="width:'+p1pct.toFixed(1)+'%;background:var(--green)"></div></div><span class="dept-bar-pct">'+Math.round(p1pct)+'%</span></div>'+
+            '<div class="dept-bar-row"><span class="dept-bar-label" style="color:var(--purple)">Part 2</span><div class="dept-bar-track"><div class="dept-bar-fill" style="width:'+p2pct.toFixed(1)+'%;background:var(--purple)"></div></div><span class="dept-bar-pct">'+Math.round(p2pct)+'%</span></div>'+
+            '<div class="dept-bar-row"><span class="dept-bar-label" style="color:var(--amber)">Both</span><div class="dept-bar-track"><div class="dept-bar-fill" style="width:'+bothpct.toFixed(1)+'%;background:var(--amber)"></div></div><span class="dept-bar-pct">'+Math.round(bothpct)+'%</span></div>'+
+            '<div class="dept-total">'+d.total+' employees &nbsp;&middot;&nbsp; '+d.none+' not started</div>'+
+            '</div>';
+    }).join('');
+}
+
+// ── COPY INCOMPLETE LIST ──────────────────────────────────────────────────────
+function copyIncomplete(){
+    var incomplete=filteredScores.filter(function(e){return e.Part1!=='pass'||e.Part2!=='pass';});
+    if(!incomplete.length){toast('No incomplete employees in current view','info');return;}
+    var txt='INCOMPLETE TRAINING LIST\n';
+    txt+='Generated: '+new Date().toLocaleDateString('en-MY')+'\n';
+    txt+=document.getElementById('rDateFrom').value+' to '+document.getElementById('rDateTo').value+'\n\n';
+    txt+='Employee ID\tName\tDepartment\tPart 1\tPart 2\n';
+    incomplete.forEach(function(e){
+        txt+=e.EmployeeID+'\t'+e.UserName+'\t'+e.Department+'\t'+e.Part1+'\t'+e.Part2+'\n';
+    });
+    navigator.clipboard.writeText(txt).then(function(){
+        toast('Copied '+incomplete.length+' incomplete employees to clipboard','success');
+    }).catch(function(){toast('Could not copy — try manually','error');});
+}
+
+// ── EXPORT ────────────────────────────────────────────────────────────────────
 function exportExcel(){
-    if(!allScores.length){alert('No data.');return;}
+    if(!allScores.length){toast('No data to export','error');return;}
     var rows=allScores.map(function(e){return{'Employee ID':e.EmployeeID,'Name':e.UserName,'Department':e.Department,'Company':e.CompanyID,'Type':e.Local==='1'?'Local':'Foreign','Part 1':e.Part1,'Part 1 Date':e.Part1Timestamp?fmtDT(e.Part1Timestamp):'','Part 2':e.Part2,'Part 2 Date':e.Part2Timestamp?fmtDT(e.Part2Timestamp):''};});
     var wb=XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),'Training Data');
-    // summary
+    // dept summary sheet
     var dm={};allScores.forEach(function(e){if(!dm[e.Department])dm[e.Department]={total:0,p1:0,p2:0};dm[e.Department].total++;if(e.Part1==='pass')dm[e.Department].p1++;if(e.Part2==='pass')dm[e.Department].p2++;});
-    var sum=[['Department','Total','P1 Passed','P1 %','P2 Passed','P2 %']];
-    Object.keys(dm).sort().forEach(function(k){var d=dm[k];sum.push([k,d.total,d.p1,(d.p1/d.total*100).toFixed(1)+'%',d.p2,(d.p2/d.total*100).toFixed(1)+'%']);});
+    var sum=[['Department','Total','P1 Passed','P1 %','P2 Passed','P2 %','Both Passed','Completion %']];
+    Object.keys(dm).sort().forEach(function(k){var d=dm[k];var both=allScores.filter(function(e){return e.Department===k&&e.Part1==='pass'&&e.Part2==='pass';}).length;sum.push([k,d.total,d.p1,(d.p1/d.total*100).toFixed(1)+'%',d.p2,(d.p2/d.total*100).toFixed(1)+'%',both,(both/d.total*100).toFixed(1)+'%']);});
     XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(sum),'Dept Summary');
+    // incomplete sheet
+    var inc=allScores.filter(function(e){return e.Part1!=='pass'||e.Part2!=='pass';});
+    var incRows=inc.map(function(e){return{'Employee ID':e.EmployeeID,'Name':e.UserName,'Department':e.Department,'Part 1':e.Part1,'Part 2':e.Part2};});
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(incRows),'Incomplete');
     var from=document.getElementById('rDateFrom').value||'';
     var to=document.getElementById('rDateTo').value||'';
     XLSX.writeFile(wb,'ABC_Training_'+from+'_to_'+to+'.xlsx');
+    toast('Excel exported (3 sheets)','success');
+}
+
+function exportDeptExcel(){
+    var ty=document.getElementById('deptType').value;
+    var data=allScores.filter(function(e){return ty===''||e.Local===ty;});
+    var dm={};
+    data.forEach(function(e){
+        var d=e.Department||'(No Department)';
+        if(!dm[d]) dm[d]={total:0,p1:0,p2:0,both:0,none:0};
+        dm[d].total++;
+        if(e.Part1==='pass') dm[d].p1++;
+        if(e.Part2==='pass') dm[d].p2++;
+        if(e.Part1==='pass'&&e.Part2==='pass') dm[d].both++;
+        if(e.Part1!=='pass'&&e.Part2!=='pass') dm[d].none++;
+    });
+    var rows=[['Department','Total','P1 Passed','P1 %','P2 Passed','P2 %','Both Passed','Completion %','Not Started']];
+    Object.keys(dm).sort().forEach(function(k){
+        var d=dm[k];
+        rows.push([k,d.total,d.p1,(d.p1/d.total*100).toFixed(1)+'%',d.p2,(d.p2/d.total*100).toFixed(1)+'%',d.both,(d.both/d.total*100).toFixed(1)+'%',d.none]);
+    });
+    var wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'Dept Progress');
+    XLSX.writeFile(wb,'ABC_Dept_Progress_'+new Date().toISOString().slice(0,10)+'.xlsx');
+    toast('Department report exported','success');
 }
 
 function exportCSV(){
-    if(!allScores.length){alert('No data.');return;}
+    if(!allScores.length){toast('No data','error');return;}
     var h=['Employee ID','Name','Department','Company','Type','Part 1','Part 1 Date','Part 2','Part 2 Date'];
     var rows=allScores.map(function(e){return[e.EmployeeID,'"'+e.UserName+'"','"'+e.Department+'"',e.CompanyID,e.Local==='1'?'Local':'Foreign',e.Part1,e.Part1Timestamp?fmtDT(e.Part1Timestamp):'',e.Part2,e.Part2Timestamp?fmtDT(e.Part2Timestamp):''].join(',');});
     var blob=new Blob([[h.join(',')].concat(rows).join('\n')],{type:'text/csv'});
     var from=document.getElementById('rDateFrom').value||'';
     var to=document.getElementById('rDateTo').value||'';
     var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ABC_Training_'+from+'_to_'+to+'.csv';a.click();
+    toast('CSV exported','success');
 }
 
+// ── KEYBOARD SHORTCUTS ────────────────────────────────────────────────────────
+document.addEventListener('keydown',function(ev){
+    if(ev.target.tagName==='INPUT'||ev.target.tagName==='TEXTAREA'||ev.target.tagName==='SELECT') return;
+    if(ev.key==='n'||ev.key==='N'){openCreate();}
+    if(ev.key==='/'){ ev.preventDefault(); var s=document.getElementById('eSearch'); if(s){showTab('employees');s.focus();} }
+    if(ev.key==='e'||ev.key==='E'){exportExcel();}
+    if(ev.key==='i'||ev.key==='I'){openImport();}
+    if(ev.key==='Escape'){
+        closeEmpModal(); closeDelModal(); closeImport();
+        document.getElementById('bulkDelModal').classList.remove('open');
+    }
+});
+
 // ── HELPERS ──────────────────────────────────────────────────────────────────
+function statusCell(st,ts){var cls=st==='pass'?'badge-pass':'badge-fail';var ico=st==='pass'?'check':'xmark';var out='<span class="badge '+cls+'"><i class="fas fa-'+ico+'"></i> '+esc(st)+'</span>';if(ts)out+='<div style="font-size:11px;color:var(--t3);margin-top:3px;font-family:\'JetBrains Mono\',monospace">'+fmtD(ts)+'</div>';return out;}
+function typeBadge(l){return l==='1'?'<span class="badge badge-blue">Local</span>':'<span class="badge badge-amber">Foreign</span>';}
 function fmtD(s){try{return new Date(s).toLocaleDateString('en-MY',{day:'2-digit',month:'2-digit',year:'numeric'});}catch(e){return s;}}
 function fmtDT(s){try{return new Date(s).toLocaleDateString('en-MY',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});}catch(e){return s;}}
-function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');}
 
 loadAll();
     </script>

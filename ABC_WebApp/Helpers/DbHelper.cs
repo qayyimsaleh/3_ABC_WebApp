@@ -81,6 +81,32 @@ namespace ABC_WebApp.Helpers
             }
         }
 
+        public static void SetEmployeeActive(string empID, string value)
+        {
+            using (var con = Open())
+            using (var cmd = Cmd("UPDATE [dbo].[empMaster_lists] SET Active=@Val WHERE EmployeeID=@Id", con))
+            { cmd.Parameters.AddWithValue("@Val", value); cmd.Parameters.AddWithValue("@Id", empID); cmd.ExecuteNonQuery(); }
+        }
+
+        public static void SetEmployeeAccess(string empID, string value)
+        {
+            using (var con = Open())
+            using (var cmd = Cmd("UPDATE [dbo].[empMaster_lists] SET Access=@Val WHERE EmployeeID=@Id", con))
+            { cmd.Parameters.AddWithValue("@Val", value); cmd.Parameters.AddWithValue("@Id", empID); cmd.ExecuteNonQuery(); }
+        }
+
+        public static Employee FindEmployeeByIC(string ic, string excludeEmpID)
+        {
+            const string sql = @"SELECT EmployeeID,UserName,EmployeeIC,Department,CompanyID,SuperUser,Access,Local,Active
+                FROM [dbo].[empMaster_lists] WHERE EmployeeIC=@IC AND (@Excl IS NULL OR EmployeeID<>@Excl)";
+            using (var con = Open()) using (var cmd = Cmd(sql, con))
+            {
+                cmd.Parameters.AddWithValue("@IC", ic ?? "");
+                cmd.Parameters.AddWithValue("@Excl", string.IsNullOrEmpty(excludeEmpID) ? (object)DBNull.Value : excludeEmpID);
+                using (var r = cmd.ExecuteReader()) return r.Read() ? MapEmployee(r) : null;
+            }
+        }
+
         public static void DeleteEmployee(string empID)
         {
             using (var con = Open())

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Web.Mvc;
 using ABC_WebApp.Helpers;
@@ -39,7 +40,6 @@ namespace ABC_WebApp.Controllers
             if (!SessionHelper.IsLoggedIn || !SessionHelper.IsAdmin)
                 return Json(new { error = "Unauthorised" }, JsonRequestBehavior.AllowGet);
 
-            // Default: 1 Jan of current year → today
             DateTime from = DateTime.TryParse(dateFrom, out DateTime df) ? df.Date : new DateTime(DateTime.Now.Year, 1, 1);
             DateTime to = DateTime.TryParse(dateTo, out DateTime dt) ? dt.Date : DateTime.Now.Date;
 
@@ -120,6 +120,83 @@ namespace ABC_WebApp.Controllers
                 return Json(new { success = true, message = "Employee deleted." });
             }
             catch (Exception ex) { return Json(new { success = false, message = ex.Message }); }
+        }
+
+        // ── BULK ACTIONS ─────────────────────────────────────────────────────
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult BulkAction(string action, List<string> empIDs)
+        {
+            if (!SessionHelper.IsLoggedIn || !SessionHelper.IsAdmin)
+                return Json(new { success = false, message = "Unauthorised" });
+            if (empIDs == null || !empIDs.Any())
+                return Json(new { success = false, message = "No employees selected." });
+
+            int done = 0;
+            var errors = new List<string>();
+            try
+            {
+                foreach (var id in empIDs)
+                {
+                    try
+                    {
+                        switch (action)
+                        {
+                            case "enable": DbHelper.SetEmployeeActive(id, "1"); done++; break;
+                            case "disable": DbHelper.SetEmployeeActive(id, "0"); done++; break;
+                            case "delete": DbHelper.DeleteEmployee(id); done++; break;
+                            case "grant": DbHelper.SetEmployeeAccess(id, "1"); done++; break;
+                            case "revoke": DbHelper.SetEmployeeAccess(id, "0"); done++; break;
+                        }
+                    }
+                    catch (Exception ex) { errors.Add($"{id}: {ex.Message}"); }
+                }
+                return Json(new { success = true, done, errors });
+            }
+            catch (Exception ex) { return Json(new { success = false, message = ex.Message }); }
+        }
+
+        // ── BULK IMPORT ──────────────────────────────────────────────────────
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult ImportEmployees(List<EmployeeFormModel> employees)
+        {
+            if (!SessionHelper.IsLoggedIn || !SessionHelper.IsAdmin)
+                return Json(new { success = false, message = "Unauthorised" });
+            if (employees == null || !employees.Any())
+                return Json(new { success = false, message = "No data received." });
+
+            int added = 0, updated = 0, skipped = 0;
+            var errors = new List<string>();
+
+            foreach (var emp in employees)
+            {
+                if (string.IsNullOrWhiteSpace(emp.EmployeeID) || string.IsNullOrWhiteSpace(emp.UserName))
+                { skipped++; continue; }
+                try
+                {
+                    // Set defaults for missing fields
+                    emp.Active = emp.Active ?? "1";
+                    emp.Access = emp.Access ?? "1";
+                    emp.SuperUser = emp.SuperUser ?? "0";
+                    emp.Local = emp.Local ?? "1";
+
+                    if (!DbHelper.EmployeeExists(emp.EmployeeID)) { DbHelper.InsertEmployee(emp); added++; }
+                    else { DbHelper.UpdateEmployee(emp); updated++; }
+                }
+                catch (Exception ex) { errors.Add($"{emp.EmployeeID}: {ex.Message}"); }
+            }
+            return Json(new { success = true, added, updated, skipped, errors });
+        }
+
+        // ── CHECK DUPLICATE IC ───────────────────────────────────────────────
+        [HttpGet]
+        public JsonResult CheckIC(string ic, string excludeEmpID)
+        {
+            if (!SessionHelper.IsLoggedIn || !SessionHelper.IsAdmin)
+                return Json(new { error = "Unauthorised" }, JsonRequestBehavior.AllowGet);
+            var existing = DbHelper.FindEmployeeByIC(ic, excludeEmpID);
+            return Json(new { duplicate = existing != null, existing }, JsonRequestBehavior.AllowGet);
         }
     }
 }
