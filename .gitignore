@@ -1,0 +1,42 @@
+## Visual Studio / IDE
+.vs/
+*.user
+*.suo
+*.cache
+*.userosscache
+*.sln.docstates
+
+## Build output
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+## NuGet packages
+packages/
+!packages/repositories.config
+*.nupkg
+*.nuspec
+
+## Publish profiles (user-specific)
+*.pubxml.user
+PublishScripts/
+
+## ASP.NET
+App_Data/
+*.bak
+
+## Environment / secrets (never commit these)
+.env
+Web.config.user
+secrets.json
+
+## Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+## Compiled output
+*.dll
+*.pdb
+*.exe

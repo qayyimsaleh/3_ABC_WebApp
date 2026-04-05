@@ -1,0 +1,2194 @@
+@model ABC_WebApp.Models.AdminDashboardViewModel
+@{ ViewBag.Title = "Admin"; ViewBag.ActivePage = "admin"; }
+@section Styles {
+    <style>
+
+
+
+        /* ─ TABS ─ */
+        .tabs {
+            display: flex;
+            gap: 2px;
+            background: var(--s2);
+            border: 1px solid var(--bd);
+            border-radius: var(--rl);
+            padding: 4px;
+            width: fit-content;
+            margin-bottom: 28px
+        }
+
+        .tab {
+            padding: 7px 18px;
+            border-radius: var(--r);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--tr);
+            color: var(--t3);
+            border: none;
+            background: none;
+            font-family: inherit
+        }
+
+            .tab.on {
+                background: var(--s1);
+                color: var(--t1);
+                border: 1px solid var(--bd2);
+                box-shadow: 0 2px 8px rgba(0,0,0,.3)
+            }
+
+        .tab-panel {
+            display: none
+        }
+
+            .tab-panel.on {
+                display: block
+            }
+
+        /* ─ STATS ─ */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fill,minmax(190px,1fr));
+            gap: 14px;
+            margin-bottom: 28px
+        }
+
+        .stat {
+            background: var(--s1);
+            border: 1px solid var(--bd);
+            border-radius: var(--rl);
+            padding: 18px 20px
+        }
+
+        .stat-num {
+            font-size: 30px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            line-height: 1
+        }
+
+        .stat-lbl {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: .4px;
+            color: var(--t3);
+            margin-top: 4px;
+            font-weight: 600
+        }
+
+        .stat-bar {
+            height: 3px;
+            border-radius: 2px;
+            margin-top: 12px;
+            background: var(--s4);
+            overflow: hidden
+        }
+
+        .stat-bar-fill {
+            height: 100%;
+            border-radius: 2px;
+            transition: width .7s ease
+        }
+
+        /* ─ DEPT CHART ─ */
+        .dept-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill,minmax(260px,1fr));
+            gap: 12px;
+            margin-top: 16px
+        }
+
+        .dept-card {
+            background: var(--s1);
+            border: 1px solid var(--bd);
+            border-radius: var(--rl);
+            padding: 14px 16px
+        }
+
+        .dept-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--t2);
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: .3px
+        }
+
+        .dept-bar-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+            font-size: 12px
+        }
+
+        .dept-bar-label {
+            color: var(--t3);
+            width: 42px;
+            flex-shrink: 0
+        }
+
+        .dept-bar-track {
+            flex: 1;
+            height: 6px;
+            background: var(--s4);
+            border-radius: 3px;
+            overflow: hidden
+        }
+
+        .dept-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width .6s ease
+        }
+
+        .dept-bar-pct {
+            color: var(--t2);
+            width: 36px;
+            text-align: right;
+            flex-shrink: 0
+        }
+
+        .dept-total {
+            font-size: 11px;
+            color: var(--t3);
+            margin-top: 4px
+        }
+
+        /* ─ TOOLBAR ─ */
+        .tbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 14px
+        }
+
+            .tbar h3 {
+                font-size: 14px;
+                font-weight: 600
+            }
+
+        .tbar-right {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            align-items: center
+        }
+
+        .search-box {
+            position: relative
+        }
+
+            .search-box i {
+                position: absolute;
+                left: 10px;
+                top: 50%;
+                transform: translateY(-50%);
+                color: var(--t3);
+                font-size: 12px;
+                pointer-events: none
+            }
+
+            .search-box input {
+                background: var(--s2);
+                border: 1px solid var(--bd);
+                border-radius: var(--r);
+                padding: 7px 10px 7px 30px;
+                font-size: 13px;
+                color: var(--t1);
+                font-family: inherit;
+                width: 200px;
+                transition: var(--tr)
+            }
+
+                .search-box input:focus {
+                    outline: none;
+                    border-color: rgba(79,142,247,.3);
+                    width: 240px
+                }
+
+        .filter-sel {
+            background: var(--s2);
+            border: 1px solid var(--bd);
+            border-radius: var(--r);
+            padding: 7px 10px;
+            font-size: 13px;
+            color: var(--t2);
+            font-family: inherit;
+            cursor: pointer
+        }
+
+            .filter-sel:focus {
+                outline: none;
+                border-color: rgba(79,142,247,.3)
+            }
+
+            .filter-sel option {
+                background: var(--s2)
+            }
+
+        .row-count {
+            font-size: 12px;
+            color: var(--t3);
+            font-family: 'JetBrains Mono',monospace
+        }
+
+        /* ─ BULK BAR ─ */
+        .bulk-bar {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            background: rgba(79,142,247,.08);
+            border: 1px solid rgba(79,142,247,.2);
+            border-radius: var(--r);
+            padding: 8px 14px;
+            margin-bottom: 12px;
+            flex-wrap: wrap
+        }
+
+            .bulk-bar.show {
+                display: flex
+            }
+
+        .bulk-count {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--blue)
+        }
+
+        .bulk-actions {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-left: auto
+        }
+
+        /* ─ TABLE ─ */
+        .action-btns {
+            display: flex;
+            gap: 5px
+        }
+
+        .icon-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            border: 1px solid var(--bd);
+            background: var(--s2);
+            color: var(--t2);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            transition: var(--tr)
+        }
+
+            .icon-btn:hover {
+                border-color: var(--bd2);
+                color: var(--t1);
+                background: var(--s3)
+            }
+
+            .icon-btn.del:hover {
+                border-color: rgba(248,113,113,.3);
+                color: var(--red);
+                background: var(--red-g)
+            }
+
+            .icon-btn.edit:hover {
+                border-color: rgba(79,142,247,.3);
+                color: var(--blue);
+                background: var(--blue-g)
+            }
+
+        .cb-cell {
+            width: 36px;
+            padding-left: 14px !important
+        }
+
+        .row-sel {
+            width: 15px;
+            height: 15px;
+            cursor: pointer;
+            accent-color: var(--blue)
+        }
+
+        tr.selected {
+            background: rgba(79,142,247,.05) !important
+        }
+
+        /* ─ TOGGLE ─ */
+        .toggle-sw {
+            position: relative;
+            width: 34px;
+            height: 18px;
+            cursor: pointer
+        }
+
+            .toggle-sw input {
+                opacity: 0;
+                width: 0;
+                height: 0
+            }
+
+        .slider {
+            position: absolute;
+            inset: 0;
+            background: var(--s4);
+            border-radius: 9px;
+            transition: .3s
+        }
+
+            .slider:before {
+                content: '';
+                position: absolute;
+                width: 12px;
+                height: 12px;
+                left: 3px;
+                bottom: 3px;
+                background: #fff;
+                border-radius: 50%;
+                transition: .3s
+            }
+
+        .toggle-sw input:checked + .slider {
+            background: var(--green)
+        }
+
+            .toggle-sw input:checked + .slider:before {
+                transform: translateX(16px)
+            }
+
+        /* ─ DATE RANGE ─ */
+        .date-range-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--s2);
+            border: 1px solid rgba(79,142,247,.25);
+            border-radius: var(--r);
+            padding: 5px 10px
+        }
+
+        .date-input {
+            background: transparent;
+            border: none;
+            padding: 2px 4px;
+            font-size: 13px;
+            color: var(--t1);
+            width: 130px;
+            cursor: pointer
+        }
+
+            .date-input:focus {
+                outline: none
+            }
+
+            .date-input::-webkit-calendar-picker-indicator {
+                filter: invert(.5) sepia(1) saturate(3) hue-rotate(180deg);
+                cursor: pointer;
+                opacity: .7
+            }
+
+        /* ─ MODALS ─ */
+        .sec-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px
+        }
+
+            .sec-head h2 {
+                font-size: 16px;
+                font-weight: 600
+            }
+
+        .del-info {
+            background: var(--red-g);
+            border: 1px solid rgba(248,113,113,.2);
+            border-radius: var(--r);
+            padding: 14px;
+            font-size: 13px;
+            color: #fca5a5;
+            margin-bottom: 16px
+        }
+
+        .empty {
+            padding: 48px;
+            text-align: center;
+            color: var(--t3)
+        }
+
+            .empty i {
+                font-size: 32px;
+                margin-bottom: 12px;
+                opacity: .4;
+                display: block
+            }
+
+        /* ─ IMPORT ─ */
+        .import-drop {
+            border: 2px dashed var(--bd);
+            border-radius: var(--rl);
+            padding: 32px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--tr);
+            color: var(--t3)
+        }
+
+            .import-drop:hover, .import-drop.drag {
+                border-color: var(--blue);
+                color: var(--blue);
+                background: var(--blue-g2)
+            }
+
+            .import-drop i {
+                font-size: 28px;
+                margin-bottom: 10px;
+                display: block
+            }
+
+        .import-preview {
+            margin-top: 14px;
+            max-height: 260px;
+            overflow-y: auto
+        }
+
+        .import-result {
+            background: var(--s2);
+            border: 1px solid var(--bd);
+            border-radius: var(--r);
+            padding: 12px 16px;
+            font-size: 13px;
+            margin-top: 10px
+        }
+
+        /* ─ QUICK FILTER PILLS ─ */
+        .filter-pills {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            margin-bottom: 14px
+        }
+
+        .pill {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid var(--bd);
+            background: var(--s2);
+            color: var(--t3);
+            transition: var(--tr)
+        }
+
+            .pill:hover {
+                border-color: var(--bd2);
+                color: var(--t1)
+            }
+
+            .pill.on {
+                background: var(--blue);
+                border-color: var(--blue);
+                color: #fff
+            }
+
+            .pill.red.on {
+                background: var(--red);
+                border-color: var(--red)
+            }
+
+            .pill.green.on {
+                background: var(--green);
+                border-color: var(--green);
+                color: #0d1117
+            }
+
+            .pill.amber.on {
+                background: var(--amber);
+                border-color: var(--amber);
+                color: #0d1117
+            }
+
+        /* ─ INLINE EDIT ─ */
+        .editable-cell {
+            cursor: pointer;
+            border-radius: 4px;
+            padding: 2px 4px;
+            transition: background .15s
+        }
+
+            .editable-cell:hover {
+                background: var(--s3)
+            }
+
+        .inline-input {
+            background: var(--s2);
+            border: 1px solid var(--blue);
+            border-radius: 4px;
+            padding: 2px 6px;
+            font-size: 13px;
+            color: var(--t1);
+            font-family: inherit;
+            width: 100%;
+            min-width: 80px
+        }
+
+            .inline-input:focus {
+                outline: none
+            }
+
+        /* ─ TOAST ─ */
+        #toastArea {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            pointer-events: none
+        }
+
+        .toast {
+            background: var(--s1);
+            border: 1px solid var(--bd);
+            border-radius: var(--r);
+            padding: 10px 16px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 220px;
+            box-shadow: 0 4px 20px rgba(0,0,0,.4);
+            animation: toastIn .2s ease;
+            pointer-events: all
+        }
+
+            .toast.success {
+                border-color: rgba(52,211,153,.3);
+                color: var(--green)
+            }
+
+            .toast.error {
+                border-color: rgba(248,113,113,.3);
+                color: var(--red)
+            }
+
+            .toast.info {
+                border-color: rgba(79,142,247,.3);
+                color: var(--blue)
+            }
+
+        @@keyframes toastIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px)
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0)
+            }
+        }
+
+        /* ─ SHORTCUTS BADGE ─ */
+        .kbd {
+            background: var(--s3);
+            border: 1px solid var(--bd2);
+            border-radius: 4px;
+            padding: 1px 5px;
+            font-size: 11px;
+            font-family: 'JetBrains Mono',monospace;
+            color: var(--t2)
+        }
+
+        @@media(max-width:768px) {
+            .stats-row {
+                grid-template-columns: 1fr 1fr
+            }
+
+            .tbar {
+                flex-direction: column;
+                align-items: flex-start
+            }
+
+            .search-box input {
+                width: 100%
+            }
+
+            .tbar-right {
+                width: 100%
+            }
+
+            .filter-sel {
+                flex: 1
+            }
+        }
+
+        @@media(max-width:480px) {
+            .stats-row {
+                grid-template-columns: 1fr
+            }
+        }
+    </style>
+}
+<div class="wrap-xl">
+    <!-- ─ PAGE HEADER ─ -->
+    <div style="padding:32px 0 24px;border-bottom:1px solid var(--bd);margin-bottom:28px" class="fade-up">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap">
+            <div>
+                <div style="font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--t3);font-weight:600;margin-bottom:6px">Administration</div>
+                <h1 style="font-size:22px;font-weight:700;letter-spacing:-.3px;margin-bottom:4px">Admin Dashboard</h1>
+                <p style="font-size:13px;color:var(--t3)">
+                    Training Year @Model.CurrentYear &nbsp;&middot;&nbsp; @Model.TotalActive active employees
+                    &nbsp;<span style="color:var(--t3)">|</span>&nbsp;
+                    <span style="color:var(--t3)">Shortcuts: <span class="kbd">N</span> new &nbsp;<span class="kbd">/</span> search &nbsp;<span class="kbd">E</span> export &nbsp;<span class="kbd">I</span> import</span>
+                </p>
+            </div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+                <button class="btn btn-ghost btn-sm" onclick="exportExcel()"><i class="fas fa-file-excel"></i> Export Excel</button>
+                <button class="btn btn-ghost btn-sm" onclick="exportCSV()"><i class="fas fa-download"></i> Export CSV</button>
+                <button class="btn btn-ghost btn-sm" onclick="openImport()"><i class="fas fa-file-import"></i> Import</button>
+                <button class="btn btn-primary btn-sm" onclick="openCreate()"><i class="fas fa-plus"></i> Add Employee</button>
+            </div>
+        </div>
+    </div>
+    <!-- ─ STATS ─ -->
+    <div class="stats-row fade-up">
+        <div class="stat">
+            <div class="stat-num" style="color:var(--t1)">@Model.TotalActive</div>
+            <div class="stat-lbl">Active Employees</div>
+            <div class="stat-bar"><div class="stat-bar-fill" style="width:100%;background:var(--blue)"></div></div>
+        </div>
+        <div class="stat">
+            <div class="stat-num" style="color:var(--green)" id="s-p1">@Model.PassedPart1</div>
+            <div class="stat-lbl">Passed Part 1</div>
+            <div class="stat-bar"><div class="stat-bar-fill" id="sb-p1" style="width:@(Model.TotalEmployees>0?(Model.PassedPart1*100/Model.TotalEmployees):0)%;background:var(--green)"></div></div>
+        </div>
+        <div class="stat">
+            <div class="stat-num" style="color:var(--purple)" id="s-p2">@Model.PassedPart2</div>
+            <div class="stat-lbl">Passed Part 2</div>
+            <div class="stat-bar"><div class="stat-bar-fill" id="sb-p2" style="width:@(Model.TotalEmployees>0?(Model.PassedPart2*100/Model.TotalEmployees):0)%;background:var(--purple)"></div></div>
+        </div>
+        <div class="stat">
+            <div class="stat-num" style="color:var(--red)" id="s-np">@Model.NotPassedPart1</div>
+            <div class="stat-lbl">Not Completed P1</div>
+            <div class="stat-bar"><div class="stat-bar-fill" id="sb-np" style="width:@(Model.TotalEmployees>0?(Model.NotPassedPart1*100/Model.TotalEmployees):0)%;background:var(--red)"></div></div>
+        </div>
+        <div class="stat">
+            @{ double bothPct = Model.TotalEmployees > 0 ? Math.Round((double)Model.PassedPart2 / Model.TotalEmployees * 100, 1) : 0; }
+            <div class="stat-num" style="color:var(--amber)">@bothPct%</div>
+            <div class="stat-lbl">Full Completion</div>
+            <div class="stat-bar"><div class="stat-bar-fill" style="width:@bothPct%;background:var(--amber)"></div></div>
+        </div>
+        <div class="stat">
+            <div class="stat-num" style="color:var(--t3)">@Model.TotalInactive</div>
+            <div class="stat-lbl">Inactive Accounts</div>
+            <div class="stat-bar"><div class="stat-bar-fill" style="width:@(Model.TotalActive+Model.TotalInactive>0?(Model.TotalInactive*100/(Model.TotalActive+Model.TotalInactive)):0)%;background:var(--s4)"></div></div>
+        </div>
+    </div>
+    <!-- ─ TABS ─ -->
+    <div class="tabs fade-up">
+        <button class="tab on" onclick="showTab('report')"><i class="fas fa-chart-bar" style="margin-right:5px"></i>Training Report</button>
+        <button class="tab" onclick="showTab('employees')"><i class="fas fa-users" style="margin-right:5px"></i>Employees</button>
+        <button class="tab" onclick="showTab('departments')"><i class="fas fa-building" style="margin-right:5px"></i>By Department</button>
+        <button class="tab" onclick="showTab('archive')"><i class="fas fa-box-archive" style="margin-right:5px"></i>Archive <span id="archiveBadge" style="display:none;background:rgba(248,113,113,.2);color:var(--red);border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px"></span></button>
+        <button class="tab" onclick="showTab('scorearchive')"><i class="fas fa-database" style="margin-right:5px"></i>Score Archive <span id="scoreArchiveBadge" style="display:none;background:rgba(167,139,250,.2);color:var(--purple);border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px"></span></button>
+    </div>
+    <!-- ═══ TAB: REPORT ═══ -->
+    <div class="tab-panel on" id="tab-report">
+        <!-- Quick filter pills -->
+        <div class="filter-pills">
+            <span class="pill on" onclick="quickFilter('all',this)">All</span>
+            <span class="pill green" onclick="quickFilter('both',this)"><i class="fas fa-check-double"></i> Both Passed</span>
+            <span class="pill amber" onclick="quickFilter('p1only',this)">Part 1 Only</span>
+            <span class="pill red" onclick="quickFilter('none',this)"><i class="fas fa-xmark"></i> Not Started</span>
+            <span class="pill" onclick="quickFilter('local',this)">Local</span>
+            <span class="pill" onclick="quickFilter('foreign',this)">Foreign</span>
+        </div>
+        <div class="tbar">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <h3>Training Status</h3>
+                <span class="row-count" id="reportCount"></span>
+            </div>
+            <div class="tbar-right">
+                <div class="date-range-wrap">
+                    <i class="fas fa-calendar-days" style="color:var(--t3);font-size:12px"></i>
+                    <input type="date" class="form-input date-input" id="rDateFrom" onchange="onDateChange()">
+                    <span style="color:var(--t3);font-size:12px;padding:0 2px">to</span>
+                    <input type="date" class="form-input date-input" id="rDateTo" onchange="onDateChange()">
+                    <button class="btn btn-ghost btn-sm" onclick="resetDateRange()" title="Reset to current year"><i class="fas fa-rotate-left"></i></button>
+                </div>
+                <div class="search-box">
+                    <i class="fas fa-magnifying-glass"></i>
+                    <input type="text" id="rSearch" placeholder="Search name or ID&hellip;" oninput="filterReport()">
+                </div>
+                <select class="filter-sel" id="rDept" onchange="filterReport()"><option value="">All Departments</option></select>
+                <select class="filter-sel" id="rType" onchange="filterReport()">
+                    <option value="">All Types</option>
+                    <option value="1">Local</option>
+                    <option value="0">Foreign</option>
+                </select>
+                <button class="btn btn-ghost btn-sm" title="Copy incomplete list to clipboard" onclick="copyIncomplete()"><i class="fas fa-copy"></i> Copy Incomplete</button>
+                <button class="btn btn-ghost btn-sm" style="color:var(--amber);border-color:rgba(251,191,36,.3)" onclick="openArchiveScoresModal()" title="Archive score data"><i class="fas fa-box-archive"></i> Archive Scores</button>
+            </div>
+        </div>
+        <div class="tbl-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Employee ID</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Company</th>
+                        <th>Type</th>
+                        <th>Part 1</th>
+                        <th>Part 2</th>
+                        <th>Last Activity</th>
+                    </tr>
+                </thead>
+                <tbody id="reportBody"><tr><td colspan="8" class="empty"><span class="spin" style="border-top-color:var(--blue)"></span></td></tr></tbody>
+            </table>
+        </div>
+    </div>
+    <!-- ═══ TAB: EMPLOYEES ═══ -->
+    <div class="tab-panel" id="tab-employees">
+        <!-- Bulk action bar -->
+        <div class="bulk-bar" id="bulkBar">
+            <i class="fas fa-check-square" style="color:var(--blue)"></i>
+            <span class="bulk-count" id="bulkCount">0 selected</span>
+            <div class="bulk-actions">
+                <button class="btn btn-ghost btn-sm" onclick="bulkAction('enable')"><i class="fas fa-toggle-on"></i> Enable</button>
+                <button class="btn btn-ghost btn-sm" onclick="bulkAction('disable')"><i class="fas fa-toggle-off"></i> Disable</button>
+                <button class="btn btn-ghost btn-sm" onclick="bulkAction('grant')"><i class="fas fa-unlock"></i> Grant Access</button>
+                <button class="btn btn-ghost btn-sm" onclick="bulkAction('revoke')"><i class="fas fa-ban"></i> Revoke Access</button>
+                <button class="btn btn-danger btn-sm" onclick="bulkAction('archive')"><i class="fas fa-box-archive"></i> Archive Selected</button>
+                <button class="btn btn-ghost btn-sm" onclick="clearSelection()"><i class="fas fa-xmark"></i> Clear</button>
+            </div>
+        </div>
+        <!-- Quick filter pills -->
+        <div class="filter-pills">
+            <span class="pill on" onclick="empQuickFilter('all',this)">All</span>
+            <span class="pill green" onclick="empQuickFilter('active',this)">Active</span>
+            <span class="pill red" onclick="empQuickFilter('inactive',this)">Inactive</span>
+            <span class="pill amber" onclick="empQuickFilter('noaccess',this)">No Access</span>
+            <span class="pill" onclick="empQuickFilter('admin',this)"><i class="fas fa-shield"></i> Admins</span>
+            <span class="pill" onclick="empQuickFilter('local',this)">Local</span>
+            <span class="pill" onclick="empQuickFilter('foreign',this)">Foreign</span>
+        </div>
+        <div class="tbar">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <h3>Employee Management</h3>
+                <span class="row-count" id="empCount"></span>
+            </div>
+            <div class="tbar-right">
+                <div class="search-box">
+                    <i class="fas fa-magnifying-glass"></i>
+                    <input type="text" id="eSearch" placeholder="Search name, ID, dept&hellip;" oninput="filterEmployees()">
+                </div>
+                <select class="filter-sel" id="eDept" onchange="filterEmployees()"><option value="">All Departments</option></select>
+                <button class="btn btn-ghost btn-sm" onclick="selectAllVisible()" title="Select all visible rows"><i class="fas fa-check-double"></i> Select All</button>
+                <button class="btn btn-ghost btn-sm" onclick="openImport()"><i class="fas fa-file-import"></i> Import</button>
+                <button class="btn btn-primary btn-sm" onclick="openCreate()"><i class="fas fa-plus"></i> Add Employee</button>
+            </div>
+        </div>
+        <div class="tbl-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="cb-cell"><input type="checkbox" class="row-sel" id="selectAllCb" onchange="toggleSelectAll(this.checked)" title="Select all"></th>
+                        <th>Employee ID</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Company</th>
+                        <th>Type</th>
+                        <th>Access</th>
+                        <th>Admin</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="empBody"><tr><td colspan="9" class="empty"><span class="spin" style="border-top-color:var(--blue)"></span></td></tr></tbody>
+            </table>
+        </div>
+    </div>
+    <!-- ═══ TAB: DEPARTMENTS ═══ -->
+    <div class="tab-panel" id="tab-departments">
+        <div class="tbar">
+            <div style="display:flex;align-items:center;gap:10px">
+                <h3>Department Progress</h3>
+                <span class="row-count" id="deptCount"></span>
+            </div>
+            <div class="tbar-right">
+                <select class="filter-sel" id="deptType" onchange="renderDepts()">
+                    <option value="">All Types</option>
+                    <option value="1">Local</option>
+                    <option value="0">Foreign</option>
+                </select>
+                <button class="btn btn-ghost btn-sm" onclick="exportDeptExcel()"><i class="fas fa-file-excel"></i> Export Dept Report</button>
+            </div>
+        </div>
+        <div class="dept-grid" id="deptGrid"><div class="empty"><span class="spin" style="border-top-color:var(--blue)"></span></div></div>
+    </div>
+    <!-- ═══ TAB: ARCHIVE ═══ -->
+    <div class="tab-panel" id="tab-archive">
+        <div class="tbar">
+            <div style="display:flex;align-items:center;gap:10px">
+                <h3>Archived Employees</h3>
+                <span class="row-count" id="archiveCount"></span>
+            </div>
+            <div class="tbar-right">
+                <div class="search-box">
+                    <i class="fas fa-magnifying-glass"></i>
+                    <input type="text" id="archSearch" placeholder="Search..." oninput="filterArchive()">
+                </div>
+            </div>
+        </div>
+        <div style="background:rgba(251,191,36,.06);border:1px solid rgba(251,191,36,.2);border-radius:var(--r);padding:10px 14px;font-size:13px;color:var(--amber);margin-bottom:14px">
+            <i class="fas fa-circle-info" style="margin-right:6px"></i>
+            Archived employees cannot log in and do not appear in reports. Restore them to reactivate their account.
+        </div>
+        <div class="tbl-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Employee ID</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Company</th>
+                        <th>Type</th>
+                        <th>Archived At</th>
+                        <th>Archived By</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="archiveBody"><tr><td colspan="8" class="empty"><i class="fas fa-box-archive"></i>Loading...</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+    <!-- ═══ TAB: SCORE ARCHIVE ═══ -->
+    <div class="tab-panel" id="tab-scorearchive">
+        <div style="background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.2);border-radius:var(--r);padding:10px 14px;font-size:13px;color:var(--purple);margin-bottom:14px">
+            <i class="fas fa-circle-info" style="margin-right:6px"></i>
+            Archived score records are preserved and hidden from active reports. No data is ever deleted. You can restore them at any time.
+        </div>
+        <div class="tbar">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+                <h3>Archived Score Records</h3>
+                <span class="row-count" id="scoreArchiveCount"></span>
+            </div>
+            <div class="tbar-right">
+                <select class="filter-sel" id="saYear" onchange="loadArchivedScores()">
+                    <option value="">All Years</option>
+                </select>
+                <div class="search-box">
+                    <i class="fas fa-magnifying-glass"></i>
+                    <input type="text" id="saSearch" placeholder="Search name or ID..." oninput="filterArchivedScores()">
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="restoreAllVisibleScores()" title="Restore all visible records"><i class="fas fa-rotate-left" style="color:var(--green)"></i> Restore All Visible</button>
+            </div>
+        </div>
+        <!-- Bulk bar for score archive -->
+        <div class="bulk-bar" id="scoreBulkBar">
+            <i class="fas fa-check-square" style="color:var(--purple)"></i>
+            <span class="bulk-count" id="scoreBulkCount">0 selected</span>
+            <div class="bulk-actions">
+                <button class="btn btn-ghost btn-sm" style="color:var(--green);border-color:rgba(52,211,153,.3)" onclick="restoreSelectedScores()"><i class="fas fa-rotate-left"></i> Restore Selected</button>
+                <button class="btn btn-ghost btn-sm" onclick="clearScoreSelection()"><i class="fas fa-xmark"></i> Clear</button>
+            </div>
+        </div>
+        <div class="tbl-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="cb-cell"><input type="checkbox" class="row-sel" id="selectAllScoreCb" onchange="toggleSelectAllScores(this.checked)" title="Select all"></th>
+                        <th>Part</th>
+                        <th>Employee ID</th>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Year</th>
+                        <th>Score</th>
+                        <th>Status</th>
+                        <th>Test Date</th>
+                        <th>Archived At</th>
+                        <th>Archived By</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="scoreArchiveBody"><tr><td colspan="12" class="empty"><i class="fas fa-database"></i>Select a year or click to load all.</td></tr></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<!-- ═══ MODAL: Archive Scores ═══ -->
+<div class="modal" id="archiveScoresModal">
+    <div class="modal-box" style="max-width:520px">
+        <div class="modal-head">
+            <h3><i class="fas fa-box-archive" style="margin-right:8px;color:var(--amber)"></i>Archive Score Data</h3>
+            <button class="modal-close" onclick="closeArchiveScoresModal()"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+            <div style="background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.2);border-radius:var(--r);padding:14px;font-size:13px;color:var(--purple);margin-bottom:16px">
+                <i class="fas fa-shield-halved" style="margin-right:6px"></i>
+                Score records are <strong>never deleted</strong>. Archiving hides them from active reports. You can restore them anytime from the Score Archive tab.
+            </div>
+            <div class="form-group">
+                <label class="form-label">Archive Method</label>
+                <select class="form-input" id="archScoreMethod" onchange="onArchScoreMethodChange()">
+                    <option value="year">By Training Year</option>
+                    <option value="employee">By Employee</option>
+                    <option value="selected">Selected Records from Report</option>
+                </select>
+            </div>
+            <div id="archScoreByYear">
+                <div class="form-group">
+                    <label class="form-label">Training Year</label>
+                    <select class="form-input" id="archScoreYear"></select>
+                </div>
+                <div id="archYearPreview" style="font-size:13px;color:var(--t3);margin-bottom:12px"></div>
+            </div>
+            <div id="archScoreByEmp" style="display:none">
+                <div class="form-group">
+                    <label class="form-label">Employee ID</label>
+                    <input type="text" class="form-input" id="archScoreEmpID" placeholder="e.g. E1240" oninput="this.value=this.value.toUpperCase();previewArchEmp()">
+                </div>
+                <div id="archEmpPreview" style="font-size:13px;color:var(--t3);margin-bottom:12px"></div>
+            </div>
+            <div id="archScoreBySelected" style="display:none">
+                <p style="font-size:13px;color:var(--t3)">This will archive the score records for all employees currently visible in the filtered report view.</p>
+                <div id="archSelectedPreview" style="font-size:13px;color:var(--t2);margin-top:8px"></div>
+            </div>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-ghost" onclick="closeArchiveScoresModal()">Cancel</button>
+            <button class="btn btn-danger" id="archScoreBtn" onclick="executeArchiveScores()"><i class="fas fa-box-archive"></i> Archive Scores</button>
+        </div>
+    </div>
+</div>
+<!-- ═══ MODAL: Create/Edit Employee ═══ -->
+<div class="modal" id="empModal">
+    <div class="modal-box" style="max-width:560px">
+        <div class="modal-head">
+            <h3 id="empModalTitle">Add Employee</h3>
+            <button class="modal-close" onclick="closeEmpModal()"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+            <div id="empModalAlert"></div>
+            <div id="dupWarning" style="display:none;background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.3);border-radius:var(--r);padding:10px 14px;font-size:13px;color:var(--amber);margin-bottom:12px">
+                <i class="fas fa-triangle-exclamation"></i> <span id="dupMsg"></span>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Employee ID *</label>
+                    <input type="text" class="form-input" id="fEmpID" placeholder="e.g. E1240" oninput="this.value=this.value.toUpperCase()">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">IC Number (Password) *</label>
+                    <input type="text" class="form-input" id="fIC" placeholder="e.g. 5057" onblur="checkDupIC()">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Full Name *</label>
+                <input type="text" class="form-input" id="fName" placeholder="e.g. JOHN DOE" oninput="this.value=this.value.toUpperCase()">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Department</label>
+                    <input type="text" class="form-input" id="fDept" placeholder="e.g. HUMAN RESOURCES" list="deptSuggestions" oninput="this.value=this.value.toUpperCase()">
+                    <datalist id="deptSuggestions"></datalist>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Company ID</label>
+                    <input type="text" class="form-input" id="fCo" placeholder="e.g. PCEO" oninput="this.value=this.value.toUpperCase()">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Employee Type</label>
+                    <select class="form-input" id="fLocal"><option value="1">Local</option><option value="0">Foreign</option></select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Status</label>
+                    <select class="form-input" id="fActive"><option value="1">Active</option><option value="0">Inactive</option></select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Portal Access</label>
+                    <select class="form-input" id="fAccess"><option value="1">Granted</option><option value="0">Restricted</option></select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Admin (SuperUser)</label>
+                    <select class="form-input" id="fSU"><option value="0">No</option><option value="1">Yes</option></select>
+                </div>
+            </div>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-ghost" onclick="closeEmpModal()">Cancel</button>
+            <button class="btn btn-primary" id="empSaveBtn" onclick="saveEmployee()">Save Employee</button>
+        </div>
+    </div>
+</div>
+<!-- ═══ MODAL: Confirm Archive ═══ -->
+<div class="modal" id="archiveModal">
+    <div class="modal-box" style="max-width:420px">
+        <div class="modal-head">
+            <h3><i class="fas fa-box-archive" style="margin-right:8px;color:var(--amber)"></i>Archive Employee</h3>
+            <button class="modal-close" onclick="closeArchiveModal()"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+            <div style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);border-radius:var(--r);padding:14px;font-size:13px;color:var(--amber);margin-bottom:14px">
+                <i class="fas fa-triangle-exclamation" style="margin-right:6px"></i>
+                <strong id="archiveName"></strong> (<span id="archiveID" class="mono"></span>) will be archived.
+            </div>
+            <p style="font-size:13px;color:var(--t3)">The employee will be deactivated and cannot log in. Their training records are preserved. You can restore them later from the Archive tab.</p>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-ghost" onclick="closeArchiveModal()">Cancel</button>
+            <button class="btn btn-danger" id="archiveConfirmBtn" onclick="confirmArchive()"><i class="fas fa-box-archive"></i> Archive</button>
+        </div>
+    </div>
+</div>
+<!-- ═══ MODAL: Confirm Restore ═══ -->
+<div class="modal" id="restoreModal">
+    <div class="modal-box" style="max-width:420px">
+        <div class="modal-head">
+            <h3><i class="fas fa-rotate-left" style="margin-right:8px;color:var(--green)"></i>Restore Employee</h3>
+            <button class="modal-close" onclick="closeRestoreModal()"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+            <div style="background:rgba(52,211,153,.08);border:1px solid rgba(52,211,153,.25);border-radius:var(--r);padding:14px;font-size:13px;color:var(--green);margin-bottom:14px">
+                <i class="fas fa-circle-check" style="margin-right:6px"></i>
+                Restore <strong id="restoreName"></strong> (<span id="restoreID" class="mono"></span>)?
+            </div>
+            <p style="font-size:13px;color:var(--t3)">The employee's account will be reactivated with full access restored. They will be able to log in again.</p>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-ghost" onclick="closeRestoreModal()">Cancel</button>
+            <button class="btn btn-primary" id="restoreConfirmBtn" onclick="confirmRestore()"><i class="fas fa-rotate-left"></i> Restore</button>
+        </div>
+    </div>
+</div>
+<!-- ═══ MODAL: Bulk Delete Confirm ═══ -->
+<div class="modal" id="bulkDelModal">
+    <div class="modal-box" style="max-width:420px">
+        <div class="modal-head"><h3>Confirm Bulk Archive</h3><button class="modal-close" onclick="document.getElementById('bulkDelModal').classList.remove('open')"><i class="fas fa-xmark"></i></button></div>
+        <div class="modal-body">
+            <div style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);border-radius:var(--r);padding:14px;font-size:13px;color:var(--amber);margin-bottom:12px">
+                <i class="fas fa-triangle-exclamation" style="margin-right:6px"></i>
+                You are about to archive <strong id="bulkDelCount"></strong> employees.
+            </div>
+            <p style="font-size:13px;color:var(--t3)">They will be deactivated and moved to the Archive tab. Training records are preserved and you can restore them later.</p>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-ghost" onclick="document.getElementById('bulkDelModal').classList.remove('open')">Cancel</button>
+            <button class="btn btn-danger" id="bulkDelConfirmBtn" onclick="executeBulkDelete()"><i class="fas fa-box-archive"></i> Archive All</button>
+        </div>
+    </div>
+</div>
+<!-- ═══ MODAL: Import ═══ -->
+<div class="modal" id="importModal">
+    <div class="modal-box" style="max-width:680px">
+        <div class="modal-head">
+            <h3><i class="fas fa-file-import" style="margin-right:8px;color:var(--blue)"></i>Bulk Import Employees</h3>
+            <button class="modal-close" onclick="closeImport()"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+            <div id="importStep1">
+                <p style="font-size:13px;color:var(--t2);margin-bottom:14px">
+                    Upload an Excel/CSV file or paste tab-separated data below.<br>
+                    <strong>Required columns:</strong> EmployeeID, UserName, EmployeeIC<br>
+                    <span style="color:var(--t3)">Optional: Department, CompanyID, Local (1/0), Active (1/0), Access (1/0), SuperUser (1/0)</span>
+                </p>
+                <div class="import-drop" id="importDrop" onclick="document.getElementById('importFile').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="handleFileDrop(event)">
+                    <i class="fas fa-cloud-arrow-up"></i>
+                    <div>Drop Excel/CSV here or click to browse</div>
+                    <div style="font-size:12px;margin-top:6px;color:var(--t3)">.xlsx, .xls, .csv supported</div>
+                </div>
+                <input type="file" id="importFile" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFileSelect(this)">
+                <div style="text-align:center;color:var(--t3);margin:14px 0;font-size:13px">&mdash; or paste data &mdash;</div>
+                <textarea id="importPaste" class="form-input" rows="5" placeholder="EmployeeID&#9;UserName&#9;EmployeeIC&#9;Department&#10;E9001&#9;JOHN DOE&#9;12345&#9;FINANCE&#10;E9002&#9;JANE LEE&#9;67890&#9;HR" style="font-family:'JetBrains Mono',monospace;font-size:12px;resize:vertical" oninput="parsePaste()"></textarea>
+                <div class="import-preview" id="importPreview"></div>
+            </div>
+            <div id="importStep2" style="display:none">
+                <div class="import-result" id="importResult"></div>
+            </div>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-ghost" onclick="closeImport()">Cancel</button>
+            <button class="btn btn-primary" id="importBtn" onclick="runImport()" disabled><i class="fas fa-upload"></i> Import <span id="importBtnCount"></span></button>
+        </div>
+    </div>
+</div>
+<!-- Toast container -->
+<div id="toastArea"></div>
+@section Scripts {
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script>
+var CY=@Model.CurrentYear, allScores=[], allEmps=[], filteredScores=[], filteredEmps=[];
+var editMode=false, editID='', delTargetID='', selectedIDs=new Set(), pendingBulkAction='';
+var importRows=[];
+var tok=function(){var t=document.querySelector('input[name="__RequestVerificationToken"]');return t?t.value:'';};
+
+// ── TOAST ────────────────────────────────────────────────────────────────────
+function toast(msg, type){
+    type=type||'info';
+    var el=document.createElement('div');
+    el.className='toast '+type;
+    el.innerHTML='<i class="fas fa-'+(type==='success'?'circle-check':type==='error'?'circle-exclamation':'circle-info')+'"></i><span>'+esc(msg)+'</span>';
+    document.getElementById('toastArea').appendChild(el);
+    setTimeout(function(){el.style.opacity='0';el.style.transition='opacity .3s';setTimeout(function(){el.remove();},300);},3000);
+}
+
+// ── TABS ─────────────────────────────────────────────────────────────────────
+function showTab(id){
+    var tabOrder=['report','employees','departments','archive','scorearchive'];
+    document.querySelectorAll('.tab').forEach(function(t,i){t.classList.toggle('on',tabOrder[i]===id);});
+    document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('on');});
+    document.getElementById('tab-'+id).classList.add('on');
+    if(id==='departments') renderDepts();
+    if(id==='archive') loadArchive();
+    if(id==='scorearchive') loadArchivedScores();
+}
+
+// ── DATE HELPERS ─────────────────────────────────────────────────────────────
+function toInputDate(d){var y=d.getFullYear(),m=('0'+(d.getMonth()+1)).slice(-2),day=('0'+d.getDate()).slice(-2);return y+'-'+m+'-'+day;}
+function defaultFrom(){return toInputDate(new Date(CY,0,1));}
+function defaultTo(){return toInputDate(new Date());}
+
+function initDateRange(){
+    document.getElementById('rDateFrom').value=defaultFrom();
+    document.getElementById('rDateTo').value=defaultTo();
+}
+
+function resetDateRange(){
+    document.getElementById('rDateFrom').value=defaultFrom();
+    document.getElementById('rDateTo').value=defaultTo();
+    document.getElementById('rSearch').value='';
+    document.getElementById('rDept').value='';
+    document.getElementById('rType').value='';
+    document.querySelectorAll('.filter-pills .pill').forEach(function(p,i){p.classList.toggle('on',i===0);});
+    loadReport();
+}
+
+var dateChangeTimer=null;
+function onDateChange(){
+    clearTimeout(dateChangeTimer);
+    dateChangeTimer=setTimeout(function(){
+        var from=document.getElementById('rDateFrom').value;
+        var to=document.getElementById('rDateTo').value;
+        if(from&&to&&from<=to) loadReport();
+    },400);
+}
+
+// ── LOAD ─────────────────────────────────────────────────────────────────────
+function loadReport(){
+    var from=document.getElementById('rDateFrom').value;
+    var to=document.getElementById('rDateTo').value;
+    if(!from||!to) return;
+    document.getElementById('reportBody').innerHTML='<tr><td colspan="8" style="text-align:center;padding:32px"><span class="spin" style="border-top-color:var(--blue)"></span></td></tr>';
+    fetch('@Url.Action("GetScoresJson","Admin")?dateFrom='+encodeURIComponent(from)+'&dateTo='+encodeURIComponent(to))
+    .then(function(r){
+        if(!r.ok){return r.text().then(function(t){throw new Error('GetScoresJson HTTP '+r.status+': '+t.substring(0,200));});}
+        return r.json();
+    }).then(function(d){
+        allScores=d; filteredScores=d;
+        populateDepts(d.map(function(e){return e.Department;}),'rDept');
+        filterReport(); updateStats(d);
+    }).catch(function(e){
+        document.getElementById('reportBody').innerHTML='<tr><td colspan="8"><div class="empty" style="color:var(--red)"><i class="fas fa-triangle-exclamation"></i> Failed to load report: '+e.message+'</div></td></tr>';
+        console.error('loadReport error:',e);
+    });
+}
+
+function loadEmployees(){
+    fetch('@Url.Action("GetEmployeesJson","Admin")')
+    .then(function(r){
+        if(!r.ok){return r.text().then(function(t){throw new Error('GetEmployeesJson HTTP '+r.status+': '+t.substring(0,200));});}
+        return r.json();
+    }).then(function(d){
+        allEmps=d; filteredEmps=d;
+        populateDepts(d.map(function(e){return e.Department;}),'eDept');
+        // populate dept autocomplete
+        var dl=document.getElementById('deptSuggestions');
+        dl.innerHTML='';
+        [...new Set(d.map(function(e){return e.Department;}))].sort().forEach(function(dep){
+            if(!dep) return;
+            var o=document.createElement('option'); o.value=dep; dl.appendChild(o);
+        });
+        renderEmployees();
+    }).catch(function(e){
+        document.getElementById('empBody').innerHTML='<tr><td colspan="9"><div class="empty" style="color:var(--red)"><i class="fas fa-triangle-exclamation"></i> Failed to load employees: '+e.message+'</div></td></tr>';
+        console.error('loadEmployees error:',e);
+    });
+}
+
+function loadAll(){initDateRange();loadReport();loadEmployees();}
+
+function populateDepts(depts,selId){
+    var unique=[...new Set(depts)].filter(Boolean).sort();
+    var sel=document.getElementById(selId);
+    while(sel.options.length>1) sel.remove(1);
+    unique.forEach(function(d){var o=document.createElement('option');o.value=d;o.textContent=d;sel.appendChild(o);});
+}
+
+// ── STATS ─────────────────────────────────────────────────────────────────────
+function updateStats(data){
+    var total=data.length,p1=data.filter(function(e){return e.Part1==='pass';}).length,p2=data.filter(function(e){return e.Part2==='pass';}).length;
+    document.getElementById('s-p1').textContent=p1;
+    document.getElementById('s-p2').textContent=p2;
+    document.getElementById('s-np').textContent=(total-p1);
+    document.getElementById('sb-p1').style.width=(total>0?p1/total*100:0)+'%';
+    document.getElementById('sb-p2').style.width=(total>0?p2/total*100:0)+'%';
+    document.getElementById('sb-np').style.width=(total>0?(total-p1)/total*100:0)+'%';
+}
+
+// ── QUICK FILTERS ─────────────────────────────────────────────────────────────
+var activeReportPill='all', activeEmpPill='all';
+
+function quickFilter(type, el){
+    activeReportPill=type;
+    document.querySelectorAll('#tab-report .filter-pills .pill').forEach(function(p){p.classList.remove('on');});
+    el.classList.add('on');
+    var rType=document.getElementById('rType');
+    if(rType) rType.value='';
+    filterReport();
+}
+
+function empQuickFilter(type, el){
+    activeEmpPill=type;
+    document.querySelectorAll('#tab-employees .filter-pills .pill').forEach(function(p){p.classList.remove('on');});
+    el.classList.add('on');
+    filterEmployees();
+}
+
+// ── REPORT FILTER ─────────────────────────────────────────────────────────────
+function filterReport(){
+    var s=document.getElementById('rSearch').value.toLowerCase();
+    var d=document.getElementById('rDept').value;
+    var ty=document.getElementById('rType').value;
+    filteredScores=allScores.filter(function(e){
+        if(s&&!(e.EmployeeID.toLowerCase().includes(s)||e.UserName.toLowerCase().includes(s)||e.Department.toLowerCase().includes(s))) return false;
+        if(d&&e.Department!==d) return false;
+        if(ty!==''&&e.Local!==ty) return false;
+        if(activeReportPill==='both'&&!(e.Part1==='pass'&&e.Part2==='pass')) return false;
+        if(activeReportPill==='p1only'&&!(e.Part1==='pass'&&e.Part2!=='pass')) return false;
+        if(activeReportPill==='none'&&(e.Part1==='pass'||e.Part2==='pass')) return false;
+        if(activeReportPill==='local'&&e.Local!=='1') return false;
+        if(activeReportPill==='foreign'&&e.Local!=='0') return false;
+        return true;
+    });
+    renderReport();
+}
+
+function renderReport(){
+    document.getElementById('reportCount').textContent=filteredScores.length+' records';
+    var tb=document.getElementById('reportBody');
+    if(!filteredScores.length){tb.innerHTML='<tr><td colspan="8"><div class="empty"><i class="fas fa-database"></i>No records found</div></td></tr>';return;}
+    tb.innerHTML=filteredScores.map(function(e){
+        var latest=e.Part1Timestamp&&e.Part2Timestamp?(new Date(e.Part1Timestamp)>new Date(e.Part2Timestamp)?e.Part1Timestamp:e.Part2Timestamp):(e.Part1Timestamp||e.Part2Timestamp||null);
+        return '<tr>'+
+            '<td class="mono">'+esc(e.EmployeeID)+'</td>'+
+            '<td style="font-weight:500">'+esc(e.UserName)+'</td>'+
+            '<td style="color:var(--t2)">'+esc(e.Department)+'</td>'+
+            '<td style="color:var(--t3)">'+esc(e.CompanyID)+'</td>'+
+            '<td>'+typeBadge(e.Local)+'</td>'+
+            '<td>'+statusCell(e.Part1,e.Part1Timestamp)+'</td>'+
+            '<td>'+statusCell(e.Part2,e.Part2Timestamp)+'</td>'+
+            '<td style="font-size:12px;color:var(--t3);font-family:\'JetBrains Mono\',monospace">'+(latest?fmtDT(latest):'&mdash;')+'</td>'+
+            '</tr>';
+    }).join('');
+}
+
+// ── EMPLOYEE FILTER ───────────────────────────────────────────────────────────
+function filterEmployees(){
+    var s=document.getElementById('eSearch').value.toLowerCase();
+    var d=document.getElementById('eDept').value;
+    filteredEmps=allEmps.filter(function(e){
+        if(s&&!(e.EmployeeID.toLowerCase().includes(s)||e.UserName.toLowerCase().includes(s)||e.Department.toLowerCase().includes(s))) return false;
+        if(d&&e.Department!==d) return false;
+        if(activeEmpPill==='active'&&e.Active!=='1') return false;
+        if(activeEmpPill==='inactive'&&e.Active==='1') return false;
+        if(activeEmpPill==='noaccess'&&e.Access==='1') return false;
+        if(activeEmpPill==='admin'&&e.SuperUser!=='1') return false;
+        if(activeEmpPill==='local'&&e.Local!=='1') return false;
+        if(activeEmpPill==='foreign'&&e.Local!=='0') return false;
+        return true;
+    });
+    renderEmployees();
+}
+
+function renderEmployees(){
+    document.getElementById('empCount').textContent=filteredEmps.length+' employees';
+    var tb=document.getElementById('empBody');
+    if(!filteredEmps.length){tb.innerHTML='<tr><td colspan="9"><div class="empty"><i class="fas fa-users"></i>No employees found</div></td></tr>';return;}
+    tb.innerHTML=filteredEmps.map(function(e){
+        var acc=e.Access==='1', su=e.SuperUser==='1', sel=selectedIDs.has(e.EmployeeID);
+        return '<tr class="'+(sel?'selected':'')+'" id="row-'+esc(e.EmployeeID)+'">'+
+            '<td class="cb-cell"><input type="checkbox" class="row-sel" '+(sel?'checked':'')+' onchange="toggleRowSel(\''+esc(e.EmployeeID)+'\',this.checked)"></td>'+
+            '<td class="mono">'+esc(e.EmployeeID)+'</td>'+
+            '<td style="font-weight:500" class="editable-cell" data-empid="'+esc(e.EmployeeID)+'" data-field="UserName" data-val="'+esc(e.UserName)+'" ondblclick="inlineEditFromData(this)">'+esc(e.UserName)+'</td>'+
+            '<td class="editable-cell" data-empid="'+esc(e.EmployeeID)+'" data-field="Department" data-val="'+esc(e.Department)+'" ondblclick="inlineEditFromData(this)" style="color:var(--t2)">'+esc(e.Department||'&mdash;')+'</td>'+
+            '<td class="editable-cell" data-empid="'+esc(e.EmployeeID)+'" data-field="CompanyID" data-val="'+esc(e.CompanyID)+'" ondblclick="inlineEditFromData(this)" style="color:var(--t3)">'+esc(e.CompanyID||'&mdash;')+'</td>'+
+            '<td>'+typeBadge(e.Local)+'</td>'+
+            '<td><label class="toggle-sw" title="Toggle access"><input type="checkbox" '+(acc?'checked':'')+' onchange="toggleAccess(\''+esc(e.EmployeeID)+'\',this.checked)"><span class="slider"></span></label></td>'+
+            '<td>'+(su?'<span class="badge badge-purple">Admin</span>':'<span style="color:var(--t3);font-size:12px">&mdash;</span>')+'</td>'+
+            '<td><div class="action-btns">'+
+                '<button class="icon-btn edit" onclick="openEdit(\''+esc(e.EmployeeID)+'\')" title="Edit (E)"><i class="fas fa-pen"></i></button>'+
+                '<button class="icon-btn del" onclick="openArchive(\''+esc(e.EmployeeID)+'\',\''+esc(e.UserName)+'\')" title="Archive employee"><i class="fas fa-box-archive"></i></button>'+
+            '</div></td>'+
+            '</tr>';
+    }).join('');
+}
+
+// ── INLINE EDIT ───────────────────────────────────────────────────────────────
+function inlineEdit(cell, empID, field, currentVal){
+    if(cell.querySelector('input')) return;
+    var orig=cell.innerHTML;
+    cell.innerHTML='<input class="inline-input" type="text" value="'+esc(currentVal)+'">';
+    var inp=cell.querySelector('input');
+    inp.focus(); inp.select();
+
+    function save(){
+        var val=inp.value.trim().toUpperCase();
+        if(val===currentVal.toUpperCase()){cell.innerHTML=orig;return;}
+        // Find the employee and update the field
+        var emp=allEmps.find(function(e){return e.EmployeeID===empID;});
+        if(!emp){cell.innerHTML=orig;return;}
+        var model=Object.assign({},emp);
+        model[field]=val;
+        cell.innerHTML='<span class="spin" style="border-top-color:var(--blue);width:14px;height:14px;border-width:2px"></span>';
+        var body='__RequestVerificationToken='+encodeURIComponent(tok());
+        Object.keys(model).forEach(function(k){body+='&'+k+'='+encodeURIComponent(model[k]||'');});
+        fetch('@Url.Action("SaveEmployee","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body})
+        .then(function(r){return r.json();}).then(function(d){
+            if(d.success){emp[field]=val;toast('Updated '+field+' for '+empID,'success');loadEmployees();}
+            else{cell.innerHTML=orig;toast('Failed: '+d.message,'error');}
+        }).catch(function(){cell.innerHTML=orig;toast('Network error','error');});
+    }
+
+    inp.addEventListener('blur',save);
+    inp.addEventListener('keydown',function(ev){
+        if(ev.key==='Enter'){inp.blur();}
+        if(ev.key==='Escape'){cell.innerHTML=orig;}
+    });
+}
+
+// ── INLINE EDIT FROM DATA ATTR (XSS-safe) ─────────────────────────────────
+function inlineEditFromData(cell){
+    var empID=cell.getAttribute('data-empid');
+    var field=cell.getAttribute('data-field');
+    var val=cell.getAttribute('data-val');
+    inlineEdit(cell, empID, field, val||'');
+}
+
+// ── SELECTION ─────────────────────────────────────────────────────────────────
+function toggleRowSel(id, checked){
+    if(checked) selectedIDs.add(id); else selectedIDs.delete(id);
+    var row=document.getElementById('row-'+id);
+    if(row) row.classList.toggle('selected',checked);
+    updateBulkBar();
+}
+
+function toggleSelectAll(checked){
+    filteredEmps.forEach(function(e){
+        if(checked) selectedIDs.add(e.EmployeeID); else selectedIDs.delete(e.EmployeeID);
+    });
+    renderEmployees();
+    updateBulkBar();
+}
+
+function selectAllVisible(){
+    filteredEmps.forEach(function(e){selectedIDs.add(e.EmployeeID);});
+    document.getElementById('selectAllCb').checked=true;
+    renderEmployees(); updateBulkBar();
+}
+
+function clearSelection(){
+    selectedIDs.clear();
+    document.getElementById('selectAllCb').checked=false;
+    renderEmployees(); updateBulkBar();
+}
+
+function updateBulkBar(){
+    var n=selectedIDs.size;
+    var bar=document.getElementById('bulkBar');
+    bar.classList.toggle('show',n>0);
+    document.getElementById('bulkCount').textContent=n+' selected';
+}
+
+// ── BULK ACTIONS ──────────────────────────────────────────────────────────────
+function bulkAction(action){
+    if(!selectedIDs.size){toast('No employees selected','error');return;}
+    var ids=[...selectedIDs];
+
+    if(action==='archive'){
+        document.getElementById('bulkDelCount').textContent=ids.length;
+        pendingBulkAction='archive';
+        document.getElementById('bulkDelModal').classList.add('open');
+        return;
+    }
+
+    var labels={enable:'Enable',disable:'Disable',grant:'Grant Access',revoke:'Revoke Access'};
+    if(!confirm('Apply "'+labels[action]+'" to '+ids.length+' employees?')) return;
+    executeBulk(action, ids);
+}
+
+function executeBulkDelete(){
+    document.getElementById('bulkDelModal').classList.remove('open');
+    // Bulk archive: call ArchiveEmployee for each selected
+    var ids=[...selectedIDs];
+    var done=0, total=ids.length;
+    var btn=document.getElementById('bulkDelConfirmBtn');
+
+    function archiveNext(i){
+        if(i>=ids.length){
+            toast(done+' employees archived','success');
+            clearSelection(); loadAll(); loadArchive(); updateArchiveBadge();
+            return;
+        }
+        fetch('@Url.Action("ArchiveEmployee","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+            body:'__RequestVerificationToken='+encodeURIComponent(tok())+'&empID='+encodeURIComponent(ids[i])})
+        .then(function(r){return r.json();}).then(function(d){
+            if(d.success) done++;
+            archiveNext(i+1);
+        }).catch(function(){archiveNext(i+1);});
+    }
+    archiveNext(0);
+}
+
+function executeBulk(action, ids){
+    var body='__RequestVerificationToken='+encodeURIComponent(tok())+'&action='+encodeURIComponent(action);
+    ids.forEach(function(id){body+='&empIDs='+encodeURIComponent(id);});
+    fetch('@Url.Action("BulkAction","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body})
+    .then(function(r){return r.json();}).then(function(d){
+        if(d.success){
+            toast(d.done+' employees updated','success');
+            clearSelection(); loadAll();
+        } else { toast('Error: '+d.message,'error'); }
+    }).catch(function(){toast('Network error','error');});
+}
+
+// ── ACCESS TOGGLE ─────────────────────────────────────────────────────────────
+function toggleAccess(id, checked){
+    fetch('@Url.Action("ToggleAccess","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:'__RequestVerificationToken='+encodeURIComponent(tok())+'&empID='+encodeURIComponent(id)})
+    .then(function(r){return r.json();}).then(function(d){
+        if(!d.success){toast('Failed: '+d.message,'error');loadEmployees();}
+        else toast(d.status==='1'?'Access granted':'Access revoked','success');
+    }).catch(function(){toast('Network error','error');loadEmployees();});
+}
+
+// ── CREATE / EDIT MODAL ───────────────────────────────────────────────────────
+function openCreate(){
+    editMode=false; editID='';
+    document.getElementById('empModalTitle').textContent='Add Employee';
+    document.getElementById('fEmpID').disabled=false;
+    ['fEmpID','fIC','fName','fDept','fCo'].forEach(function(id){document.getElementById(id).value='';});
+    document.getElementById('fLocal').value='1';
+    document.getElementById('fActive').value='1';
+    document.getElementById('fAccess').value='1';
+    document.getElementById('fSU').value='0';
+    document.getElementById('empModalAlert').innerHTML='';
+    document.getElementById('dupWarning').style.display='none';
+    document.getElementById('empSaveBtn').innerHTML='Save Employee';
+    document.getElementById('empModal').classList.add('open');
+    setTimeout(function(){document.getElementById('fEmpID').focus();},100);
+}
+
+function openEdit(id){
+    editMode=true; editID=id;
+    document.getElementById('empModalTitle').textContent='Edit Employee';
+    document.getElementById('fEmpID').disabled=true;
+    document.getElementById('empModalAlert').innerHTML='';
+    document.getElementById('dupWarning').style.display='none';
+    fetch('@Url.Action("GetEmployee","Admin")?id='+encodeURIComponent(id))
+    .then(function(r){return r.json();}).then(function(d){
+        document.getElementById('fEmpID').value=d.EmployeeID||'';
+        document.getElementById('fIC').value=d.EmployeeIC||'';
+        document.getElementById('fName').value=d.UserName||'';
+        document.getElementById('fDept').value=d.Department||'';
+        document.getElementById('fCo').value=d.CompanyID||'';
+        document.getElementById('fLocal').value=d.Local||'1';
+        document.getElementById('fActive').value=d.Active||'1';
+        document.getElementById('fAccess').value=d.Access||'1';
+        document.getElementById('fSU').value=d.SuperUser||'0';
+        document.getElementById('empSaveBtn').innerHTML='Save Changes';
+        document.getElementById('empModal').classList.add('open');
+        setTimeout(function(){document.getElementById('fName').focus();},100);
+    });
+}
+
+function closeEmpModal(){document.getElementById('empModal').classList.remove('open');}
+
+function checkDupIC(){
+    var ic=document.getElementById('fIC').value.trim();
+    var excl=editMode?editID:'';
+    if(!ic) return;
+    fetch('@Url.Action("CheckIC","Admin")?ic='+encodeURIComponent(ic)+'&excludeEmpID='+encodeURIComponent(excl))
+    .then(function(r){return r.json();}).then(function(d){
+        var dw=document.getElementById('dupWarning');
+        if(d.duplicate&&d.existing){
+            document.getElementById('dupMsg').textContent='This IC is already used by '+d.existing.UserName+' ('+d.existing.EmployeeID+')';
+            dw.style.display='block';
+        } else { dw.style.display='none'; }
+    });
+}
+
+function saveEmployee(){
+    var btn=document.getElementById('empSaveBtn');
+    btn.disabled=true; btn.innerHTML='<span class="spin"></span> Saving...';
+    var model={EmployeeID:document.getElementById('fEmpID').value.trim(),UserName:document.getElementById('fName').value.trim(),
+        EmployeeIC:document.getElementById('fIC').value.trim(),Department:document.getElementById('fDept').value.trim(),
+        CompanyID:document.getElementById('fCo').value.trim(),Local:document.getElementById('fLocal').value,
+        Active:document.getElementById('fActive').value,Access:document.getElementById('fAccess').value,SuperUser:document.getElementById('fSU').value};
+    var body='__RequestVerificationToken='+encodeURIComponent(tok());
+    Object.keys(model).forEach(function(k){body+='&'+k+'='+encodeURIComponent(model[k]);});
+    fetch('@Url.Action("SaveEmployee","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body})
+    .then(function(r){return r.json();}).then(function(d){
+        btn.disabled=false; btn.innerHTML=editMode?'Save Changes':'Save Employee';
+        if(d.success){closeEmpModal();toast(d.message,'success');loadAll();}
+        else{document.getElementById('empModalAlert').innerHTML='<div class="alert alert-error"><i class="fas fa-circle-exclamation"></i><span>'+esc(d.message)+'</span></div>';}
+    });
+}
+
+// Delete redirected to Archive - use openArchive() instead
+
+// ── IMPORT ────────────────────────────────────────────────────────────────────
+function openImport(){
+    importRows=[];
+    document.getElementById('importStep1').style.display='block';
+    document.getElementById('importStep2').style.display='none';
+    document.getElementById('importPaste').value='';
+    document.getElementById('importPreview').innerHTML='';
+    document.getElementById('importBtn').disabled=true;
+    document.getElementById('importBtnCount').textContent='';
+    document.getElementById('importModal').classList.add('open');
+}
+function closeImport(){document.getElementById('importModal').classList.remove('open');}
+
+function handleFileDrop(ev){
+    ev.preventDefault();
+    document.getElementById('importDrop').classList.remove('drag');
+    var f=ev.dataTransfer.files[0];
+    if(f) processImportFile(f);
+}
+function handleFileSelect(inp){if(inp.files[0]) processImportFile(inp.files[0]);}
+
+function processImportFile(file){
+    var reader=new FileReader();
+    reader.onload=function(e){
+        var data=new Uint8Array(e.target.result);
+        var wb=XLSX.read(data,{type:'array'});
+        var ws=wb.Sheets[wb.SheetNames[0]];
+        var json=XLSX.utils.sheet_to_json(ws,{defval:''});
+        importRows=json.map(function(r){
+            return {
+                EmployeeID: String(r.EmployeeID||r['Employee ID']||r['EmpID']||'').trim().toUpperCase(),
+                UserName:   String(r.UserName||r['Name']||r['Full Name']||'').trim().toUpperCase(),
+                EmployeeIC: String(r.EmployeeIC||r['IC']||r['IC Number']||'').trim(),
+                Department: String(r.Department||r['Dept']||'').trim().toUpperCase(),
+                CompanyID:  String(r.CompanyID||r['Company']||'').trim().toUpperCase(),
+                Local:      String(r.Local||'1').trim(),
+                Active:     String(r.Active||'1').trim(),
+                Access:     String(r.Access||'1').trim(),
+                SuperUser:  String(r.SuperUser||'0').trim()
+            };
+        }).filter(function(r){return r.EmployeeID&&r.UserName;});
+        showImportPreview();
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+function parsePaste(){
+    var text=document.getElementById('importPaste').value.trim();
+    if(!text){importRows=[];document.getElementById('importPreview').innerHTML='';document.getElementById('importBtn').disabled=true;return;}
+    var lines=text.split('\n').map(function(l){return l.trim();}).filter(Boolean);
+    var headers=lines[0].split('\t').map(function(h){return h.trim();});
+    // Check if first line is header
+    var isHeader=isNaN(headers[0])&&headers[0].toLowerCase().includes('id')||headers[0].toLowerCase().includes('emp');
+    var dataLines=isHeader?lines.slice(1):lines;
+    var COLS=['EmployeeID','UserName','EmployeeIC','Department','CompanyID','Local','Active','Access','SuperUser'];
+    importRows=dataLines.map(function(line){
+        var cells=line.split('\t');
+        var row={};
+        if(isHeader){
+            headers.forEach(function(h,i){row[h]=cells[i]||'';});
+        } else {
+            COLS.forEach(function(c,i){row[c]=cells[i]||'';});
+        }
+        return {
+            EmployeeID: String(row.EmployeeID||row['Employee ID']||'').trim().toUpperCase(),
+            UserName:   String(row.UserName||row['Name']||'').trim().toUpperCase(),
+            EmployeeIC: String(row.EmployeeIC||row['IC']||'').trim(),
+            Department: String(row.Department||'').trim().toUpperCase(),
+            CompanyID:  String(row.CompanyID||'').trim().toUpperCase(),
+            Local:'1', Active:'1', Access:'1', SuperUser:'0'
+        };
+    }).filter(function(r){return r.EmployeeID&&r.UserName;});
+    showImportPreview();
+}
+
+function showImportPreview(){
+    var valid=importRows.filter(function(r){return r.EmployeeID&&r.UserName&&r.EmployeeIC;});
+    var invalid=importRows.filter(function(r){return !r.EmployeeIC;});
+    var html='<div style="font-size:13px;color:var(--t2);margin-bottom:8px"><strong>'+importRows.length+'</strong> rows found'+(invalid.length?' &mdash; <span style="color:var(--amber)">'+invalid.length+' missing IC</span>':'')+'</div>';
+    html+='<div class="tbl-wrap" style="max-height:200px"><table><thead><tr><th>ID</th><th>Name</th><th>IC</th><th>Department</th><th>Status</th></tr></thead><tbody>';
+    html+=importRows.slice(0,20).map(function(r){
+        var ok=r.EmployeeID&&r.UserName&&r.EmployeeIC;
+        var exists=allEmps.find(function(e){return e.EmployeeID===r.EmployeeID;});
+        return '<tr><td class="mono">'+esc(r.EmployeeID)+'</td><td>'+esc(r.UserName)+'</td><td class="mono">'+esc(r.EmployeeIC)+'</td><td>'+esc(r.Department)+'</td>'+
+            '<td><span class="badge '+(ok?'badge-pass':'badge-fail')+'">'+(!ok?'Missing IC':exists?'Update':'New')+'</span></td></tr>';
+    }).join('');
+    if(importRows.length>20) html+='<tr><td colspan="5" style="text-align:center;color:var(--t3);font-size:12px">... and '+(importRows.length-20)+' more</td></tr>';
+    html+='</tbody></table></div>';
+    document.getElementById('importPreview').innerHTML=html;
+    document.getElementById('importBtn').disabled=importRows.length===0;
+    document.getElementById('importBtnCount').textContent='('+importRows.length+')';
+}
+
+function runImport(){
+    var btn=document.getElementById('importBtn');
+    btn.disabled=true; btn.innerHTML='<span class="spin"></span> Importing...';
+    var body='__RequestVerificationToken='+encodeURIComponent(tok());
+    importRows.forEach(function(r,i){
+        Object.keys(r).forEach(function(k){body+='&employees['+i+'].'+k+'='+encodeURIComponent(r[k]||'');});
+    });
+    fetch('@Url.Action("ImportEmployees","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body})
+    .then(function(r){return r.json();}).then(function(d){
+        btn.disabled=false; btn.innerHTML='<i class="fas fa-upload"></i> Import';
+        document.getElementById('importStep1').style.display='none';
+        document.getElementById('importStep2').style.display='block';
+        if(d.success){
+            document.getElementById('importResult').innerHTML=
+                '<div style="color:var(--green);font-size:14px;font-weight:600;margin-bottom:8px"><i class="fas fa-circle-check"></i> Import Complete</div>'+
+                '<div style="font-size:13px;color:var(--t2);line-height:1.8">'+
+                '  <span style="color:var(--green)">&#10003;</span> Added: <strong>'+d.added+'</strong><br>'+
+                '  <span style="color:var(--blue)">&#8635;</span> Updated: <strong>'+d.updated+'</strong><br>'+
+                (d.skipped?'  <span style="color:var(--amber)">&#33;</span> Skipped: <strong>'+d.skipped+'</strong><br>':'')+
+                (d.errors&&d.errors.length?'  <span style="color:var(--red)">&#10007;</span> Errors: '+d.errors.join(', '):'')+'</div>';
+            loadAll();
+        } else {
+            document.getElementById('importResult').innerHTML='<div style="color:var(--red)"><i class="fas fa-circle-exclamation"></i> '+esc(d.message)+'</div>';
+        }
+    }).catch(function(){
+        btn.disabled=false; btn.innerHTML='<i class="fas fa-upload"></i> Import';
+        toast('Network error during import','error');
+    });
+}
+
+// ── DEPARTMENTS TAB ───────────────────────────────────────────────────────────
+function renderDepts(){
+    var ty=document.getElementById('deptType').value;
+    var data=allScores.filter(function(e){return ty===''||e.Local===ty;});
+    var dm={};
+    data.forEach(function(e){
+        var d=e.Department||'(No Department)';
+        if(!dm[d]) dm[d]={total:0,p1:0,p2:0,both:0,none:0};
+        dm[d].total++;
+        var hasp1=e.Part1==='pass', hasp2=e.Part2==='pass';
+        if(hasp1) dm[d].p1++;
+        if(hasp2) dm[d].p2++;
+        if(hasp1&&hasp2) dm[d].both++;
+        if(!hasp1&&!hasp2) dm[d].none++;
+    });
+    var depts=Object.keys(dm).sort();
+    document.getElementById('deptCount').textContent=depts.length+' departments';
+    if(!depts.length){document.getElementById('deptGrid').innerHTML='<div class="empty"><i class="fas fa-building"></i>No data</div>';return;}
+    document.getElementById('deptGrid').innerHTML=depts.map(function(name){
+        var d=dm[name];
+        var p1pct=d.total>0?(d.p1/d.total*100):0;
+        var p2pct=d.total>0?(d.p2/d.total*100):0;
+        var bothpct=d.total>0?(d.both/d.total*100):0;
+        return '<div class="dept-card">'+
+            '<div class="dept-name">'+esc(name)+'</div>'+
+            '<div class="dept-bar-row"><span class="dept-bar-label" style="color:var(--green)">Part 1</span><div class="dept-bar-track"><div class="dept-bar-fill" style="width:'+p1pct.toFixed(1)+'%;background:var(--green)"></div></div><span class="dept-bar-pct">'+Math.round(p1pct)+'%</span></div>'+
+            '<div class="dept-bar-row"><span class="dept-bar-label" style="color:var(--purple)">Part 2</span><div class="dept-bar-track"><div class="dept-bar-fill" style="width:'+p2pct.toFixed(1)+'%;background:var(--purple)"></div></div><span class="dept-bar-pct">'+Math.round(p2pct)+'%</span></div>'+
+            '<div class="dept-bar-row"><span class="dept-bar-label" style="color:var(--amber)">Both</span><div class="dept-bar-track"><div class="dept-bar-fill" style="width:'+bothpct.toFixed(1)+'%;background:var(--amber)"></div></div><span class="dept-bar-pct">'+Math.round(bothpct)+'%</span></div>'+
+            '<div class="dept-total">'+d.total+' employees &nbsp;&middot;&nbsp; '+d.none+' not started</div>'+
+            '</div>';
+    }).join('');
+}
+
+// ── COPY INCOMPLETE LIST ──────────────────────────────────────────────────────
+function copyIncomplete(){
+    var incomplete=filteredScores.filter(function(e){return e.Part1!=='pass'||e.Part2!=='pass';});
+    if(!incomplete.length){toast('No incomplete employees in current view','info');return;}
+    var txt='INCOMPLETE TRAINING LIST\n';
+    txt+='Generated: '+new Date().toLocaleDateString('en-MY')+'\n';
+    txt+=document.getElementById('rDateFrom').value+' to '+document.getElementById('rDateTo').value+'\n\n';
+    txt+='Employee ID\tName\tDepartment\tPart 1\tPart 2\n';
+    incomplete.forEach(function(e){
+        txt+=e.EmployeeID+'\t'+e.UserName+'\t'+e.Department+'\t'+e.Part1+'\t'+e.Part2+'\n';
+    });
+    navigator.clipboard.writeText(txt).then(function(){
+        toast('Copied '+incomplete.length+' incomplete employees to clipboard','success');
+    }).catch(function(){toast('Could not copy - try manually','error');});
+}
+
+// ── EXPORT ────────────────────────────────────────────────────────────────────
+function exportExcel(){
+    if(!allScores.length){toast('No data to export','error');return;}
+    var rows=allScores.map(function(e){return{'Employee ID':e.EmployeeID,'Name':e.UserName,'Department':e.Department,'Company':e.CompanyID,'Type':e.Local==='1'?'Local':'Foreign','Part 1':e.Part1,'Part 1 Date':e.Part1Timestamp?fmtDT(e.Part1Timestamp):'','Part 2':e.Part2,'Part 2 Date':e.Part2Timestamp?fmtDT(e.Part2Timestamp):''};});
+    var wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),'Training Data');
+    // dept summary sheet
+    var dm={};allScores.forEach(function(e){if(!dm[e.Department])dm[e.Department]={total:0,p1:0,p2:0};dm[e.Department].total++;if(e.Part1==='pass')dm[e.Department].p1++;if(e.Part2==='pass')dm[e.Department].p2++;});
+    var sum=[['Department','Total','P1 Passed','P1 %','P2 Passed','P2 %','Both Passed','Completion %']];
+    Object.keys(dm).sort().forEach(function(k){var d=dm[k];var both=allScores.filter(function(e){return e.Department===k&&e.Part1==='pass'&&e.Part2==='pass';}).length;sum.push([k,d.total,d.p1,(d.p1/d.total*100).toFixed(1)+'%',d.p2,(d.p2/d.total*100).toFixed(1)+'%',both,(both/d.total*100).toFixed(1)+'%']);});
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(sum),'Dept Summary');
+    // incomplete sheet
+    var inc=allScores.filter(function(e){return e.Part1!=='pass'||e.Part2!=='pass';});
+    var incRows=inc.map(function(e){return{'Employee ID':e.EmployeeID,'Name':e.UserName,'Department':e.Department,'Part 1':e.Part1,'Part 2':e.Part2};});
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(incRows),'Incomplete');
+    var from=document.getElementById('rDateFrom').value||'';
+    var to=document.getElementById('rDateTo').value||'';
+    XLSX.writeFile(wb,'ABC_Training_'+from+'_to_'+to+'.xlsx');
+    toast('Excel exported (3 sheets)','success');
+}
+
+function exportDeptExcel(){
+    var ty=document.getElementById('deptType').value;
+    var data=allScores.filter(function(e){return ty===''||e.Local===ty;});
+    var dm={};
+    data.forEach(function(e){
+        var d=e.Department||'(No Department)';
+        if(!dm[d]) dm[d]={total:0,p1:0,p2:0,both:0,none:0};
+        dm[d].total++;
+        if(e.Part1==='pass') dm[d].p1++;
+        if(e.Part2==='pass') dm[d].p2++;
+        if(e.Part1==='pass'&&e.Part2==='pass') dm[d].both++;
+        if(e.Part1!=='pass'&&e.Part2!=='pass') dm[d].none++;
+    });
+    var rows=[['Department','Total','P1 Passed','P1 %','P2 Passed','P2 %','Both Passed','Completion %','Not Started']];
+    Object.keys(dm).sort().forEach(function(k){
+        var d=dm[k];
+        rows.push([k,d.total,d.p1,(d.p1/d.total*100).toFixed(1)+'%',d.p2,(d.p2/d.total*100).toFixed(1)+'%',d.both,(d.both/d.total*100).toFixed(1)+'%',d.none]);
+    });
+    var wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,XLSX.utils.aoa_to_sheet(rows),'Dept Progress');
+    XLSX.writeFile(wb,'ABC_Dept_Progress_'+new Date().toISOString().slice(0,10)+'.xlsx');
+    toast('Department report exported','success');
+}
+
+function exportCSV(){
+    if(!allScores.length){toast('No data','error');return;}
+    var h=['Employee ID','Name','Department','Company','Type','Part 1','Part 1 Date','Part 2','Part 2 Date'];
+    var rows=allScores.map(function(e){return[e.EmployeeID,'"'+e.UserName+'"','"'+e.Department+'"',e.CompanyID,e.Local==='1'?'Local':'Foreign',e.Part1,e.Part1Timestamp?fmtDT(e.Part1Timestamp):'',e.Part2,e.Part2Timestamp?fmtDT(e.Part2Timestamp):''].join(',');});
+    var blob=new Blob([[h.join(',')].concat(rows).join('\n')],{type:'text/csv'});
+    var from=document.getElementById('rDateFrom').value||'';
+    var to=document.getElementById('rDateTo').value||'';
+    var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='ABC_Training_'+from+'_to_'+to+'.csv';a.click();
+    toast('CSV exported','success');
+}
+
+// ── KEYBOARD SHORTCUTS ────────────────────────────────────────────────────────
+document.addEventListener('keydown',function(ev){
+    if(ev.target.tagName==='INPUT'||ev.target.tagName==='TEXTAREA'||ev.target.tagName==='SELECT') return;
+    if(ev.key==='n'||ev.key==='N'){openCreate();}
+    if(ev.key==='/'){ ev.preventDefault(); var s=document.getElementById('eSearch'); if(s){showTab('employees');s.focus();} }
+    if(ev.key==='e'||ev.key==='E'){exportExcel();}
+    if(ev.key==='i'||ev.key==='I'){openImport();}
+    if(ev.key==='Escape'){
+        closeEmpModal(); closeArchiveModal(); closeRestoreModal(); closeImport(); closeArchiveScoresModal();
+        document.getElementById('bulkDelModal').classList.remove('open');
+    }
+});
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+function statusCell(st,ts){var cls=st==='pass'?'badge-pass':'badge-fail';var ico=st==='pass'?'check':'xmark';var out='<span class="badge '+cls+'"><i class="fas fa-'+ico+'"></i> '+esc(st)+'</span>';if(ts)out+='<div style="font-size:11px;color:var(--t3);margin-top:3px;font-family:\'JetBrains Mono\',monospace">'+fmtD(ts)+'</div>';return out;}
+function typeBadge(l){return l==='1'?'<span class="badge badge-blue">Local</span>':'<span class="badge badge-amber">Foreign</span>';}
+function fmtD(s){try{return new Date(s).toLocaleDateString('en-MY',{day:'2-digit',month:'2-digit',year:'numeric'});}catch(e){return s;}}
+function fmtDT(s){try{return new Date(s).toLocaleDateString('en-MY',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit',hour12:false});}catch(e){return s;}}
+function esc(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');}
+
+// ── ARCHIVE ──────────────────────────────────────────────────────────────────
+var archiveTarget='', archiveTargetName='', allArchived=[], filteredArchived=[];
+
+function openArchive(id, name){
+    archiveTarget=id; archiveTargetName=name;
+    document.getElementById('archiveName').textContent=name;
+    document.getElementById('archiveID').textContent=id;
+    document.getElementById('archiveConfirmBtn').disabled=false;
+    document.getElementById('archiveConfirmBtn').innerHTML='<i class="fas fa-box-archive"></i> Archive';
+    document.getElementById('archiveModal').classList.add('open');
+}
+function closeArchiveModal(){document.getElementById('archiveModal').classList.remove('open');}
+
+function confirmArchive(){
+    var btn=document.getElementById('archiveConfirmBtn');
+    btn.disabled=true; btn.innerHTML='<span class="spin"></span> Archiving...';
+    fetch('@Url.Action("ArchiveEmployee","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:'__RequestVerificationToken='+encodeURIComponent(tok())+'&empID='+encodeURIComponent(archiveTarget)})
+    .then(function(r){return r.json();}).then(function(d){
+        btn.disabled=false; btn.innerHTML='<i class="fas fa-box-archive"></i> Archive';
+        if(d.success){
+            closeArchiveModal();
+            toast(archiveTargetName+' archived','success');
+            loadAll(); loadArchive();
+            // Update badge
+            setTimeout(updateArchiveBadge,500);
+        } else { toast('Error: '+d.message,'error'); }
+    }).catch(function(){toast('Network error','error');});
+}
+
+function loadArchive(){
+    document.getElementById('archiveBody').innerHTML='<tr><td colspan="8" style="text-align:center;padding:24px"><span class="spin" style="border-top-color:var(--blue)"></span></td></tr>';
+    fetch('@Url.Action("GetArchivedEmployees","Admin")')
+    .then(function(r){
+        if(!r.ok){return r.text().then(function(t){throw new Error('HTTP '+r.status+': '+t.substring(0,200));});}
+        return r.json();
+    }).then(function(d){
+        allArchived=d; filteredArchived=d;
+        filterArchive();
+        updateArchiveBadge();
+    }).catch(function(e){
+        document.getElementById('archiveBody').innerHTML='<tr><td colspan="8"><div class="empty" style="color:var(--red)"><i class="fas fa-triangle-exclamation"></i> Failed to load archive: '+e.message+'</div></td></tr>';
+        console.error('loadArchive error:',e);
+    });
+}
+
+function filterArchive(){
+    var s=document.getElementById('archSearch').value.toLowerCase();
+    filteredArchived=allArchived.filter(function(e){
+        return !s||(e.EmployeeID.toLowerCase().includes(s)||e.UserName.toLowerCase().includes(s)||e.Department.toLowerCase().includes(s));
+    });
+    renderArchive();
+}
+
+function renderArchive(){
+    document.getElementById('archiveCount').textContent=filteredArchived.length+' archived';
+    var tb=document.getElementById('archiveBody');
+    if(!filteredArchived.length){
+        tb.innerHTML='<tr><td colspan="8"><div class="empty"><i class="fas fa-box-archive"></i>No archived employees</div></td></tr>';
+        return;
+    }
+    tb.innerHTML=filteredArchived.map(function(e){
+        return '<tr style="opacity:.8">'+
+            '<td class="mono">'+esc(e.EmployeeID)+'</td>'+
+            '<td style="font-weight:500">'+esc(e.UserName)+'</td>'+
+            '<td style="color:var(--t2)">'+esc(e.Department||'&mdash;')+'</td>'+
+            '<td style="color:var(--t3)">'+esc(e.CompanyID||'&mdash;')+'</td>'+
+            '<td>'+typeBadge(e.Local)+'</td>'+
+            '<td style="font-size:12px;color:var(--t3);font-family:\'JetBrains Mono\',monospace">'+(e.ArchivedAt?fmtDT(e.ArchivedAt):'&mdash;')+'</td>'+
+            '<td class="mono" style="font-size:12px;color:var(--t3)">'+esc(e.ArchivedBy||'&mdash;')+'</td>'+
+            '<td><div class="action-btns">'+
+                '<button class="btn btn-ghost btn-sm" style="color:var(--green);border-color:rgba(52,211,153,.3)" onclick="openRestore(\''+esc(e.EmployeeID)+'\',\''+esc(e.UserName)+'\')" ><i class="fas fa-rotate-left"></i> Restore</button>'+
+            '</div></td>'+
+            '</tr>';
+    }).join('');
+}
+
+function updateArchiveBadge(){
+    var badge=document.getElementById('archiveBadge');
+    if(allArchived.length>0){
+        badge.textContent=allArchived.length;
+        badge.style.display='inline';
+    } else {
+        badge.style.display='none';
+    }
+}
+
+// ── RESTORE ───────────────────────────────────────────────────────────────────
+var restoreTarget='', restoreTargetName='';
+
+function openRestore(id, name){
+    restoreTarget=id; restoreTargetName=name;
+    document.getElementById('restoreName').textContent=name;
+    document.getElementById('restoreID').textContent=id;
+    document.getElementById('restoreConfirmBtn').disabled=false;
+    document.getElementById('restoreConfirmBtn').innerHTML='<i class="fas fa-rotate-left"></i> Restore';
+    document.getElementById('restoreModal').classList.add('open');
+}
+function closeRestoreModal(){document.getElementById('restoreModal').classList.remove('open');}
+
+function confirmRestore(){
+    var btn=document.getElementById('restoreConfirmBtn');
+    btn.disabled=true; btn.innerHTML='<span class="spin"></span> Restoring...';
+    fetch('@Url.Action("RestoreEmployee","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:'__RequestVerificationToken='+encodeURIComponent(tok())+'&empID='+encodeURIComponent(restoreTarget)})
+    .then(function(r){return r.json();}).then(function(d){
+        btn.disabled=false; btn.innerHTML='<i class="fas fa-rotate-left"></i> Restore';
+        if(d.success){
+            closeRestoreModal();
+            toast(restoreTargetName+' restored and can log in again','success');
+            loadAll(); loadArchive();
+        } else { toast('Error: '+d.message,'error'); }
+    }).catch(function(){toast('Network error','error');});
+}
+
+// ── SCORE ARCHIVE ─────────────────────────────────────────────────────────────
+var allArchivedScores=[], filteredArchivedScores=[], selectedScoreIDs=new Set();
+
+function loadArchivedScores(){
+    var yr=document.getElementById('saYear').value;
+    document.getElementById('scoreArchiveBody').innerHTML='<tr><td colspan="12" style="text-align:center;padding:24px"><span class="spin" style="border-top-color:var(--purple)"></span></td></tr>';
+    var url='@Url.Action("GetArchivedScores","Admin")?'+(yr?'year='+encodeURIComponent(yr):'');
+    fetch(url)
+    .then(function(r){if(!r.ok) throw new Error('HTTP '+r.status);return r.json();})
+    .then(function(d){
+        allArchivedScores=d; filteredArchivedScores=d;
+        filterArchivedScores();
+        updateScoreArchiveBadge();
+        loadArchivedScoreYears();
+    }).catch(function(e){
+        document.getElementById('scoreArchiveBody').innerHTML='<tr><td colspan="12"><div class="empty" style="color:var(--red)"><i class="fas fa-triangle-exclamation"></i> '+e.message+'</div></td></tr>';
+    });
+}
+
+function loadArchivedScoreYears(){
+    fetch('@Url.Action("GetArchivedScoreYears","Admin")')
+    .then(function(r){return r.json();}).then(function(years){
+        var sel=document.getElementById('saYear');
+        var cur=sel.value;
+        while(sel.options.length>1) sel.remove(1);
+        years.forEach(function(y){var o=document.createElement('option');o.value=y;o.textContent=y;sel.appendChild(o);});
+        if(cur) sel.value=cur;
+    });
+}
+
+function filterArchivedScores(){
+    var s=document.getElementById('saSearch').value.toLowerCase();
+    filteredArchivedScores=allArchivedScores.filter(function(e){
+        return !s||(e.EmployeeID.toLowerCase().includes(s)||e.UserName.toLowerCase().includes(s)||(e.Department&&e.Department.toLowerCase().includes(s)));
+    });
+    renderArchivedScores();
+}
+
+function renderArchivedScores(){
+    document.getElementById('scoreArchiveCount').textContent=filteredArchivedScores.length+' records';
+    var tb=document.getElementById('scoreArchiveBody');
+    if(!filteredArchivedScores.length){
+        tb.innerHTML='<tr><td colspan="12"><div class="empty"><i class="fas fa-database"></i>No archived score records</div></td></tr>';
+        return;
+    }
+    tb.innerHTML=filteredArchivedScores.map(function(e){
+        var key=e.Part+'_'+e.ID;
+        var sel=selectedScoreIDs.has(key);
+        var partBadge=e.Part==='Part1'?'<span class="badge badge-blue">Part 1</span>':'<span class="badge badge-purple">Part 2</span>';
+        var statusBadge=e.ScoreStatus==='pass'?'<span class="badge badge-pass"><i class="fas fa-check"></i> pass</span>':'<span class="badge badge-fail"><i class="fas fa-xmark"></i> '+esc(e.ScoreStatus)+'</span>';
+        return '<tr class="'+(sel?'selected':'')+'" style="opacity:.85">'+
+            '<td class="cb-cell"><input type="checkbox" class="row-sel" '+(sel?'checked':'')+' onchange="toggleScoreSel(\''+key+'\',this.checked)"></td>'+
+            '<td>'+partBadge+'</td>'+
+            '<td class="mono">'+esc(e.EmployeeID)+'</td>'+
+            '<td style="font-weight:500">'+esc(e.UserName)+'</td>'+
+            '<td style="color:var(--t2)">'+esc(e.Department||'\u2014')+'</td>'+
+            '<td class="mono">'+e.TrainingYear+'</td>'+
+            '<td class="mono">'+esc(e.ScorePercentage)+'%</td>'+
+            '<td>'+statusBadge+'</td>'+
+            '<td style="font-size:12px;color:var(--t3);font-family:\'JetBrains Mono\',monospace">'+(e.Timestamp?fmtDT(e.Timestamp):'\u2014')+'</td>'+
+            '<td style="font-size:12px;color:var(--t3);font-family:\'JetBrains Mono\',monospace">'+(e.ArchivedAt?fmtDT(e.ArchivedAt):'\u2014')+'</td>'+
+            '<td class="mono" style="font-size:12px;color:var(--t3)">'+esc(e.ArchivedBy||'\u2014')+'</td>'+
+            '<td><button class="btn btn-ghost btn-sm" style="color:var(--green);border-color:rgba(52,211,153,.3)" onclick="restoreSingleScore(\''+e.Part+'\','+e.ID+')"><i class="fas fa-rotate-left"></i></button></td>'+
+            '</tr>';
+    }).join('');
+}
+
+function updateScoreArchiveBadge(){
+    var badge=document.getElementById('scoreArchiveBadge');
+    if(allArchivedScores.length>0){badge.textContent=allArchivedScores.length;badge.style.display='inline';}
+    else{badge.style.display='none';}
+}
+
+// ── SCORE SELECTION ───────────────────────────────────────────────────────────
+function toggleScoreSel(key, checked){
+    if(checked) selectedScoreIDs.add(key); else selectedScoreIDs.delete(key);
+    updateScoreBulkBar();
+}
+
+function toggleSelectAllScores(checked){
+    filteredArchivedScores.forEach(function(e){
+        var key=e.Part+'_'+e.ID;
+        if(checked) selectedScoreIDs.add(key); else selectedScoreIDs.delete(key);
+    });
+    renderArchivedScores(); updateScoreBulkBar();
+}
+
+function clearScoreSelection(){
+    selectedScoreIDs.clear();
+    document.getElementById('selectAllScoreCb').checked=false;
+    renderArchivedScores(); updateScoreBulkBar();
+}
+
+function updateScoreBulkBar(){
+    var n=selectedScoreIDs.size;
+    document.getElementById('scoreBulkBar').classList.toggle('show',n>0);
+    document.getElementById('scoreBulkCount').textContent=n+' selected';
+}
+
+// ── RESTORE SCORES ────────────────────────────────────────────────────────────
+function restoreSingleScore(part, id){
+    var table=part==='Part1'?'partOne_scores':'partTwo_scores';
+    fetch('@Url.Action("RestoreScoreRecords","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:'__RequestVerificationToken='+encodeURIComponent(tok())+'&table='+encodeURIComponent(table)+'&ids[0]='+id})
+    .then(function(r){return r.json();}).then(function(d){
+        if(d.success){toast(d.message,'success');loadArchivedScores();loadReport();}
+        else toast('Error: '+d.message,'error');
+    }).catch(function(){toast('Network error','error');});
+}
+
+function restoreSelectedScores(){
+    if(!selectedScoreIDs.size){toast('No records selected','error');return;}
+    if(!confirm('Restore '+selectedScoreIDs.size+' selected score records back to active reports?')) return;
+    var p1ids=[], p2ids=[];
+    selectedScoreIDs.forEach(function(key){
+        var parts=key.split('_');
+        if(parts[0]==='Part1') p1ids.push(parseInt(parts[1]));
+        else p2ids.push(parseInt(parts[1]));
+    });
+    var promises=[];
+    if(p1ids.length){
+        var body='__RequestVerificationToken='+encodeURIComponent(tok())+'&table=partOne_scores';
+        p1ids.forEach(function(id,i){body+='&ids['+i+']='+id;});
+        promises.push(fetch('@Url.Action("RestoreScoreRecords","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body}).then(function(r){return r.json();}));
+    }
+    if(p2ids.length){
+        var body='__RequestVerificationToken='+encodeURIComponent(tok())+'&table=partTwo_scores';
+        p2ids.forEach(function(id,i){body+='&ids['+i+']='+id;});
+        promises.push(fetch('@Url.Action("RestoreScoreRecords","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body}).then(function(r){return r.json();}));
+    }
+    Promise.all(promises).then(function(results){
+        var total=results.reduce(function(s,r){return s+(r.count||0);},0);
+        toast(total+' records restored','success');
+        clearScoreSelection(); loadArchivedScores(); loadReport();
+    }).catch(function(){toast('Network error','error');});
+}
+
+function restoreAllVisibleScores(){
+    if(!filteredArchivedScores.length){toast('No records to restore','info');return;}
+    if(!confirm('Restore all '+filteredArchivedScores.length+' visible archived score records?')) return;
+    var p1ids=[], p2ids=[];
+    filteredArchivedScores.forEach(function(e){
+        if(e.Part==='Part1') p1ids.push(e.ID); else p2ids.push(e.ID);
+    });
+    var promises=[];
+    if(p1ids.length){
+        var body='__RequestVerificationToken='+encodeURIComponent(tok())+'&table=partOne_scores';
+        p1ids.forEach(function(id,i){body+='&ids['+i+']='+id;});
+        promises.push(fetch('@Url.Action("RestoreScoreRecords","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body}).then(function(r){return r.json();}));
+    }
+    if(p2ids.length){
+        var body='__RequestVerificationToken='+encodeURIComponent(tok())+'&table=partTwo_scores';
+        p2ids.forEach(function(id,i){body+='&ids['+i+']='+id;});
+        promises.push(fetch('@Url.Action("RestoreScoreRecords","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body}).then(function(r){return r.json();}));
+    }
+    Promise.all(promises).then(function(results){
+        var total=results.reduce(function(s,r){return s+(r.count||0);},0);
+        toast(total+' records restored','success');
+        loadArchivedScores(); loadReport();
+    }).catch(function(){toast('Network error','error');});
+}
+
+// ── ARCHIVE SCORES MODAL ──────────────────────────────────────────────────────
+function openArchiveScoresModal(){
+    document.getElementById('archScoreMethod').value='year';
+    onArchScoreMethodChange();
+    // Populate year dropdown with active score years
+    fetch('@Url.Action("GetActiveScoreYears","Admin")')
+    .then(function(r){return r.json();}).then(function(years){
+        var sel=document.getElementById('archScoreYear');
+        sel.innerHTML='';
+        years.forEach(function(y){var o=document.createElement('option');o.value=y;o.textContent=y;sel.appendChild(o);});
+        if(!years.length) sel.innerHTML='<option value="">No active score data</option>';
+        updateArchYearPreview();
+    });
+    updateArchSelectedPreview();
+    document.getElementById('archiveScoresModal').classList.add('open');
+}
+
+function closeArchiveScoresModal(){document.getElementById('archiveScoresModal').classList.remove('open');}
+
+function onArchScoreMethodChange(){
+    var m=document.getElementById('archScoreMethod').value;
+    document.getElementById('archScoreByYear').style.display=m==='year'?'block':'none';
+    document.getElementById('archScoreByEmp').style.display=m==='employee'?'block':'none';
+    document.getElementById('archScoreBySelected').style.display=m==='selected'?'block':'none';
+}
+
+function updateArchYearPreview(){
+    var yr=document.getElementById('archScoreYear').value;
+    if(!yr){document.getElementById('archYearPreview').innerHTML='';return;}
+    var count=allScores.filter(function(e){return true;}).length;
+    document.getElementById('archYearPreview').innerHTML='<i class="fas fa-circle-info" style="margin-right:4px;color:var(--amber)"></i>This will archive all Part 1 and Part 2 score records for training year <strong>'+yr+'</strong>.';
+}
+
+function previewArchEmp(){
+    var id=document.getElementById('archScoreEmpID').value.trim();
+    if(!id){document.getElementById('archEmpPreview').innerHTML='';return;}
+    var emp=allEmps.find(function(e){return e.EmployeeID===id;});
+    if(emp){
+        document.getElementById('archEmpPreview').innerHTML='<i class="fas fa-user" style="margin-right:4px;color:var(--blue)"></i><strong>'+esc(emp.UserName)+'</strong> — '+esc(emp.Department||'No dept')+'. All their active score records will be archived.';
+    } else {
+        document.getElementById('archEmpPreview').innerHTML='<i class="fas fa-circle-question" style="margin-right:4px;color:var(--t3)"></i>Employee not found in current list (may still have score records).';
+    }
+}
+
+function updateArchSelectedPreview(){
+    var n=filteredScores.length;
+    document.getElementById('archSelectedPreview').innerHTML=n>0?'<strong>'+n+'</strong> employees currently shown in the report. Their score records matching the current date range will be archived.':'No employees in current report view.';
+}
+
+function executeArchiveScores(){
+    var m=document.getElementById('archScoreMethod').value;
+    var btn=document.getElementById('archScoreBtn');
+    btn.disabled=true; btn.innerHTML='<span class="spin"></span> Archiving...';
+
+    if(m==='year'){
+        var yr=document.getElementById('archScoreYear').value;
+        if(!yr){toast('Select a year','error');btn.disabled=false;btn.innerHTML='<i class="fas fa-box-archive"></i> Archive Scores';return;}
+        if(!confirm('Archive ALL score records for year '+yr+'? Records can be restored from the Score Archive tab.')) {btn.disabled=false;btn.innerHTML='<i class="fas fa-box-archive"></i> Archive Scores';return;}
+        fetch('@Url.Action("ArchiveScoresByYear","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+            body:'__RequestVerificationToken='+encodeURIComponent(tok())+'&year='+encodeURIComponent(yr)})
+        .then(function(r){return r.json();}).then(function(d){
+            btn.disabled=false; btn.innerHTML='<i class="fas fa-box-archive"></i> Archive Scores';
+            if(d.success){closeArchiveScoresModal();toast(d.message,'success');loadReport();}
+            else toast('Error: '+d.message,'error');
+        }).catch(function(){btn.disabled=false;btn.innerHTML='<i class="fas fa-box-archive"></i> Archive Scores';toast('Network error','error');});
+    }
+    else if(m==='employee'){
+        var empID=document.getElementById('archScoreEmpID').value.trim();
+        if(!empID){toast('Enter an Employee ID','error');btn.disabled=false;btn.innerHTML='<i class="fas fa-box-archive"></i> Archive Scores';return;}
+        if(!confirm('Archive all score records for employee '+empID+'?')){btn.disabled=false;btn.innerHTML='<i class="fas fa-box-archive"></i> Archive Scores';return;}
+        fetch('@Url.Action("ArchiveScoresByEmployee","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+            body:'__RequestVerificationToken='+encodeURIComponent(tok())+'&empID='+encodeURIComponent(empID)})
+        .then(function(r){return r.json();}).then(function(d){
+            btn.disabled=false; btn.innerHTML='<i class="fas fa-box-archive"></i> Archive Scores';
+            if(d.success){closeArchiveScoresModal();toast(d.message,'success');loadReport();}
+            else toast('Error: '+d.message,'error');
+        }).catch(function(){btn.disabled=false;btn.innerHTML='<i class="fas fa-box-archive"></i> Archive Scores';toast('Network error','error');});
+    }
+    else if(m==='selected'){
+        if(!filteredScores.length){toast('No employees in current report view','error');btn.disabled=false;btn.innerHTML='<i class="fas fa-box-archive"></i> Archive Scores';return;}
+        if(!confirm('Archive score records for '+filteredScores.length+' employees currently shown in the report?')){btn.disabled=false;btn.innerHTML='<i class="fas fa-box-archive"></i> Archive Scores';return;}
+        // Archive by each employee in the filtered list
+        var ids=filteredScores.map(function(e){return e.EmployeeID;});
+        var done=0, total=ids.length;
+        function archNext(i){
+            if(i>=ids.length){
+                btn.disabled=false; btn.innerHTML='<i class="fas fa-box-archive"></i> Archive Scores';
+                closeArchiveScoresModal();
+                toast(done+' employees\' scores archived','success');
+                loadReport();
+                return;
+            }
+            fetch('@Url.Action("ArchiveScoresByEmployee","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+                body:'__RequestVerificationToken='+encodeURIComponent(tok())+'&empID='+encodeURIComponent(ids[i])})
+            .then(function(r){return r.json();}).then(function(d){
+                if(d.success) done++;
+                archNext(i+1);
+            }).catch(function(){archNext(i+1);});
+        }
+        archNext(0);
+    }
+}
+
+
+loadAll();
+    </script>
+    @Html.AntiForgeryToken()
+}
