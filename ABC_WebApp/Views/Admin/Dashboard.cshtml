@@ -1014,17 +1014,26 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Status</label>
-                    <select class="form-input" id="fActive"><option value="1">Active</option><option value="0">Inactive</option></select>
+                    <select class="form-input" id="fActive" onchange="checkEmpReasonRequired()"><option value="1">Active</option><option value="0">Inactive</option></select>
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
                     <label class="form-label">Portal Access</label>
-                    <select class="form-input" id="fAccess"><option value="1">Granted</option><option value="0">Restricted</option></select>
+                    <select class="form-input" id="fAccess" onchange="checkEmpReasonRequired()"><option value="1">Granted</option><option value="0">Restricted</option></select>
                 </div>
                 <div class="form-group">
                     <label class="form-label">Admin (SuperUser)</label>
                     <select class="form-input" id="fSU"><option value="0">No</option><option value="1">Yes</option></select>
+                </div>
+            </div>
+            <div id="empReasonSection" style="display:none;margin-top:4px">
+                <div style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);border-radius:var(--r);padding:10px 14px;font-size:12px;color:var(--amber);margin-bottom:10px">
+                    <i class="fas fa-triangle-exclamation" style="margin-right:6px"></i><span id="empReasonHint"></span>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Reason / Remark <span style="color:var(--red)">*</span></label>
+                    <textarea id="fReason" class="form-input" rows="2" maxlength="500" placeholder="State the reason for this change..." style="resize:vertical"></textarea>
                 </div>
             </div>
         </div>
@@ -1125,6 +1134,27 @@
         </div>
     </div>
 </div>
+<!-- ═══ MODAL: Reason / Remark ═══ -->
+<div class="modal" id="reasonModal">
+    <div class="modal-box" style="max-width:440px">
+        <div class="modal-head">
+            <h3><i class="fas fa-comment-dots" style="margin-right:8px;color:var(--amber)"></i><span id="reasonModalTitle">State Reason</span></h3>
+            <button class="modal-close" onclick="closeReasonModal()"><i class="fas fa-xmark"></i></button>
+        </div>
+        <div class="modal-body">
+            <div id="reasonModalContext" style="background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.25);border-radius:var(--r);padding:14px;font-size:13px;color:var(--amber);margin-bottom:16px"></div>
+            <div class="form-group">
+                <label class="form-label">Reason / Remark <span style="color:var(--red)">*</span></label>
+                <textarea id="reasonInput" class="form-input" rows="3" maxlength="500" placeholder="State the reason for this action..." style="resize:vertical" onkeydown="if(event.ctrlKey&&event.key==='Enter')confirmReason()"></textarea>
+                <div id="reasonError" style="display:none;color:var(--red);font-size:12px;margin-top:4px"><i class="fas fa-circle-exclamation" style="margin-right:4px"></i>A reason is required before proceeding.</div>
+            </div>
+        </div>
+        <div class="modal-foot">
+            <button class="btn btn-ghost" onclick="closeReasonModal()">Cancel</button>
+            <button class="btn btn-danger" id="reasonConfirmBtn" onclick="confirmReason()"><i id="reasonConfirmIcon" class="fas fa-ban" style="margin-right:6px"></i><span id="reasonConfirmLabel">Confirm</span></button>
+        </div>
+    </div>
+</div>
 <!-- Toast container -->
 <div id="toastArea"></div>
 @section Scripts {
@@ -1132,6 +1162,8 @@
     <script>
 var CY=@Model.CurrentYear, allScores=[], allEmps=[], filteredScores=[], filteredEmps=[];
 var editMode=false, editID='', delTargetID='', selectedIDs=new Set(), pendingBulkAction='';
+var pendingReasonFn=null, pendingReasonCheckbox=null;
+var origActive='1', origAccess='1';
 var importRows=[];
 var tok=function(){var t=document.querySelector('input[name="__RequestVerificationToken"]');return t?t.value:'';};
 
@@ -1336,7 +1368,7 @@ function renderEmployees(){
             '<td class="editable-cell" data-empid="'+esc(e.EmployeeID)+'" data-field="Department" data-val="'+esc(e.Department)+'" ondblclick="inlineEditFromData(this)" style="color:var(--t2)">'+esc(e.Department||'&mdash;')+'</td>'+
             '<td class="editable-cell" data-empid="'+esc(e.EmployeeID)+'" data-field="CompanyID" data-val="'+esc(e.CompanyID)+'" ondblclick="inlineEditFromData(this)" style="color:var(--t3)">'+esc(e.CompanyID||'&mdash;')+'</td>'+
             '<td>'+typeBadge(e.Local)+'</td>'+
-            '<td><label class="toggle-sw" title="Toggle access"><input type="checkbox" '+(acc?'checked':'')+' onchange="toggleAccess(\''+esc(e.EmployeeID)+'\',this.checked)"><span class="slider"></span></label></td>'+
+            '<td><label class="toggle-sw" title="Toggle access"><input type="checkbox" '+(acc?'checked':'')+' onchange="toggleAccess(\''+esc(e.EmployeeID)+'\',this.checked,this)"><span class="slider"></span></label></td>'+
             '<td>'+(su?'<span class="badge badge-purple">Admin</span>':'<span style="color:var(--t3);font-size:12px">&mdash;</span>')+'</td>'+
             '<td><div class="action-btns">'+
                 '<button class="icon-btn edit" onclick="openEdit(\''+esc(e.EmployeeID)+'\')" title="Edit (E)"><i class="fas fa-pen"></i></button>'+
@@ -1434,9 +1466,17 @@ function bulkAction(action){
         return;
     }
 
-    var labels={enable:'Enable',disable:'Disable',grant:'Grant Access',revoke:'Revoke Access'};
+    if(action==='disable'||action==='revoke'){
+        var label=action==='disable'?'Set Inactive':'Revoke Access';
+        var icon=action==='disable'?'toggle-off':'ban';
+        var ctx='<i class="fas fa-triangle-exclamation" style="margin-right:6px"></i>Applying <strong>'+(action==='disable'?'Inactive status':'Restricted access')+'</strong> to <strong>'+ids.length+'</strong> employee'+(ids.length>1?'s':'')+'.';
+        openReasonModal(label, ctx, icon, label, function(reason){executeBulk(action, ids, reason);}, null);
+        return;
+    }
+
+    var labels={enable:'Enable',grant:'Grant Access'};
     if(!confirm('Apply "'+labels[action]+'" to '+ids.length+' employees?')) return;
-    executeBulk(action, ids);
+    executeBulk(action, ids, '');
 }
 
 function executeBulkDelete(){
@@ -1462,8 +1502,8 @@ function executeBulkDelete(){
     archiveNext(0);
 }
 
-function executeBulk(action, ids){
-    var body='__RequestVerificationToken='+encodeURIComponent(tok())+'&action='+encodeURIComponent(action);
+function executeBulk(action, ids, reason){
+    var body='__RequestVerificationToken='+encodeURIComponent(tok())+'&action='+encodeURIComponent(action)+'&reason='+encodeURIComponent(reason||'');
     ids.forEach(function(id){body+='&empIDs='+encodeURIComponent(id);});
     fetch('@Url.Action("BulkAction","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body})
     .then(function(r){return r.json();}).then(function(d){
@@ -1475,18 +1515,59 @@ function executeBulk(action, ids){
 }
 
 // ── ACCESS TOGGLE ─────────────────────────────────────────────────────────────
-function toggleAccess(id, checked){
+function toggleAccess(id, checked, el){
+    if(!checked){
+        var empName=(allEmps.find(function(e){return e.EmployeeID===id;})||{}).UserName||id;
+        var ctx='<i class="fas fa-ban" style="margin-right:6px"></i>Revoking portal access for <strong>'+esc(empName)+'</strong> (<span class="mono">'+esc(id)+'</span>).';
+        openReasonModal('Revoke Portal Access', ctx, 'ban', 'Revoke Access', function(reason){doToggleAccess(id, reason);}, el);
+        return;
+    }
+    doToggleAccess(id, '');
+}
+
+function doToggleAccess(id, reason){
     fetch('@Url.Action("ToggleAccess","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
-        body:'__RequestVerificationToken='+encodeURIComponent(tok())+'&empID='+encodeURIComponent(id)})
+        body:'__RequestVerificationToken='+encodeURIComponent(tok())+'&empID='+encodeURIComponent(id)+'&reason='+encodeURIComponent(reason||'')})
     .then(function(r){return r.json();}).then(function(d){
         if(!d.success){toast('Failed: '+d.message,'error');loadEmployees();}
         else toast(d.status==='1'?'Access granted':'Access revoked','success');
     }).catch(function(){toast('Network error','error');loadEmployees();});
 }
 
+// ── REASON MODAL ──────────────────────────────────────────────────────────────
+function openReasonModal(title, contextHtml, icon, confirmLabel, onConfirm, checkboxEl){
+    document.getElementById('reasonModalTitle').textContent=title;
+    document.getElementById('reasonModalContext').innerHTML=contextHtml;
+    document.getElementById('reasonConfirmIcon').className='fas fa-'+icon+' ';
+    document.getElementById('reasonConfirmLabel').textContent=confirmLabel;
+    document.getElementById('reasonInput').value='';
+    document.getElementById('reasonError').style.display='none';
+    pendingReasonFn=onConfirm;
+    pendingReasonCheckbox=checkboxEl||null;
+    document.getElementById('reasonModal').classList.add('open');
+    setTimeout(function(){document.getElementById('reasonInput').focus();},100);
+}
+
+function closeReasonModal(){
+    document.getElementById('reasonModal').classList.remove('open');
+    if(pendingReasonCheckbox){pendingReasonCheckbox.checked=true;pendingReasonCheckbox=null;}
+    pendingReasonFn=null;
+}
+
+function confirmReason(){
+    var reason=document.getElementById('reasonInput').value.trim();
+    if(!reason){document.getElementById('reasonError').style.display='block';document.getElementById('reasonInput').focus();return;}
+    document.getElementById('reasonError').style.display='none';
+    document.getElementById('reasonModal').classList.remove('open');
+    var fn=pendingReasonFn;
+    pendingReasonFn=null; pendingReasonCheckbox=null;
+    if(fn) fn(reason);
+}
+
 // ── CREATE / EDIT MODAL ───────────────────────────────────────────────────────
 function openCreate(){
     editMode=false; editID='';
+    origActive='1'; origAccess='1';
     document.getElementById('empModalTitle').textContent='Add Employee';
     document.getElementById('fEmpID').disabled=false;
     ['fEmpID','fIC','fName','fDept','fCo'].forEach(function(id){document.getElementById(id).value='';});
@@ -1496,6 +1577,8 @@ function openCreate(){
     document.getElementById('fSU').value='0';
     document.getElementById('empModalAlert').innerHTML='';
     document.getElementById('dupWarning').style.display='none';
+    document.getElementById('empReasonSection').style.display='none';
+    document.getElementById('fReason').value='';
     document.getElementById('empSaveBtn').innerHTML='Save Employee';
     document.getElementById('empModal').classList.add('open');
     setTimeout(function(){document.getElementById('fEmpID').focus();},100);
@@ -1507,6 +1590,8 @@ function openEdit(id){
     document.getElementById('fEmpID').disabled=true;
     document.getElementById('empModalAlert').innerHTML='';
     document.getElementById('dupWarning').style.display='none';
+    document.getElementById('empReasonSection').style.display='none';
+    document.getElementById('fReason').value='';
     fetch('@Url.Action("GetEmployee","Admin")?id='+encodeURIComponent(id))
     .then(function(r){return r.json();}).then(function(d){
         document.getElementById('fEmpID').value=d.EmployeeID||'';
@@ -1518,6 +1603,8 @@ function openEdit(id){
         document.getElementById('fActive').value=d.Active||'1';
         document.getElementById('fAccess').value=d.Access||'1';
         document.getElementById('fSU').value=d.SuperUser||'0';
+        origActive=d.Active||'1';
+        origAccess=d.Access||'1';
         document.getElementById('empSaveBtn').innerHTML='Save Changes';
         document.getElementById('empModal').classList.add('open');
         setTimeout(function(){document.getElementById('fName').focus();},100);
@@ -1525,6 +1612,20 @@ function openEdit(id){
 }
 
 function closeEmpModal(){document.getElementById('empModal').classList.remove('open');}
+
+function checkEmpReasonRequired(){
+    if(!editMode){document.getElementById('empReasonSection').style.display='none';return;}
+    var activeNowOff=document.getElementById('fActive').value==='0'&&origActive==='1';
+    var accessNowOff=document.getElementById('fAccess').value==='0'&&origAccess==='1';
+    var needed=activeNowOff||accessNowOff;
+    document.getElementById('empReasonSection').style.display=needed?'block':'none';
+    if(needed){
+        var hints=[];
+        if(activeNowOff) hints.push('Status → Inactive');
+        if(accessNowOff) hints.push('Portal Access → Restricted');
+        document.getElementById('empReasonHint').textContent='Reason required for: '+hints.join(' and ')+'.';
+    }
+}
 
 function checkDupIC(){
     var ic=document.getElementById('fIC').value.trim();
@@ -1541,6 +1642,15 @@ function checkDupIC(){
 }
 
 function saveEmployee(){
+    var activeNowOff=editMode&&document.getElementById('fActive').value==='0'&&origActive==='1';
+    var accessNowOff=editMode&&document.getElementById('fAccess').value==='0'&&origAccess==='1';
+    var needReason=activeNowOff||accessNowOff;
+    var reason=document.getElementById('fReason').value.trim();
+    if(needReason&&!reason){
+        document.getElementById('empModalAlert').innerHTML='<div class="alert alert-error"><i class="fas fa-circle-exclamation"></i><span>A reason is required when setting Inactive or Restricted access.</span></div>';
+        document.getElementById('fReason').focus();
+        return;
+    }
     var btn=document.getElementById('empSaveBtn');
     btn.disabled=true; btn.innerHTML='<span class="spin"></span> Saving...';
     var model={EmployeeID:document.getElementById('fEmpID').value.trim(),UserName:document.getElementById('fName').value.trim(),
@@ -1549,6 +1659,7 @@ function saveEmployee(){
         Active:document.getElementById('fActive').value,Access:document.getElementById('fAccess').value,SuperUser:document.getElementById('fSU').value};
     var body='__RequestVerificationToken='+encodeURIComponent(tok());
     Object.keys(model).forEach(function(k){body+='&'+k+'='+encodeURIComponent(model[k]);});
+    if(needReason) body+='&reason='+encodeURIComponent(reason);
     fetch('@Url.Action("SaveEmployee","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body})
     .then(function(r){return r.json();}).then(function(d){
         btn.disabled=false; btn.innerHTML=editMode?'Save Changes':'Save Employee';
@@ -1795,7 +1906,7 @@ document.addEventListener('keydown',function(ev){
     if(ev.key==='e'||ev.key==='E'){exportExcel();}
     if(ev.key==='i'||ev.key==='I'){openImport();}
     if(ev.key==='Escape'){
-        closeEmpModal(); closeArchiveModal(); closeRestoreModal(); closeImport(); closeArchiveScoresModal();
+        closeEmpModal(); closeArchiveModal(); closeRestoreModal(); closeImport(); closeArchiveScoresModal(); closeReasonModal();
         document.getElementById('bulkDelModal').classList.remove('open');
     }
 });

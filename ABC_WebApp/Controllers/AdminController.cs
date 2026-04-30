@@ -88,7 +88,7 @@ namespace ABC_WebApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public JsonResult SaveEmployee(EmployeeFormModel model)
+        public JsonResult SaveEmployee(EmployeeFormModel model, string reason)
         {
             if (!SessionHelper.IsLoggedIn || !SessionHelper.IsAdmin)
                 return Json(new { success = false, message = "Unauthorised" });
@@ -97,11 +97,21 @@ namespace ABC_WebApp.Controllers
             try
             {
                 bool isNew = !DbHelper.EmployeeExists(model.EmployeeID);
+                string detail = null;
+                if (!isNew)
+                {
+                    var existing = DbHelper.GetEmployeeAdmin(model.EmployeeID);
+                    bool settingInactive = model.Active == "0" && existing?.Active == "1";
+                    bool settingRestricted = model.Access == "0" && existing?.Access == "1";
+                    if ((settingInactive || settingRestricted) && string.IsNullOrWhiteSpace(reason))
+                        return Json(new { success = false, message = "A reason is required when setting Inactive or Restricted access." });
+                    if (!string.IsNullOrWhiteSpace(reason)) detail = reason.Trim();
+                }
                 if (isNew) DbHelper.InsertEmployee(model);
                 else DbHelper.UpdateEmployee(model);
                 string action = isNew ? "ADD_EMPLOYEE" : "EDIT_EMPLOYEE";
                 DbHelper.WriteLog(SessionHelper.EmployeeID, SessionHelper.UserName, "Admin",
-                    action, model.EmployeeID, model.UserName, null, GetIP(), "SUCCESS");
+                    action, model.EmployeeID, model.UserName, detail, GetIP(), "SUCCESS");
                 return Json(new { success = true, message = isNew ? "Employee added." : "Employee updated.", isNew });
             }
             catch (Exception ex)
@@ -137,20 +147,22 @@ namespace ABC_WebApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public JsonResult ToggleAccess(string empID)
+        public JsonResult ToggleAccess(string empID, string reason)
         {
             if (!SessionHelper.IsLoggedIn || !SessionHelper.IsAdmin)
                 return Json(new { success = false, message = "Unauthorised" });
             try
             {
-                // Read current Access value and flip it
                 var emp = DbHelper.GetEmployeeAdmin(empID);
                 if (emp == null) return Json(new { success = false, message = "Employee not found." });
                 string newAccess = emp.Access == "1" ? "0" : "1";
+                if (newAccess == "0" && string.IsNullOrWhiteSpace(reason))
+                    return Json(new { success = false, message = "A reason is required to restrict portal access." });
                 DbHelper.SetEmployeeAccess(empID, newAccess);
                 string logAction = newAccess == "1" ? "GRANT_ACCESS" : "REVOKE_ACCESS";
+                string detail = newAccess == "0" ? reason?.Trim() : null;
                 DbHelper.WriteLog(SessionHelper.EmployeeID, SessionHelper.UserName, "Admin",
-                    logAction, empID, emp.UserName, null, GetIP(), "SUCCESS");
+                    logAction, empID, emp.UserName, detail, GetIP(), "SUCCESS");
                 return Json(new { success = true, status = newAccess });
             }
             catch (Exception ex)
@@ -218,13 +230,16 @@ namespace ABC_WebApp.Controllers
         // ── BULK ACTIONS ─────────────────────────────────────────────────────
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public JsonResult BulkAction(string action, List<string> empIDs)
+        public JsonResult BulkAction(string action, List<string> empIDs, string reason)
         {
             if (!SessionHelper.IsLoggedIn || !SessionHelper.IsAdmin)
                 return Json(new { success = false, message = "Unauthorised" });
             if (empIDs == null || !empIDs.Any())
                 return Json(new { success = false, message = "No employees selected." });
+            if ((action == "disable" || action == "revoke") && string.IsNullOrWhiteSpace(reason))
+                return Json(new { success = false, message = "A reason is required for this action." });
 
+            string detail = reason?.Trim();
             int done = 0;
             var errors = new List<string>();
             try
@@ -243,6 +258,13 @@ namespace ABC_WebApp.Controllers
                         }
                     }
                     catch (Exception ex) { errors.Add($"{id}: {ex.Message}"); }
+                }
+                if (done > 0 && (action == "disable" || action == "revoke"))
+                {
+                    string logAction = action == "disable" ? "BULK_DISABLE" : "BULK_REVOKE_ACCESS";
+                    string summary = $"{done} employee(s) affected. Reason: {detail}";
+                    DbHelper.WriteLog(SessionHelper.EmployeeID, SessionHelper.UserName, "Admin",
+                        logAction, null, null, summary, GetIP(), "SUCCESS");
                 }
                 return Json(new { success = true, done, errors });
             }
