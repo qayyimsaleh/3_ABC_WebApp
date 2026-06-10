@@ -128,4 +128,12 @@ namespace ABC_WebApp.Models
         public string Department { get; set; }
         public string CompanyID { get; set; }
     }
+
+    public class TrainingProgressInfo
+    {
+        public int SlideIndex { get; set; }
+        public string SlideId { get; set; }
+        public string Lang { get; set; }
+        public string LastUpdated { get; set; }
+    }
 }

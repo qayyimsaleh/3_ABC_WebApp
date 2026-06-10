@@ -303,6 +303,55 @@ namespace ABC_WebApp.Helpers
             try { return DateTime.Parse(timestamp.Split('.')[0]).Year; } catch { return null; }
         }
 
+        public static TrainingProgressInfo GetTrainingProgress(string empID, int part, int year)
+        {
+            const string sql = @"SELECT SlideIndex, SlideId, Lang,
+                CONVERT(nvarchar(20), LastUpdated, 105) + ' ' + CONVERT(nvarchar(8), LastUpdated, 108) AS LastUpdated
+                FROM training_progress WHERE EmployeeID=@EmpID AND Part=@Part AND TrainingYear=@Year";
+            using (var con = Open()) using (var cmd = Cmd(sql, con))
+            {
+                cmd.Parameters.AddWithValue("@EmpID", empID);
+                cmd.Parameters.AddWithValue("@Part", part);
+                cmd.Parameters.AddWithValue("@Year", year);
+                using (var r = cmd.ExecuteReader())
+                    if (r.Read()) return new TrainingProgressInfo
+                    {
+                        SlideIndex = (int)r["SlideIndex"],
+                        SlideId = r["SlideId"] != DBNull.Value ? r["SlideId"].ToString() : null,
+                        Lang = r["Lang"] != DBNull.Value ? r["Lang"].ToString() : "english",
+                        LastUpdated = r["LastUpdated"] != DBNull.Value ? r["LastUpdated"].ToString() : null
+                    };
+            }
+            return new TrainingProgressInfo { SlideIndex = 0, Lang = "english" };
+        }
+
+        public static void SaveTrainingProgress(string empID, int part, int year, string lang, int slideIndex, string slideId)
+        {
+            if (slideIndex <= 0)
+            {
+                using (var con = Open())
+                using (var cmd = Cmd("DELETE FROM training_progress WHERE EmployeeID=@EmpID AND Part=@Part AND TrainingYear=@Year", con))
+                { cmd.Parameters.AddWithValue("@EmpID", empID); cmd.Parameters.AddWithValue("@Part", part); cmd.Parameters.AddWithValue("@Year", year); cmd.ExecuteNonQuery(); }
+                return;
+            }
+            const string upsert = @"IF EXISTS (SELECT 1 FROM training_progress WHERE EmployeeID=@EmpID AND Part=@Part AND TrainingYear=@Year)
+                UPDATE training_progress SET SlideIndex=@Slide, SlideId=@SlideId, Lang=@Lang, LastUpdated=GETDATE()
+                WHERE EmployeeID=@EmpID AND Part=@Part AND TrainingYear=@Year
+            ELSE
+                INSERT INTO training_progress(EmployeeID,Part,TrainingYear,Lang,SlideIndex,SlideId,LastUpdated)
+                VALUES(@EmpID,@Part,@Year,@Lang,@Slide,@SlideId,GETDATE())";
+            using (var con = Open()) using (var cmd = Cmd(upsert, con))
+            {
+                cmd.Parameters.AddWithValue("@EmpID", empID);
+                cmd.Parameters.AddWithValue("@Part", part);
+                cmd.Parameters.AddWithValue("@Year", year);
+                cmd.Parameters.AddWithValue("@Lang", lang ?? "english");
+                cmd.Parameters.AddWithValue("@Slide", slideIndex);
+                cmd.Parameters.AddWithValue("@SlideId", string.IsNullOrEmpty(slideId) ? (object)DBNull.Value : slideId);
+                cmd.ExecuteNonQuery();
+            }
+        }
+
         private static SqlConnection Open() { var c = new SqlConnection(ConnStr); c.Open(); return c; }
         private static SqlCommand Cmd(string sql, SqlConnection con) => new SqlCommand(sql, con);
 

@@ -1,4 +1,4 @@
-function ExecuteScript(strId)
+﻿function ExecuteScript(strId)
 {
   switch (strId)
   {
@@ -106,82 +106,69 @@ player.SetVar("SystemDate2",dateString);
 
 
 function ScriptFinal(){
-	
-	
-	if(window.opener){
-		var player = GetPlayer();
-		
-		/* not working, probably need to postMessage from main to child to pass the info.
-		if(window.opener.studentID){
-			player.SetVar("IDTextEntryXXX",window.opener.studentID);
-		}
-		
-		if(window.opener.studentName){
-			player.SetVar("NameTextEntryXX",window.opener.studentName);
-		}
-		*/
-		
-		if(window.DS)
-		{
-			if(window.DS.lmsManager)
-			{
-				if(window.DS.lmsManager.getScorings())
-				{
-					if(window.DS.lmsManager.getScorings().models.length > 0)
-					{
-						if(window.DS.lmsManager.getScorings().models[0].playerProps)
-						{
-							if(window.DS.lmsManager.getScorings().models[0].playerProps.attributes.Completed && window.DS.lmsManager.getScorings().models[0].playerProps.attributes.Status ==='pass')
-							{
-								window.opener.postMessage('ScorePercentage|' + window.DS.lmsManager.getScorings().models[0].playerProps.attributes.PercentScore,'*');
-								window.opener.postMessage('ScoreStatus|' + window.DS.lmsManager.getScorings().models[0].playerProps.attributes.Status,'*');
-							}
-						}
-					}
-					
-				}
-			}
-				
-		}
-			
-		
+	if(!window.DS||!window.DS.lmsManager) return;
+	var sc=window.DS.lmsManager.getScorings();
+	if(!sc||!sc.models||sc.models.length===0) return;
+	var pp=sc.models[0].playerProps;
+	if(!pp||!pp.attributes.Completed||pp.attributes.Status!=='pass') return;
+
+	var score=pp.attributes.PercentScore;
+	var status=pp.attributes.Status;
+
+	if(window.parent !== window){
+		window.parent.postMessage('ScorePercentage|'+score,window.location.origin);
+		window.parent.postMessage('ScoreStatus|'+status,window.location.origin);
 	}
-	
-	/* not working browser not allow
-	if(window.opener){
-		var player = GetPlayer();
-		
-		if(window.opener.studentID){
-			player.SetVar("IDTextEntryXXX",window.opener.studentID);
-		}
-		
-		if(window.opener.studentName){
-			player.SetVar("NameTextEntryXX",window.opener.studentName);
-		}
-		
-		if(window.opener.studentScorePencentage){
-			if(window.DS)
-			{
-				if(window.DS.lmsManager)
-				{
-					if(window.DS.lmsManager.getScorings())
-					{
-						if(window.DS.lmsManager.getScorings().models.length > 0)
-						{
-							if(window.DS.lmsManager.getScorings().models[0].playerProps)
-							{
-								window.opener.studentScorePencentage = window.DS.lmsManager.getScorings().models[0].playerProps.attributes.PercentScore;
-							}
-						}
-						
-					}
-				}
-					
-			}
-			
-		}
-	}
-	*/
-	
+
+	// Backup to localStorage — same origin as wrapper page, survives if parent tab was closed
+	try{
+		var ctx=JSON.parse(localStorage.getItem('abc_ctx')||'{}');
+		localStorage.setItem('abc_pending',JSON.stringify({
+			part:ctx.part||0,empID:ctx.empID||'',year:ctx.year||0,
+			lang:ctx.lang||'',score:String(score),status:String(status),ts:Date.now()
+		}));
+	}catch(e){}
 }
 
+// Track visited slides via globalProvideData interception
+(function(){
+	var _orig=window.globalProvideData;
+	var _seen={};
+	var _count=0;
+	var _TOTAL=55;
+	window.globalProvideData=function(type,data){
+		if(type==='slide'&&window.parent!==window){
+			try{
+				var slideId='';
+				if(document.currentScript){
+					var m=(document.currentScript.src||'').match(/\/([^\/?.]+)\.js/);
+					if(m) slideId=m[1];
+				}
+				if(slideId){
+					if(!_seen[slideId]){_seen[slideId]=true;_count++;}
+					try{localStorage.setItem('abc_slide_prog_p2',JSON.stringify({id:slideId,count:_count,ts:Date.now()}));}catch(e){}
+					window.parent.postMessage('SlideLoaded|'+_count+'|'+_TOTAL+'|'+slideId,window.location.origin);
+				}
+			}catch(e){}
+		}
+		if(_orig) return _orig.apply(this,arguments);
+	};
+})();
+
+// Resume from last slide if URL contains ?resumeSlide=slideId
+(function(){
+	try{
+		var m=window.location.search.match(/[?&]resumeSlide=([^&]+)/);
+		if(!m||!m[1]) return;
+		var slideId=decodeURIComponent(m[1]);
+		if(!slideId) return;
+		var tries=0;
+		var t=setInterval(function(){
+			try{
+				var p=GetPlayer();
+				if(p&&typeof p.gotoSlide==='function'){p.gotoSlide(slideId);clearInterval(t);}
+			}catch(e){}
+			if(++tries>40) clearInterval(t);
+		},500);
+	}catch(e){}
+})();

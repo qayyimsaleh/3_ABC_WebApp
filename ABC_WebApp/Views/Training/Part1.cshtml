@@ -4,8 +4,6 @@
 }
 @section Styles {
     <style>
-
-
         .page-head {
             padding: 32px 0 24px;
             border-bottom: 1px solid var(--bd);
@@ -185,6 +183,15 @@
                 color: var(--t1)
             }
 
+        .steps { display:flex; flex-direction:column; gap:14px }
+        .step-item { display:flex; align-items:flex-start; gap:12px }
+        .step-dot { width:24px; height:24px; border-radius:50%; background:var(--s4); color:var(--t3); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; flex-shrink:0; margin-top:1px; transition:var(--tr) }
+        .step-dot.s-done { background:var(--green); color:#000 }
+        .step-dot.s-active { background:var(--blue); color:#fff; animation:step-pulse 1.5s ease infinite }
+        .step-name { font-size:13px; font-weight:600; color:var(--t1) }
+        .step-sub { font-size:11px; color:var(--t3); margin-top:2px }
+        @@keyframes step-pulse { 0%,100%{box-shadow:0 0 0 0 rgba(79,142,247,.4)} 50%{box-shadow:0 0 0 6px rgba(79,142,247,0)} }
+
         @@media(max-width:560px) {
             .lang-row, .score-row {
                 grid-template-columns: 1fr
@@ -208,13 +215,50 @@
     </div>
     <div class="prog-card fade-up">
         <div class="prog-top">
-            <span>Progress</span>
+            <span>Session Progress</span>
             <span id="pctLbl" style="color:var(--blue);font-family:'JetBrains Mono',monospace">0%</span>
         </div>
         <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
         <div class="prog-hint" id="progHint">Select a language and start the training module</div>
     </div>
     <div class="card fade-up" style="margin-bottom:16px">
+        <div style="font-size:13px;font-weight:600;margin-bottom:14px;color:var(--t2)">
+            <i class="fas fa-list-check" style="margin-right:6px;color:var(--blue)"></i>Progress Steps
+        </div>
+        <div class="steps">
+            <div class="step-item">
+                <div class="step-dot s-done" id="sd1"><i class="fas fa-check"></i></div>
+                <div><div class="step-name">Select Language</div><div class="step-sub">English or Bahasa Malaysia</div></div>
+            </div>
+            <div class="step-item">
+                <div class="step-dot" id="sd2">2</div>
+                <div><div class="step-name">Complete Training Module</div><div class="step-sub">Work through all slides and the quiz</div></div>
+            </div>
+            <div class="step-item">
+                <div class="step-dot" id="sd3">3</div>
+                <div><div class="step-name">Quiz Results Ready</div><div class="step-sub">Score appears after completing the quiz</div></div>
+            </div>
+            <div class="step-item">
+                <div class="step-dot" id="sd4">4</div>
+                <div><div class="step-name">Submit Results</div><div class="step-sub">Save your score to the system</div></div>
+            </div>
+        </div>
+    </div>
+    <div class="card fade-up" id="resumePanel" style="display:none;margin-bottom:16px;border-color:rgba(79,142,247,.3);background:rgba(79,142,247,.04)">
+        <div style="font-size:13px;font-weight:600;margin-bottom:8px;color:var(--blue)">
+            <i class="fas fa-rotate-right" style="margin-right:6px"></i>Training Progress Found
+        </div>
+        <div id="resumeInfo" style="font-size:12px;color:var(--t2);margin-bottom:14px"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="btn btn-primary" onclick="resumeTraining()" style="flex:1">
+                <i class="fas fa-play"></i> Resume Training
+            </button>
+            <button class="btn" onclick="startFresh()" style="flex:1;background:var(--s3);color:var(--t1);border:1px solid var(--bd)">
+                <i class="fas fa-rotate-left"></i> Start from Beginning
+            </button>
+        </div>
+    </div>
+    <div class="card fade-up" id="langCard" style="margin-bottom:16px">
         <div style="font-size:13px;font-weight:600;margin-bottom:14px;color:var(--t2)">
             <i class="fas fa-language" style="margin-right:6px;color:var(--blue)"></i>Select Language
         </div>
@@ -234,6 +278,10 @@
             <i class="fas fa-play"></i> <span id="startBtnTxt">Start Training in English</span>
         </button>
     </div>
+    <div id="trainingArea" style="display:none;margin-bottom:16px">
+        <iframe id="trainingFrame" src="about:blank" allowfullscreen
+            style="width:100%;height:560px;border:none;border-radius:var(--rl);display:block"></iframe>
+    </div>
     <div class="card fade-up" id="resultCard" style="display:none">
         <div style="font-size:13px;font-weight:600;margin-bottom:14px;color:var(--t2)">
             <i class="fas fa-chart-bar" style="margin-right:6px;color:var(--blue)"></i>Quiz Results
@@ -251,89 +299,194 @@
 @section Scripts {
     <script>
 var lang='english', score='', status='', autoSubmitted=false;
-var URLS = {
-    english: '@Url.Content("~/Content/Training/Part1_EN/story.html")',
-    malay:   '@Url.Content("~/Content/Training/Part1_BM/story.html")'
+var savedSlideId='', savedLang='english', totalSlides=0;
+var URLS={
+    english:'@Url.Content("~/Content/Training/Part1_EN/story.html")',
+    malay:  '@Url.Content("~/Content/Training/Part1_BM/story.html")'
 };
-// Allowed origin for postMessage — only accept from same server
-var ALLOWED_ORIGIN = window.location.origin;
+var ALLOWED_ORIGIN=window.location.origin;
+var CURR_EMP='@Session["EmployeeID"]';
+var CURR_YEAR=@DateTime.Now.Year;
 
-function selLang(l) {
-    lang = l;
-    document.getElementById('optEN').classList.toggle('on', l === 'english');
-    document.getElementById('optBM').classList.toggle('on', l === 'malay');
-    document.getElementById('startBtnTxt').textContent = 'Start Training in ' + (l === 'english' ? 'English' : 'Bahasa Malaysia');
+(function(){
+    try{
+        var raw=localStorage.getItem('abc_pending');
+        if(!raw) return;
+        var p=JSON.parse(raw);
+        if(p.part!==1||p.empID!==CURR_EMP||p.year!==CURR_YEAR||!p.score||!p.status) return;
+        score=p.score; status=p.status;
+        updateProg(score);
+        document.getElementById('resultCard').style.display='block';
+        updateDisplay(score,status,true);
+        showAlert('info','Previous session result recovered. Click Submit to save it, or retake the training.');
+        setStep(2,'done'); setStep(3,'done'); setStep(4,'active');
+    }catch(e){}
+})();
+
+(function(){
+    fetch('@Url.Action("GetProgress","Training")?part=1',{credentials:'same-origin'})
+        .then(function(r){return r.json();})
+        .then(function(d){
+            if(d.slideId&&d.slideId.length>0){
+                savedSlideId=d.slideId;
+                savedLang=d.lang||'english';
+                selLang(savedLang);
+                showResumePanel(d.lastUpdated);
+            }
+        }).catch(function(){
+            try{
+                var raw=localStorage.getItem('abc_slide_prog_p1');
+                if(!raw) return;
+                var sp=JSON.parse(raw);
+                if((Date.now()-sp.ts)/3600000<168&&sp.id){
+                    savedSlideId=sp.id;
+                    showResumePanel(null);
+                }
+            }catch(e){}
+        });
+})();
+
+function selLang(l){
+    lang=l;
+    document.getElementById('optEN').classList.toggle('on',l==='english');
+    document.getElementById('optBM').classList.toggle('on',l==='malay');
+    document.getElementById('startBtnTxt').textContent='Start Training in '+(l==='english'?'English':'Bahasa Malaysia');
 }
 
-function startTraining() {
-    var url = URLS[lang];
-    window.open(url, '_blank');
+function showResumePanel(lastUpdated){
+    var p=document.getElementById('resumePanel'),i=document.getElementById('resumeInfo');
+    if(!p||!i) return;
+    i.textContent='Saved progress'+(lastUpdated?' from '+lastUpdated:'')+'. Continue where you left off.';
+    p.style.display='block';
 }
 
-function closeTraining() {} // no-op, kept for compatibility
+function resumeTraining(){
+    try{
+        localStorage.setItem('abc_ctx',JSON.stringify({part:1,empID:CURR_EMP,year:CURR_YEAR,lang:savedLang,ts:Date.now()}));
+        localStorage.removeItem('abc_slide_prog_p1');
+    }catch(e){}
+    lang=savedLang;
+    _launchFrame(URLS[savedLang]+'?resumeSlide='+encodeURIComponent(savedSlideId));
+}
 
-window.addEventListener('message', function(e) {
-    // Security: only accept messages from our own server (same origin)
-    if (!e.origin || e.origin !== ALLOWED_ORIGIN) return;
-    if (!e.data) return;
-    var p = e.data.split('|');
-    if (p.length < 2) return;
-    if (p[0] === 'ScorePercentage') { score = p[1]; updateProg(score); }
-    else if (p[0] === 'ScoreStatus') { status = p[1]; }
-    // Show result card as soon as any score data arrives from the training tab
-    if (score || status) document.getElementById('resultCard').style.display = 'block';
-    if (score && status) updateDisplay(score, status);
+function startFresh(){
+    document.getElementById('resumePanel').style.display='none';
+    savedSlideId='';
+    clearProgressFromDb();
+    try{localStorage.removeItem('abc_slide_prog_p1');}catch(e){}
+}
+
+function startTraining(){
+    try{
+        localStorage.setItem('abc_ctx',JSON.stringify({part:1,empID:CURR_EMP,year:CURR_YEAR,lang:lang,ts:Date.now()}));
+        localStorage.removeItem('abc_slide_prog_p1');
+    }catch(e){}
+    _launchFrame(URLS[lang]);
+}
+
+function _launchFrame(url){
+    document.getElementById('langCard').style.display='none';
+    document.getElementById('resumePanel').style.display='none';
+    document.getElementById('trainingArea').style.display='block';
+    document.getElementById('trainingFrame').src=url;
+    setStep(2,'active');
+}
+
+function closeTraining(){}
+
+window.addEventListener('message',function(e){
+    if(!e.origin||e.origin!==ALLOWED_ORIGIN) return;
+    if(!e.data) return;
+    var p=e.data.split('|');
+    if(p.length<2) return;
+    if(p[0]==='ScorePercentage'){score=p[1];updateProg(score);}
+    else if(p[0]==='ScoreStatus'){status=p[1];}
+    else if(p[0]==='SlideLoaded'){
+        var sCount=parseInt(p[1])||0,sTot=parseInt(p[2])||0,sId=p[3]||'';
+        if(sTot>0) totalSlides=sTot;
+        if(sCount>0&&totalSlides>0) updateProg(Math.round(sCount/totalSlides*100));
+        if(sId) saveProgressToDb(sCount,sId);
+        return;
+    }
+    if(score||status) document.getElementById('resultCard').style.display='block';
+    if(score&&status){updateDisplay(score,status,false);setStep(2,'done');setStep(3,'done');setStep(4,'active');}
 });
 
-function updateProg(s) {
-    var p = parseInt(s) || 0;
-    document.getElementById('progFill').style.width = p + '%';
-    document.getElementById('pctLbl').textContent = p + '%';
-    document.getElementById('progHint').textContent = p >= 100 ? 'Training complete - ready to submit' : p > 0 ? 'Training in progress...' : 'Select a language and start the training module';
+function saveProgressToDb(slideCount,slideId){
+    if(!slideCount||slideCount<=0||!slideId) return;
+    var tok=document.querySelector('input[name="__RequestVerificationToken"]');
+    fetch('@Url.Action("SaveProgress","Training")',{
+        method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:'__RequestVerificationToken='+encodeURIComponent(tok?tok.value:'')+
+             '&part=1&slideIndex='+slideCount+'&slideId='+encodeURIComponent(slideId)+'&lang='+encodeURIComponent(lang)
+    }).catch(function(){});
 }
 
-function updateDisplay(s, st) {
-    var sv = document.getElementById('scoreVal'), stv = document.getElementById('statusVal');
-    sv.textContent = s + '%'; stv.textContent = st;
-    sv.className = 'score-val ' + st.toLowerCase();
-    stv.className = 'score-val ' + st.toLowerCase();
-    document.getElementById('submitBtn').disabled = false;
-
-    // Auto-submit after a brief delay so user can see the score
-    if (!autoSubmitted) {
-        autoSubmitted = true;
-        setTimeout(function() { submitScore(); }, 1500);
-    }
+function clearProgressFromDb(){
+    var tok=document.querySelector('input[name="__RequestVerificationToken"]');
+    fetch('@Url.Action("SaveProgress","Training")',{
+        method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:'__RequestVerificationToken='+encodeURIComponent(tok?tok.value:'')+
+             '&part=1&slideIndex=0&lang=english'
+    }).catch(function(){});
 }
 
-function showAlert(type, msg) {
-    document.getElementById('alertArea').innerHTML = '<div class="alert alert-' + type + '" style="margin-bottom:12px"><i class="fas fa-' + (type === 'success' ? 'circle-check' : 'circle-exclamation') + '"></i><span>' + msg + '</span></div>';
+function updateProg(s){
+    var p=parseInt(s)||0;
+    document.getElementById('progFill').style.width=p+'%';
+    document.getElementById('pctLbl').textContent=p+'%';
+    document.getElementById('progHint').textContent=p>=100?'Training complete â€” ready to submit':p>0?'Training in progress...':'Select a language and start the training module';
 }
 
-function submitScore() {
-    if (!score || !status) { showAlert('error', 'Complete the training quiz first.'); return; }
-    var btn = document.getElementById('submitBtn');
-    btn.disabled = true; btn.innerHTML = '<span class="spin"></span> Submitting...';
-    var tok = document.querySelector('input[name="__RequestVerificationToken"]');
-    fetch('@Url.Action("SubmitPart1","Training")', {
-        method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: '__RequestVerificationToken=' + encodeURIComponent(tok ? tok.value : '') +
-              '&EmpID=' + encodeURIComponent('@Session["EmployeeID"]') +
-              '&UserName=' + encodeURIComponent('@Session["UserName"]') +
-              '&ScorePercentage=' + encodeURIComponent(score) +
-              '&ScoreStatus=' + encodeURIComponent(status)
-    }).then(function(r) { return r.json(); }).then(function(d) {
-        if (d.success) {
-            btn.innerHTML = '<i class="fas fa-check"></i> Submitted';
-            btn.style.background = 'var(--green)'; btn.style.color = '#000';
-            showAlert('success', d.message);
-        } else {
-            showAlert('error', d.message);
-            btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Results';
+function updateDisplay(s,st,recovered){
+    var sv=document.getElementById('scoreVal'),stv=document.getElementById('statusVal');
+    sv.textContent=s+'%'; stv.textContent=st;
+    sv.className='score-val '+st.toLowerCase();
+    stv.className='score-val '+st.toLowerCase();
+    document.getElementById('submitBtn').disabled=false;
+    if(!recovered&&!autoSubmitted){autoSubmitted=true;setTimeout(function(){submitScore();},1500);}
+}
+
+function setStep(n,state){
+    var d=document.getElementById('sd'+n);
+    if(!d) return;
+    d.className='step-dot'+(state==='done'?' s-done':state==='active'?' s-active':'');
+    d.innerHTML=state==='done'?'<i class="fas fa-check"></i>':String(n);
+}
+
+function showAlert(type,msg){
+    document.getElementById('alertArea').innerHTML='<div class="alert alert-'+type+'" style="margin-bottom:12px"><i class="fas fa-'+(type==='success'?'circle-check':type==='info'?'circle-info':'circle-exclamation')+'"></i><span>'+msg+'</span></div>';
+}
+
+function submitScore(){
+    if(!score||!status){showAlert('error','Complete the training quiz first.');return;}
+    var btn=document.getElementById('submitBtn');
+    btn.disabled=true; btn.innerHTML='<span class="spin"></span> Submitting...';
+    setStep(4,'active');
+    var tok=document.querySelector('input[name="__RequestVerificationToken"]');
+    fetch('@Url.Action("SubmitPart1","Training")',{
+        method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body:'__RequestVerificationToken='+encodeURIComponent(tok?tok.value:'')+
+             '&EmpID='+encodeURIComponent('@Session["EmployeeID"]')+
+             '&UserName='+encodeURIComponent('@Session["UserName"]')+
+             '&ScorePercentage='+encodeURIComponent(score)+
+             '&ScoreStatus='+encodeURIComponent(status)
+    }).then(function(r){return r.json();}).then(function(d){
+        if(d.success){
+            btn.innerHTML='<i class="fas fa-check"></i> Submitted';
+            btn.style.background='var(--green)'; btn.style.color='#000';
+            showAlert('success',d.message);
+            setStep(4,'done');
+            try{localStorage.removeItem('abc_pending');}catch(e){}
+            clearProgressFromDb();
+            try{localStorage.removeItem('abc_slide_prog_p1');}catch(e){}
+        }else{
+            showAlert('error',d.message);
+            btn.disabled=false; btn.innerHTML='<i class="fas fa-paper-plane"></i> Submit Results';
         }
-    }).catch(function() {
-        showAlert('error', 'Network error. Please try again.');
-        btn.disabled = false; btn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Results';
+    }).catch(function(){
+        showAlert('error','Network error. Please try again.');
+        btn.disabled=false; btn.innerHTML='<i class="fas fa-paper-plane"></i> Submit Results';
     });
 }
     </script>

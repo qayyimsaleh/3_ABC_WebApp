@@ -63,6 +63,30 @@ namespace ABC_WebApp.Controllers
             }
         }
 
+        // ── GET /Training/GetProgress ────────────────────────────────────────
+        public JsonResult GetProgress(int part)
+        {
+            if (!SessionHelper.IsLoggedIn || (part != 1 && part != 2))
+                return Json(new { slideIndex = 0, slideId = (string)null, lang = "english", lastUpdated = (string)null }, JsonRequestBehavior.AllowGet);
+            var prog = DbHelper.GetTrainingProgress(SessionHelper.EmployeeID, part, DateTime.Now.Year);
+            return Json(new { slideIndex = prog.SlideIndex, slideId = prog.SlideId, lang = prog.Lang, lastUpdated = prog.LastUpdated }, JsonRequestBehavior.AllowGet);
+        }
+
+        // ── POST /Training/SaveProgress ──────────────────────────────────────
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public JsonResult SaveProgress(int part, int slideIndex, string slideId, string lang)
+        {
+            if (!SessionHelper.IsLoggedIn || (part != 1 && part != 2))
+                return Json(new { success = false });
+            try
+            {
+                DbHelper.SaveTrainingProgress(SessionHelper.EmployeeID, part, DateTime.Now.Year, lang ?? "english", slideIndex, slideId ?? "");
+                return Json(new { success = true });
+            }
+            catch { return Json(new { success = false }); }
+        }
+
         // ── POST /Training/SubmitPart2  (AJAX JSON) ──────────────────────────
         [HttpPost]
         [ValidateAntiForgeryToken]
