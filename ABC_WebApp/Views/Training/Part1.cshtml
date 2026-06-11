@@ -358,6 +358,7 @@ function showResumePanel(lastUpdated){
     if(!p||!i) return;
     i.textContent='Saved progress'+(lastUpdated?' from '+lastUpdated:'')+'. Continue where you left off.';
     p.style.display='block';
+    document.getElementById('langCard').style.display='none';
 }
 
 function resumeTraining(){
@@ -371,6 +372,7 @@ function resumeTraining(){
 
 function startFresh(){
     document.getElementById('resumePanel').style.display='none';
+    document.getElementById('langCard').style.display='block';
     savedSlideId='';
     clearProgressFromDb();
     try{localStorage.removeItem('abc_slide_prog_p1');}catch(e){}
