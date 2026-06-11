@@ -175,7 +175,7 @@ var _slideFullIdMap = {};
 				if(n.nodeName==='SCRIPT'){
 					var src=n.src||'';
 					var m=src.match(/html5\/data\/js\/([^\/]+)\.js/);
-					if(m&&window.parent!==window){
+					if(m&&/^[0-9A-Za-z]{8,15}$/.test(m[1])&&window.parent!==window){
 						var slideId=m[1];
 						if(!_seen[slideId]){_seen[slideId]=true;_count++;}
 						var fullSlideId=_slideFullIdMap[slideId]||slideId;
@@ -203,7 +203,7 @@ var _slideFullIdMap = {};
 				for(var j=0;j<nodes.length;j++){
 					var n=nodes[j];
 					var fnm=n.src?n.src.match(/html5\/data\/js\/([^\/]+)\.js/):null;
-					if(n.nodeName==='SCRIPT'&&fnm&&fnm[1]!=='frame'&&fnm[1]!=='data'){
+					if(n.nodeName==='SCRIPT'&&fnm&&/^[0-9A-Za-z]{8,15}$/.test(fnm[1])){
 						resumeObs.disconnect();
 						setTimeout(function(){
 							var tries=0;
