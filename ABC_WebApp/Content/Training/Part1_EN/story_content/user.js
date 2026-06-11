@@ -148,8 +148,7 @@ var _slideFullIdMap = {};
 							if (!_slideFullIdMap[fId]) _slideFullIdMap[fId] = scId + '.' + fId;
 						}
 					}
-					console.log('[ABC] GPD map built, scenes:', allScenes.length, 'slides:', Object.keys(_slideFullIdMap).length);
-				} catch(e2) { console.log('[ABC] GPD error:', e2); }
+				} catch(e2) {}
 			}
 			return fn ? fn.apply(this, arguments) : undefined;
 		};
@@ -205,21 +204,20 @@ var _slideFullIdMap = {};
 					var n=nodes[j];
 					var fnm=n.src?n.src.match(/html5\/data\/js\/([^\/]+)\.js/):null;
 					if(n.nodeName==='SCRIPT'&&fnm&&/^[0-9A-Za-z]{8,15}$/.test(fnm[1])){
-						console.log('[ABC] resumeObs triggered by:', n.src, 'slideId to resume:', slideId);
 						resumeObs.disconnect();
 						setTimeout(function(){
 							var tries=0;
 							var t=setInterval(function(){
 								if(done){clearInterval(t);return;}
 								try{
-									var p=GetPlayer();
-									if(p&&typeof p.gotoSlide==='function'){
-										var fId=(slideId.indexOf('.')===-1&&_slideFullIdMap[slideId])?_slideFullIdMap[slideId]:slideId;
-										console.log('[ABC] calling gotoSlide with:', fId, 'map size:', Object.keys(_slideFullIdMap).length);
-										p.gotoSlide(fId);done=true;clearInterval(t);
+									var fId=(slideId.indexOf('.')===-1&&_slideFullIdMap[slideId])?_slideFullIdMap[slideId]:slideId;
+									var fullId=fId.indexOf('_player.')===0?fId:'_player.'+fId;
+									if(window.DS&&window.DS.pubSub&&typeof window.DS.pubSub.trigger==='function'){
+										window.DS.pubSub.trigger('nextSlide:requesting',fullId);
+										done=true;clearInterval(t);
 									}
 								}catch(e){}
-								if(++tries>20){ console.log('[ABC] gotoSlide gave up after 20 tries'); clearInterval(t); }
+								if(++tries>20){clearInterval(t);}
 							},250);
 						},800);
 						return;
