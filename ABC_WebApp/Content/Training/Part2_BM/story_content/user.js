@@ -130,31 +130,63 @@ function ScriptFinal(){
 	}catch(e){}
 }
 
-// Track visited slides via globalProvideData interception
+var _slideFullIdMap = {};
 (function(){
-	var _orig=window.globalProvideData;
+	function _wrapGPD(fn) {
+		return function(type, dataStr) {
+			if (type === 'data' && typeof dataStr === 'string' && !Object.keys(_slideFullIdMap).length) {
+				try {
+					var allScenes = [], sRe = /"startingSlide":"_player\.([^.]+)\.[^"]+","sceneNumber":(\d+)/g, sMatch;
+					while ((sMatch = sRe.exec(dataStr)) !== null) {
+						if (parseInt(sMatch[2]) > 0) allScenes.push({id: sMatch[1], pos: sMatch.index});
+					}
+					for (var i = 0; i < allScenes.length; i++) {
+						var scId = allScenes[i].id;
+						var chunk = dataStr.substring(allScenes[i].pos, i+1 < allScenes.length ? allScenes[i+1].pos : dataStr.length);
+						var hRe = /"html5url":"html5\/data\/js\/([^"]+)\.js"/g, hMatch;
+						while ((hMatch = hRe.exec(chunk)) !== null) {
+							var fId = hMatch[1];
+							if (!_slideFullIdMap[fId]) _slideFullIdMap[fId] = scId + '.' + fId;
+						}
+					}
+				} catch(e2) {}
+			}
+			return fn ? fn.apply(this, arguments) : undefined;
+		};
+	}
+	var _stored = _wrapGPD(window.globalProvideData);
+	try {
+		Object.defineProperty(window, 'globalProvideData', {
+			get: function() { return _stored; },
+			set: function(fn) { _stored = _wrapGPD(fn); },
+			configurable: true
+		});
+	} catch(e) { window.globalProvideData = _stored; }
+})();
+
+(function(){
 	var _seen={};
 	var _count=0;
 	var _TOTAL=55;
-	window.globalProvideData=function(type,data){
-		if(type==='slide'&&window.parent!==window){
-			try{
-				var slideId='';
-				if(document.currentScript){
-					var m=(document.currentScript.src||'').match(/\/([^\/?.]+)\.js/);
-					if(m) slideId=m[1];
+	var obs=new MutationObserver(function(muts){
+		for(var i=0;i<muts.length;i++){
+			var nodes=muts[i].addedNodes;
+			for(var j=0;j<nodes.length;j++){
+				var n=nodes[j];
+				if(n.nodeName==='SCRIPT'){
+					var src=n.src||'';
+					var m=src.match(/html5\/data\/js\/([^\/]+)\.js/);
+					if(m&&window.parent!==window){
+						var slideId=m[1];
+						if(!_seen[slideId]){_seen[slideId]=true;_count++;}
+						var fullSlideId=_slideFullIdMap[slideId]||slideId;
+						window.parent.postMessage('SlideLoaded|'+_count+'|'+_TOTAL+'|'+fullSlideId,window.location.origin);
+					}
 				}
-				if(!slideId){try{var st=new Error().stack||'';var ms=st.match(/\/html5\/data\/js\/([^\/?.]+)\.js/);if(ms)slideId=ms[1];}catch(e){}}
-				if(!slideId&&data&&typeof data==='object'){slideId=String(data.id||data.uid||data.slideId||'');}
-				if(slideId&&slideId.length>4){
-					if(!_seen[slideId]){_seen[slideId]=true;_count++;}
-					try{localStorage.setItem('abc_slide_prog_p2',JSON.stringify({id:slideId,count:_count,ts:Date.now()}));}catch(e){}
-					window.parent.postMessage('SlideLoaded|'+_count+'|'+_TOTAL+'|'+slideId,window.location.origin);
-				}
-			}catch(e){}
+			}
 		}
-		if(_orig) return _orig.apply(this,arguments);
-	};
+	});
+	obs.observe(document.documentElement,{childList:true,subtree:true});
 })();
 
 // Resume from last slide if URL contains ?resumeSlide=slideId
@@ -164,13 +196,35 @@ function ScriptFinal(){
 		if(!m||!m[1]) return;
 		var slideId=decodeURIComponent(m[1]);
 		if(!slideId) return;
-		var tries=0;
-		var t=setInterval(function(){
-			try{
-				var p=GetPlayer();
-				if(p&&typeof p.gotoSlide==='function'){p.gotoSlide(slideId);clearInterval(t);}
-			}catch(e){}
-			if(++tries>40) clearInterval(t);
-		},500);
+		var done=false;
+		var resumeObs=new MutationObserver(function(muts){
+			if(done) return;
+			for(var i=0;i<muts.length;i++){
+				var nodes=muts[i].addedNodes;
+				for(var j=0;j<nodes.length;j++){
+					var n=nodes[j];
+					var fnm=n.src?n.src.match(/html5\/data\/js\/([^\/]+)\.js/):null;
+					if(n.nodeName==='SCRIPT'&&fnm&&fnm[1]!=='frame'&&fnm[1]!=='data'){
+						resumeObs.disconnect();
+						setTimeout(function(){
+							var tries=0;
+							var t=setInterval(function(){
+								if(done){clearInterval(t);return;}
+								try{
+									var p=GetPlayer();
+									if(p&&typeof p.gotoSlide==='function'){
+										var fId=(slideId.indexOf('.')===-1&&_slideFullIdMap[slideId])?_slideFullIdMap[slideId]:slideId;
+										p.gotoSlide(fId);done=true;clearInterval(t);
+									}
+								}catch(e){}
+								if(++tries>20) clearInterval(t);
+							},250);
+						},800);
+						return;
+					}
+				}
+			}
+		});
+		resumeObs.observe(document.documentElement,{childList:true,subtree:true});
 	}catch(e){}
 })();
