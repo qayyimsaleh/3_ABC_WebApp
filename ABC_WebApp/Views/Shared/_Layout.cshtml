@@ -667,13 +667,13 @@
                     <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle light/dark mode">
                         <i class="fas fa-sun" id="themeIcon"></i>
                     </button>
-                    <div class="user-chip">
+                    <a href="@Url.Action("Index","Profile")" class="user-chip" style="text-decoration:none">
                         <div class="user-av" id="navAvatar"></div>
                         <div class="user-info">
                             <div class="user-name">@Session["UserName"]</div>
                             <div class="user-id">@Session["EmployeeID"]</div>
                         </div>
-                    </div>
+                    </a>
                     <a href="@Url.Action("Logout","Auth")" class="btn-nav">
                         <i class="fas fa-arrow-right-from-bracket"></i> Logout
                     </a>

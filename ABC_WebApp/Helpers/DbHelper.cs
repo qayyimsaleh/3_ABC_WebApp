@@ -88,6 +88,13 @@ namespace ABC_WebApp.Helpers
             { cmd.Parameters.AddWithValue("@Val", value); cmd.Parameters.AddWithValue("@Id", empID); cmd.ExecuteNonQuery(); }
         }
 
+        public static void UpdatePassword(string empID, string newPassword)
+        {
+            using (var con = Open())
+            using (var cmd = Cmd("UPDATE [dbo].[empMaster_lists] SET EmployeeIC=@Pwd WHERE EmployeeID=@Id", con))
+            { cmd.Parameters.AddWithValue("@Pwd", newPassword ?? ""); cmd.Parameters.AddWithValue("@Id", empID); cmd.ExecuteNonQuery(); }
+        }
+
         public static Employee FindEmployeeByIC(string ic, string excludeEmpID)
         {
             const string sql = @"SELECT EmployeeID,UserName,EmployeeIC,Department,CompanyID,SuperUser,Access,Local,Active

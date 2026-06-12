@@ -91,34 +91,6 @@ namespace ABC_WebApp.Controllers
             return RedirectToAction("Login");
         }
 
-        // ── AJAX /Auth/LookupEmployee?id=xxx  (live name preview on login page) ──
-        [HttpGet]
-        [AllowAnonymous]
-        public JsonResult LookupEmployee(string id)
-        {
-            try
-            {
-                if (string.IsNullOrWhiteSpace(id))
-                    return Json(new { found = false }, JsonRequestBehavior.AllowGet);
-
-                var emp = DbHelper.GetEmployee(id.Trim());
-                if (emp == null)
-                    return Json(new { found = false }, JsonRequestBehavior.AllowGet);
-
-                // Return only the name for UX preview — do NOT expose access status,
-                // department, or other details that could be harvested for enumeration.
-                // The server enforces access rules properly on form submit.
-                return Json(new
-                {
-                    found = true,
-                    name = emp.UserName
-                }, JsonRequestBehavior.AllowGet);
-            }
-            catch
-            {
-                return Json(new { found = false }, JsonRequestBehavior.AllowGet);
-            }
-        }
         private string GetIP()
         {
             string ip = Request.ServerVariables["HTTP_X_FORWARDED_FOR"];

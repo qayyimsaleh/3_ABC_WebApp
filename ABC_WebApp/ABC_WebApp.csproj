@@ -106,6 +106,7 @@
     <Compile Include="App_Start\RouteConfig.cs" />
     <Compile Include="Controllers\AuthController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
+    <Compile Include="Controllers\ProfileController.cs" />
     <Compile Include="Controllers\TrainingController.cs" />
     <Compile Include="Controllers\AdminController.cs" />
     <Compile Include="Helpers\DbHelper.cs" />
@@ -127,6 +128,7 @@
     <Content Include="Views\Training\Part1.cshtml" />
     <Content Include="Views\Training\Part2.cshtml" />
     <Content Include="Views\Admin\Dashboard.cshtml" />
+    <Content Include="Views\Profile\Index.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Content\Training\Part1_BM\" />

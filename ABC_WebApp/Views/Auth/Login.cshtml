@@ -65,33 +65,6 @@
             box-shadow: 0 4px 24px rgba(0,0,0,.08), 0 1px 3px rgba(0,0,0,.06)
         }
 
-        .lookup-chip {
-            padding: 11px 15px;
-            border-radius: var(--r);
-            font-size: 14px;
-            display: none;
-            margin-bottom: 16px;
-            border: 1px solid
-        }
-
-            .lookup-chip.found {
-                background: var(--green-g);
-                border-color: rgba(64,217,158,.22);
-                color: var(--green)
-            }
-
-            .lookup-chip.denied {
-                background: var(--red-g);
-                border-color: rgba(248,113,113,.22);
-                color: var(--red)
-            }
-
-            .lookup-chip.miss {
-                background: var(--amber-g);
-                border-color: rgba(251,191,36,.22);
-                color: var(--amber)
-            }
-
         .input-wrap { position: relative }
 
             .input-wrap .input-icon {
@@ -171,8 +144,6 @@
                 </div>
             </div>
 
-            <div class="lookup-chip" id="lookupChip"></div>
-
             <div class="form-group">
                 <label class="form-label">Password</label>
                 <div class="input-wrap">
@@ -190,22 +161,3 @@
         Forgot password? Contact <a href="mailto:it-support@ioi.com">IT Support</a>
     </div>
 </div>
-@section Scripts {
-    <script>
-function escHtml(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#x27;');}
-var t=null,inp=document.getElementById('empInput'),chip=document.getElementById('lookupChip'),btn=document.getElementById('loginBtn');
-inp.addEventListener('input',function(){
-    clearTimeout(t);chip.style.display='none';chip.className='lookup-chip';btn.disabled=true;
-    var id=this.value.trim();if(id.length<2)return;
-    t=setTimeout(function(){
-        fetch('@Url.Action("LookupEmployee","Auth")?id='+encodeURIComponent(id))
-        .then(function(r){return r.json()}).then(function(d){
-            chip.style.display='block';
-            if(!d.found){chip.className='lookup-chip miss';chip.innerHTML='<i class="fas fa-circle-question"></i> Employee ID not found';}
-            else if(d.access==='0'){chip.className='lookup-chip denied';chip.innerHTML='<i class="fas fa-ban"></i> Access restricted &mdash; contact Admin';}
-            else{chip.className='lookup-chip found';chip.innerHTML='<i class="fas fa-circle-check"></i> <strong>'+escHtml(d.name)+'</strong>';btn.disabled=false;}
-        }).catch(function(){btn.disabled=false;});
-    },380);
-});
-    </script>
-}
