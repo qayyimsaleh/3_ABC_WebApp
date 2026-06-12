@@ -289,7 +289,7 @@
 @section Scripts {
     <script>
 var lang='english', score='', status='', autoSubmitted=false;
-var savedSlideId='', savedLang='english', totalSlides=0;
+var savedSlideId='', savedLang='english', totalSlides=69;
 var savedSlideIndex=0, lastSavedCount=0;
 var resumeAnchorCount=0, hasReachedResume=true;
 var URLS={
@@ -324,6 +324,7 @@ var CURR_YEAR=@DateTime.Now.Year;
                 savedLang=d.lang||'english';
                 savedSlideIndex=parseInt(d.slideIndex)||0;
                 hasReachedResume=false;
+                if(savedSlideIndex>0) updateProg(Math.round(savedSlideIndex/totalSlides*100));
                 selLang(savedLang);
                 showResumePanel(d.lastUpdated);
             }
