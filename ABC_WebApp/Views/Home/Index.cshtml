@@ -3,16 +3,16 @@
     ViewBag.Title = "Dashboard";
     ViewBag.ActivePage = "home";
     string firstName = (Model.CurrentEmployee != null && !string.IsNullOrEmpty(Model.CurrentEmployee.UserName))
-        ? Model.CurrentEmployee.UserName.Split(new char[] { ' ' })[0]
+        ? Model.CurrentEmployee.UserName
         : "there";
 }
 @section Styles {
     <style>
 
         .hero {
-            padding: 36px 0 28px;
+            padding: 40px 0 32px;
             border-bottom: 1px solid var(--bd);
-            margin-bottom: 32px
+            margin-bottom: 36px
         }
 
         .hero-row {
@@ -24,14 +24,14 @@
         }
 
         .hero h1 {
-            font-size: 22px;
+            font-size: 26px;
             font-weight: 700;
-            letter-spacing: -.3px;
-            margin-bottom: 4px
+            letter-spacing: -.4px;
+            margin-bottom: 6px
         }
 
         .hero p {
-            font-size: 14px;
+            font-size: 15px;
             color: var(--t3)
         }
 
@@ -40,79 +40,89 @@
             align-items: center;
             gap: 6px;
             background: var(--blue-g);
-            border: 1px solid rgba(79,142,247,.2);
+            border: 1px solid rgba(91,156,246,.2);
             color: var(--blue);
-            padding: 4px 12px;
+            padding: 5px 13px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 13px;
             font-weight: 600;
-            margin-bottom: 10px
+            margin-bottom: 12px
         }
 
         .progress-ring {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 18px;
             background: var(--s2);
             border: 1px solid var(--bd);
             border-radius: var(--rl);
-            padding: 14px 20px
+            padding: 16px 22px
         }
 
         .ring-label {
             font-size: 12px;
             color: var(--t3);
-            margin-bottom: 2px
+            margin-bottom: 3px
         }
 
         .ring-val {
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 600
         }
 
         .progress-bar {
-            height: 6px;
+            height: 8px;
             background: var(--s4);
-            border-radius: 3px;
+            border-radius: 4px;
             overflow: hidden;
-            width: 100px
+            width: 110px
         }
 
         .progress-fill {
             height: 100%;
-            border-radius: 3px;
+            border-radius: 4px;
             transition: width .6s ease
         }
 
         .section-title {
-            font-size: 11px;
+            font-size: 12px;
             font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: .5px;
+            letter-spacing: .6px;
             color: var(--t3);
-            margin-bottom: 14px
+            margin-bottom: 16px
         }
 
         .cards-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill,minmax(300px,1fr));
-            gap: 16px;
-            margin-bottom: 32px
+            gap: 18px;
+            margin-bottom: 36px
         }
 
         .mod-card {
             background: var(--s1);
             border: 1px solid var(--bd);
             border-radius: var(--rxl);
-            padding: 24px;
-            transition: var(--tr);
+            padding: 26px;
+            transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
             position: relative;
-            overflow: hidden
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0,0,0,.35)
+        }
+
+        [data-theme="light"] .mod-card {
+            box-shadow: 0 1px 3px rgba(0,0,0,.07),0 4px 16px rgba(0,0,0,.05)
         }
 
             .mod-card:hover {
                 border-color: var(--bd2);
-                transform: translateY(-2px)
+                transform: translateY(-3px);
+                box-shadow: 0 8px 32px rgba(0,0,0,.35),0 2px 8px rgba(0,0,0,.2)
+            }
+
+            [data-theme="light"] .mod-card:hover {
+                box-shadow: 0 8px 32px rgba(0,0,0,.1),0 2px 8px rgba(0,0,0,.06)
             }
 
             .mod-card .accent {
@@ -122,62 +132,49 @@
                 right: 0;
                 height: 2px;
                 opacity: 0;
-                transition: var(--tr)
+                transition: opacity .2s ease
             }
 
-            .mod-card:hover .accent {
-                opacity: 1
-            }
+            .mod-card:hover .accent { opacity: 1 }
 
         .mod-top {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 16px
-        }
-
-        .mod-icon {
-            width: 42px;
-            height: 42px;
-            border-radius: 11px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            flex-shrink: 0
-        }
-
-            .mod-icon.blue {
-                background: var(--blue-g);
-                color: var(--blue)
-            }
-
-            .mod-icon.purple {
-                background: rgba(167,139,250,.1);
-                color: var(--purple)
-            }
-
-            .mod-icon.teal {
-                background: rgba(45,212,191,.1);
-                color: var(--teal)
-            }
-
-        .mod-title {
-            font-size: 15px;
-            font-weight: 600;
-            margin-bottom: 4px;
-            letter-spacing: -.1px
-        }
-
-        .mod-desc {
-            font-size: 13px;
-            color: var(--t3);
-            line-height: 1.55;
             margin-bottom: 18px
         }
 
+        .mod-icon {
+            width: 46px;
+            height: 46px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 19px;
+            flex-shrink: 0
+        }
+
+            .mod-icon.blue   { background: var(--blue-g);       color: var(--blue)   }
+            .mod-icon.purple { background: rgba(177,151,252,.1); color: var(--purple) }
+            .mod-icon.teal   { background: rgba(52,212,192,.1);  color: var(--teal)   }
+
+        .mod-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 6px;
+            letter-spacing: -.15px
+        }
+
+        .mod-desc {
+            font-size: 14px;
+            color: var(--t3);
+            line-height: 1.55;
+            margin-bottom: 20px
+        }
+
         .lock-note {
-            font-size: 12px;
+            font-size: 13px;
             color: var(--t3);
             margin-top: 10px;
             display: flex;
@@ -186,10 +183,10 @@
         }
 
         .admin-card {
-            background: linear-gradient(135deg,rgba(79,142,247,.08),rgba(167,139,250,.06));
-            border: 1px solid rgba(79,142,247,.15);
+            background: linear-gradient(135deg,rgba(91,156,246,.08),rgba(177,151,252,.06));
+            border: 1px solid rgba(91,156,246,.16);
             border-radius: var(--rxl);
-            padding: 24px;
+            padding: 26px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -199,24 +196,19 @@
         }
 
         .admin-card-text h3 {
-            font-size: 15px;
-            font-weight: 600;
-            margin-bottom: 4px
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 5px
         }
 
         .admin-card-text p {
-            font-size: 13px;
+            font-size: 14px;
             color: var(--t3)
         }
 
         @@media(max-width:640px) {
-            .cards-grid {
-                grid-template-columns: 1fr
-            }
-
-            .progress-ring {
-                display: none
-            }
+            .cards-grid { grid-template-columns: 1fr }
+            .progress-ring { display: none }
         }
     </style>
 }
