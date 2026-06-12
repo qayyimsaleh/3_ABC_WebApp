@@ -637,10 +637,48 @@
             .wrap, .wrap-xl { padding: 0 18px }
             main { padding: 28px 0 64px }
         }
+
+        /* ─ PAGE LOADER ─ */
+        #pageLoader {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity .35s ease;
+        }
+
+        #pageLoader.pl-hide {
+            opacity: 0;
+            pointer-events: none
+        }
+
+        .pl-ring {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 3px solid var(--s3);
+            border-top-color: var(--blue);
+            border-right-color: var(--purple);
+            animation: pl-spin .75s linear infinite;
+            position: absolute
+        }
+
+        .pl-icon {
+            font-size: 20px;
+            color: var(--blue)
+        }
+
+        @@keyframes pl-spin {
+            to { transform: rotate(360deg) }
+        }
     </style>
     @RenderSection("Styles", required: false)
 </head>
 <body>
+    <div id="pageLoader"><div style="position:relative;width:56px;height:56px;display:flex;align-items:center;justify-content:center"><div class="pl-ring"></div><i class="fas fa-shield-halved pl-icon"></i></div></div>
     @if (Session["EmployeeID"] != null)
     {
         <nav>
@@ -702,6 +740,22 @@
     </footer>
     @RenderSection("Scripts", required: false)
     <script>
+        // ── PAGE LOADER ────────────────────────────────────────────────
+        (function(){
+            var pl=document.getElementById('pageLoader');
+            function hide(){if(!pl)return;pl.classList.add('pl-hide');setTimeout(function(){pl.style.display='none';},350);}
+            function show(){if(!pl)return;pl.style.display='flex';pl.classList.remove('pl-hide');}
+            window.addEventListener('load',hide);
+            document.addEventListener('click',function(e){
+                var a=e.target.closest('a[href]');
+                if(!a)return;
+                var h=a.getAttribute('href')||'';
+                if(!h||h.charAt(0)==='#'||h.indexOf('mailto:')===0||h.indexOf('javascript:')===0)return;
+                if(a.target==='_blank')return;
+                show();
+            });
+            document.addEventListener('submit',function(){show();});
+        })();
         // ── THEME TOGGLE ───────────────────────────────────────────────
         (function () {
             // Load saved theme from cookie (persists across sessions)
