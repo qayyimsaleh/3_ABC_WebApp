@@ -30,6 +30,7 @@ App_Data/
 .env
 Web.config.user
 secrets.json
+ABC_WebApp/Web.config
 
 ## Windows
 Thumbs.db

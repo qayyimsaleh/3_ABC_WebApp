@@ -2134,7 +2134,7 @@ function updateScoreBulkBar(){
 
 // ── RESTORE SCORES ────────────────────────────────────────────────────────────
 function restoreSingleScore(part, id){
-    var table=part==='Part1'?'partOne_scores':'partTwo_scores';
+    var table=part==='Part1'?'ABC_partOne_scores':'ABC_partTwo_scores';
     fetch('@Url.Action("RestoreScoreRecords","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},
         body:'__RequestVerificationToken='+encodeURIComponent(tok())+'&table='+encodeURIComponent(table)+'&ids[0]='+id})
     .then(function(r){return r.json();}).then(function(d){
@@ -2154,12 +2154,12 @@ function restoreSelectedScores(){
     });
     var promises=[];
     if(p1ids.length){
-        var body='__RequestVerificationToken='+encodeURIComponent(tok())+'&table=partOne_scores';
+        var body='__RequestVerificationToken='+encodeURIComponent(tok())+'&table=ABC_partOne_scores';
         p1ids.forEach(function(id,i){body+='&ids['+i+']='+id;});
         promises.push(fetch('@Url.Action("RestoreScoreRecords","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body}).then(function(r){return r.json();}));
     }
     if(p2ids.length){
-        var body='__RequestVerificationToken='+encodeURIComponent(tok())+'&table=partTwo_scores';
+        var body='__RequestVerificationToken='+encodeURIComponent(tok())+'&table=ABC_partTwo_scores';
         p2ids.forEach(function(id,i){body+='&ids['+i+']='+id;});
         promises.push(fetch('@Url.Action("RestoreScoreRecords","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body}).then(function(r){return r.json();}));
     }
@@ -2179,12 +2179,12 @@ function restoreAllVisibleScores(){
     });
     var promises=[];
     if(p1ids.length){
-        var body='__RequestVerificationToken='+encodeURIComponent(tok())+'&table=partOne_scores';
+        var body='__RequestVerificationToken='+encodeURIComponent(tok())+'&table=ABC_partOne_scores';
         p1ids.forEach(function(id,i){body+='&ids['+i+']='+id;});
         promises.push(fetch('@Url.Action("RestoreScoreRecords","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body}).then(function(r){return r.json();}));
     }
     if(p2ids.length){
-        var body='__RequestVerificationToken='+encodeURIComponent(tok())+'&table=partTwo_scores';
+        var body='__RequestVerificationToken='+encodeURIComponent(tok())+'&table=ABC_partTwo_scores';
         p2ids.forEach(function(id,i){body+='&ids['+i+']='+id;});
         promises.push(fetch('@Url.Action("RestoreScoreRecords","Admin")',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:body}).then(function(r){return r.json();}));
     }

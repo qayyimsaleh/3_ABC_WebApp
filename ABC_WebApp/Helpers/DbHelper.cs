@@ -15,7 +15,7 @@ namespace ABC_WebApp.Helpers
         public static Employee GetEmployee(string employeeId)
         {
             const string sql = @"SELECT EmployeeID,UserName,EmployeeIC,Department,CompanyID,SuperUser,Access,Local,Active
-                FROM [dbo].[empMaster_lists] WHERE EmployeeID=@Id AND Active='1' AND (IsArchived=0 OR IsArchived IS NULL)";
+                FROM [dbo].[ABC_empMaster_lists] WHERE EmployeeID=@Id AND Active='1' AND (IsArchived=0 OR IsArchived IS NULL)";
             using (var con = Open()) using (var cmd = Cmd(sql, con))
             { cmd.Parameters.AddWithValue("@Id", employeeId); using (var r = cmd.ExecuteReader()) return r.Read() ? MapEmployee(r) : null; }
         }
@@ -23,7 +23,7 @@ namespace ABC_WebApp.Helpers
         public static Employee GetEmployeeAdmin(string employeeId)
         {
             const string sql = @"SELECT EmployeeID,UserName,EmployeeIC,Department,CompanyID,SuperUser,Access,Local,Active
-                FROM [dbo].[empMaster_lists] WHERE EmployeeID=@Id";
+                FROM [dbo].[ABC_empMaster_lists] WHERE EmployeeID=@Id";
             using (var con = Open()) using (var cmd = Cmd(sql, con))
             { cmd.Parameters.AddWithValue("@Id", employeeId); using (var r = cmd.ExecuteReader()) return r.Read() ? MapEmployee(r) : null; }
         }
@@ -31,7 +31,7 @@ namespace ABC_WebApp.Helpers
         public static List<Employee> GetAllEmployees()
         {
             const string sql = @"SELECT EmployeeID,UserName,EmployeeIC,Department,CompanyID,SuperUser,Access,Local,Active
-                FROM [dbo].[empMaster_lists] WHERE Active='1' AND (IsArchived=0 OR IsArchived IS NULL) ORDER BY UserName ASC";
+                FROM [dbo].[ABC_empMaster_lists] WHERE Active='1' AND (IsArchived=0 OR IsArchived IS NULL) ORDER BY UserName ASC";
             var list = new List<Employee>();
             using (var con = Open()) using (var cmd = Cmd(sql, con)) using (var r = cmd.ExecuteReader()) while (r.Read()) list.Add(MapEmployee(r));
             return list;
@@ -41,21 +41,21 @@ namespace ABC_WebApp.Helpers
 
         public static bool EmployeeExists(string employeeId)
         {
-            const string sql = "SELECT TOP 1 1 FROM [dbo].[empMaster_lists] WHERE EmployeeID=@Id";
+            const string sql = "SELECT TOP 1 1 FROM [dbo].[ABC_empMaster_lists] WHERE EmployeeID=@Id";
             using (var con = Open()) using (var cmd = Cmd(sql, con))
             { cmd.Parameters.AddWithValue("@Id", employeeId); using (var r = cmd.ExecuteReader()) return r.Read(); }
         }
 
         public static void InsertEmployee(EmployeeFormModel m)
         {
-            const string sql = @"INSERT INTO [dbo].[empMaster_lists](EmployeeID,UserName,EmployeeIC,Department,CompanyID,SuperUser,Active,Local,Access,IsArchived)
+            const string sql = @"INSERT INTO [dbo].[ABC_empMaster_lists](EmployeeID,UserName,EmployeeIC,Department,CompanyID,SuperUser,Active,Local,Access,IsArchived)
                 VALUES(@EmpID,@Name,@IC,@Dept,@Company,@Super,@Active,@Local,@Access,0)";
             using (var con = Open()) using (var cmd = Cmd(sql, con)) { SetEmpParams(cmd, m); cmd.ExecuteNonQuery(); }
         }
 
         public static void UpdateEmployee(EmployeeFormModel m)
         {
-            const string sql = @"UPDATE [dbo].[empMaster_lists] SET UserName=@Name,EmployeeIC=@IC,Department=@Dept,
+            const string sql = @"UPDATE [dbo].[ABC_empMaster_lists] SET UserName=@Name,EmployeeIC=@IC,Department=@Dept,
                 CompanyID=@Company,SuperUser=@Super,Active=@Active,Local=@Local,Access=@Access WHERE EmployeeID=@EmpID";
             using (var con = Open()) using (var cmd = Cmd(sql, con)) { SetEmpParams(cmd, m); cmd.ExecuteNonQuery(); }
         }
@@ -65,10 +65,10 @@ namespace ABC_WebApp.Helpers
             string current;
             using (var con = Open())
             {
-                using (var cmd = Cmd("SELECT Active FROM [dbo].[empMaster_lists] WHERE EmployeeID=@Id", con))
+                using (var cmd = Cmd("SELECT Active FROM [dbo].[ABC_empMaster_lists] WHERE EmployeeID=@Id", con))
                 { cmd.Parameters.AddWithValue("@Id", empID); current = cmd.ExecuteScalar()?.ToString() ?? "0"; }
                 string nv = current == "1" ? "0" : "1";
-                using (var cmd = Cmd("UPDATE [dbo].[empMaster_lists] SET Active=@Val WHERE EmployeeID=@Id", con))
+                using (var cmd = Cmd("UPDATE [dbo].[ABC_empMaster_lists] SET Active=@Val WHERE EmployeeID=@Id", con))
                 { cmd.Parameters.AddWithValue("@Val", nv); cmd.Parameters.AddWithValue("@Id", empID); cmd.ExecuteNonQuery(); }
                 return nv;
             }
@@ -77,28 +77,28 @@ namespace ABC_WebApp.Helpers
         public static void SetEmployeeActive(string empID, string value)
         {
             using (var con = Open())
-            using (var cmd = Cmd("UPDATE [dbo].[empMaster_lists] SET Active=@Val WHERE EmployeeID=@Id", con))
+            using (var cmd = Cmd("UPDATE [dbo].[ABC_empMaster_lists] SET Active=@Val WHERE EmployeeID=@Id", con))
             { cmd.Parameters.AddWithValue("@Val", value); cmd.Parameters.AddWithValue("@Id", empID); cmd.ExecuteNonQuery(); }
         }
 
         public static void SetEmployeeAccess(string empID, string value)
         {
             using (var con = Open())
-            using (var cmd = Cmd("UPDATE [dbo].[empMaster_lists] SET Access=@Val WHERE EmployeeID=@Id", con))
+            using (var cmd = Cmd("UPDATE [dbo].[ABC_empMaster_lists] SET Access=@Val WHERE EmployeeID=@Id", con))
             { cmd.Parameters.AddWithValue("@Val", value); cmd.Parameters.AddWithValue("@Id", empID); cmd.ExecuteNonQuery(); }
         }
 
         public static void UpdatePassword(string empID, string newPassword)
         {
             using (var con = Open())
-            using (var cmd = Cmd("UPDATE [dbo].[empMaster_lists] SET EmployeeIC=@Pwd WHERE EmployeeID=@Id", con))
+            using (var cmd = Cmd("UPDATE [dbo].[ABC_empMaster_lists] SET EmployeeIC=@Pwd WHERE EmployeeID=@Id", con))
             { cmd.Parameters.AddWithValue("@Pwd", newPassword ?? ""); cmd.Parameters.AddWithValue("@Id", empID); cmd.ExecuteNonQuery(); }
         }
 
         public static Employee FindEmployeeByIC(string ic, string excludeEmpID)
         {
             const string sql = @"SELECT EmployeeID,UserName,EmployeeIC,Department,CompanyID,SuperUser,Access,Local,Active
-                FROM [dbo].[empMaster_lists] WHERE EmployeeIC=@IC AND (@Excl IS NULL OR EmployeeID<>@Excl)";
+                FROM [dbo].[ABC_empMaster_lists] WHERE EmployeeIC=@IC AND (@Excl IS NULL OR EmployeeID<>@Excl)";
             using (var con = Open()) using (var cmd = Cmd(sql, con))
             {
                 cmd.Parameters.AddWithValue("@IC", ic ?? "");
@@ -110,7 +110,7 @@ namespace ABC_WebApp.Helpers
         // Archive (soft delete) - sets IsArchived=1, disables login
         public static void ArchiveEmployee(string empID, string archivedByID)
         {
-            const string sql = @"UPDATE [dbo].[empMaster_lists]
+            const string sql = @"UPDATE [dbo].[ABC_empMaster_lists]
                 SET IsArchived=1, ArchivedAt=GETDATE(), ArchivedBy=@By, Active='0', Access='0'
                 WHERE EmployeeID=@Id";
             using (var con = Open()) using (var cmd = Cmd(sql, con))
@@ -120,7 +120,7 @@ namespace ABC_WebApp.Helpers
         // Restore from archive
         public static void RestoreEmployee(string empID)
         {
-            const string sql = @"UPDATE [dbo].[empMaster_lists]
+            const string sql = @"UPDATE [dbo].[ABC_empMaster_lists]
                 SET IsArchived=0, ArchivedAt=NULL, ArchivedBy=NULL, Active='1', Access='1'
                 WHERE EmployeeID=@Id";
             using (var con = Open()) using (var cmd = Cmd(sql, con))
@@ -131,7 +131,7 @@ namespace ABC_WebApp.Helpers
         public static void HardDeleteEmployee(string empID)
         {
             using (var con = Open())
-            using (var cmd = Cmd("DELETE FROM [dbo].[empMaster_lists] WHERE EmployeeID=@Id", con))
+            using (var cmd = Cmd("DELETE FROM [dbo].[ABC_empMaster_lists] WHERE EmployeeID=@Id", con))
             { cmd.Parameters.AddWithValue("@Id", empID); cmd.ExecuteNonQuery(); }
         }
 
@@ -140,7 +140,7 @@ namespace ABC_WebApp.Helpers
         {
             const string sql = @"SELECT EmployeeID,UserName,EmployeeIC,Department,CompanyID,SuperUser,Access,Local,Active,
                 CONVERT(NVARCHAR(50),ArchivedAt,120) AS ArchivedAt, ArchivedBy
-                FROM [dbo].[empMaster_lists] WHERE IsArchived=1 ORDER BY ArchivedAt DESC";
+                FROM [dbo].[ABC_empMaster_lists] WHERE IsArchived=1 ORDER BY ArchivedAt DESC";
             var list = new List<Employee>();
             using (var con = Open()) using (var cmd = Cmd(sql, con)) using (var r = cmd.ExecuteReader())
                 while (r.Read())
@@ -157,7 +157,7 @@ namespace ABC_WebApp.Helpers
         public static List<Employee> GetAllEmployeesAdmin()
         {
             const string sql = @"SELECT EmployeeID,UserName,EmployeeIC,Department,CompanyID,SuperUser,Access,Local,Active
-                FROM [dbo].[empMaster_lists] WHERE (IsArchived=0 OR IsArchived IS NULL) ORDER BY UserName ASC";
+                FROM [dbo].[ABC_empMaster_lists] WHERE (IsArchived=0 OR IsArchived IS NULL) ORDER BY UserName ASC";
             var list = new List<Employee>();
             using (var con = Open()) using (var cmd = Cmd(sql, con)) using (var r = cmd.ExecuteReader()) while (r.Read()) list.Add(MapEmployee(r));
             return list;
@@ -168,7 +168,7 @@ namespace ABC_WebApp.Helpers
             string action, string targetID, string targetName, string detail,
             string ipAddress, string result = "SUCCESS")
         {
-            const string sql = @"INSERT INTO [dbo].[auditLog]
+            const string sql = @"INSERT INTO [dbo].[ABC_auditLog]
                 (LogTime,ActorID,ActorName,ActorRole,Action,TargetID,TargetName,Detail,IPAddress,Result)
                 VALUES(GETDATE(),@AID,@AName,@ARole,@Action,@TID,@TName,@Detail,@IP,@Result)";
             try
@@ -208,12 +208,12 @@ namespace ABC_WebApp.Helpers
             const string sql = @"SELECT e.EmployeeID,e.UserName,e.Department,e.CompanyID,e.Local,
                 COALESCE(a.Part1,'not pass') AS Part1, COALESCE(a.Part1Ts,NULL) AS Part1Timestamp,
                 COALESCE(b.Part2,'not pass') AS Part2, COALESCE(b.Part2Ts,NULL) AS Part2Timestamp
-                FROM empMaster_lists e
+                FROM ABC_empMaster_lists e
                 LEFT JOIN(SELECT EmployeeID,ScoreStatus AS Part1,Timestamp AS Part1Ts,
-                    ROW_NUMBER() OVER(PARTITION BY EmployeeID ORDER BY Timestamp DESC) rn FROM partOne_scores WHERE (IsArchived=0 OR IsArchived IS NULL)
+                    ROW_NUMBER() OVER(PARTITION BY EmployeeID ORDER BY Timestamp DESC) rn FROM ABC_partOne_scores WHERE (IsArchived=0 OR IsArchived IS NULL)
                 ) a ON e.EmployeeID=a.EmployeeID AND a.rn=1
                 LEFT JOIN(SELECT EmployeeID,ScoreStatus AS Part2,Timestamp AS Part2Ts,
-                    ROW_NUMBER() OVER(PARTITION BY EmployeeID ORDER BY Timestamp DESC) rn FROM partTwo_scores WHERE (IsArchived=0 OR IsArchived IS NULL)
+                    ROW_NUMBER() OVER(PARTITION BY EmployeeID ORDER BY Timestamp DESC) rn FROM ABC_partTwo_scores WHERE (IsArchived=0 OR IsArchived IS NULL)
                 ) b ON e.EmployeeID=b.EmployeeID AND b.rn=1
                 WHERE e.EmployeeID=@EmpID AND e.UserName=@UN
                 AND (e.IsArchived=0 OR e.IsArchived IS NULL) AND e.Active='1'";
@@ -229,12 +229,12 @@ namespace ABC_WebApp.Helpers
             const string sql = @"SELECT e.EmployeeID,e.UserName,e.Department,e.CompanyID,e.Local,
                 COALESCE(a.Part1,'not pass') AS Part1, COALESCE(a.Part1Ts,NULL) AS Part1Timestamp,
                 COALESCE(b.Part2,'not pass') AS Part2, COALESCE(b.Part2Ts,NULL) AS Part2Timestamp
-                FROM empMaster_lists e
+                FROM ABC_empMaster_lists e
                 LEFT JOIN(SELECT EmployeeID,ScoreStatus AS Part1,Timestamp AS Part1Ts,
-                    ROW_NUMBER() OVER(PARTITION BY EmployeeID ORDER BY Timestamp DESC) rn FROM partOne_scores WHERE (IsArchived=0 OR IsArchived IS NULL)
+                    ROW_NUMBER() OVER(PARTITION BY EmployeeID ORDER BY Timestamp DESC) rn FROM ABC_partOne_scores WHERE (IsArchived=0 OR IsArchived IS NULL)
                 ) a ON e.EmployeeID=a.EmployeeID AND a.rn=1
                 LEFT JOIN(SELECT EmployeeID,ScoreStatus AS Part2,Timestamp AS Part2Ts,
-                    ROW_NUMBER() OVER(PARTITION BY EmployeeID ORDER BY Timestamp DESC) rn FROM partTwo_scores WHERE (IsArchived=0 OR IsArchived IS NULL)
+                    ROW_NUMBER() OVER(PARTITION BY EmployeeID ORDER BY Timestamp DESC) rn FROM ABC_partTwo_scores WHERE (IsArchived=0 OR IsArchived IS NULL)
                 ) b ON e.EmployeeID=b.EmployeeID AND b.rn=1
                 WHERE e.Active='1' AND (e.IsArchived=0 OR e.IsArchived IS NULL) ORDER BY e.UserName ASC";
             var list = new List<EmployeeScore>();
@@ -253,14 +253,14 @@ namespace ABC_WebApp.Helpers
             const string sql = @"SELECT e.EmployeeID,e.UserName,e.Department,e.CompanyID,e.Local,
                 COALESCE(a.Part1,'not pass') AS Part1, COALESCE(a.Part1Ts,NULL) AS Part1Timestamp,
                 COALESCE(b.Part2,'not pass') AS Part2, COALESCE(b.Part2Ts,NULL) AS Part2Timestamp
-                FROM empMaster_lists e
+                FROM ABC_empMaster_lists e
                 LEFT JOIN(SELECT EmployeeID,ScoreStatus AS Part1,Timestamp AS Part1Ts,
                     ROW_NUMBER() OVER(PARTITION BY EmployeeID ORDER BY Timestamp DESC) rn
-                    FROM partOne_scores WHERE Timestamp >= @From AND Timestamp < @To AND (IsArchived=0 OR IsArchived IS NULL)
+                    FROM ABC_partOne_scores WHERE Timestamp >= @From AND Timestamp < @To AND (IsArchived=0 OR IsArchived IS NULL)
                 ) a ON e.EmployeeID=a.EmployeeID AND a.rn=1
                 LEFT JOIN(SELECT EmployeeID,ScoreStatus AS Part2,Timestamp AS Part2Ts,
                     ROW_NUMBER() OVER(PARTITION BY EmployeeID ORDER BY Timestamp DESC) rn
-                    FROM partTwo_scores WHERE Timestamp >= @From AND Timestamp < @To AND (IsArchived=0 OR IsArchived IS NULL)
+                    FROM ABC_partTwo_scores WHERE Timestamp >= @From AND Timestamp < @To AND (IsArchived=0 OR IsArchived IS NULL)
                 ) b ON e.EmployeeID=b.EmployeeID AND b.rn=1
                 WHERE e.Active='1' AND (e.IsArchived=0 OR e.IsArchived IS NULL) ORDER BY e.UserName ASC";
             var list = new List<EmployeeScore>();
@@ -275,7 +275,7 @@ namespace ABC_WebApp.Helpers
 
         public static void SaveScore(string tableName, TrainingSubmitModel m)
         {
-            if (tableName != "partOne_scores" && tableName != "partTwo_scores") throw new ArgumentException("Invalid table.");
+            if (tableName != "ABC_partOne_scores" && tableName != "ABC_partTwo_scores") throw new ArgumentException("Invalid table.");
             string sql = $"INSERT INTO {tableName}(EmployeeID,UserName,ScorePercentage,ScoreStatus,TrainingYear,Timestamp) VALUES(@EmpID,@UN,@Score,@Status,@Year,@Ts)";
             using (var con = Open()) using (var cmd = Cmd(sql, con))
             {
@@ -289,7 +289,7 @@ namespace ABC_WebApp.Helpers
         public static bool IsPart1PassedThisYear(string empID, string userName)
         {
             // NOTE: Join on EmployeeID only - UserName may change if employee is renamed
-            const string sql = "SELECT TOP 1 1 FROM partOne_scores WHERE EmployeeID=@EmpID AND TrainingYear=@Year AND ScoreStatus='pass'";
+            const string sql = "SELECT TOP 1 1 FROM ABC_partOne_scores WHERE EmployeeID=@EmpID AND TrainingYear=@Year AND ScoreStatus='pass'";
             using (var con = Open()) using (var cmd = Cmd(sql, con))
             {
                 cmd.Parameters.AddWithValue("@EmpID", empID);
@@ -314,7 +314,7 @@ namespace ABC_WebApp.Helpers
         {
             const string sql = @"SELECT SlideIndex, SlideId, Lang,
                 CONVERT(nvarchar(20), LastUpdated, 105) + ' ' + CONVERT(nvarchar(8), LastUpdated, 108) AS LastUpdated
-                FROM training_progress WHERE EmployeeID=@EmpID AND Part=@Part AND TrainingYear=@Year";
+                FROM ABC_training_progress WHERE EmployeeID=@EmpID AND Part=@Part AND TrainingYear=@Year";
             using (var con = Open()) using (var cmd = Cmd(sql, con))
             {
                 cmd.Parameters.AddWithValue("@EmpID", empID);
@@ -337,15 +337,15 @@ namespace ABC_WebApp.Helpers
             if (slideIndex <= 0)
             {
                 using (var con = Open())
-                using (var cmd = Cmd("DELETE FROM training_progress WHERE EmployeeID=@EmpID AND Part=@Part AND TrainingYear=@Year", con))
+                using (var cmd = Cmd("DELETE FROM ABC_training_progress WHERE EmployeeID=@EmpID AND Part=@Part AND TrainingYear=@Year", con))
                 { cmd.Parameters.AddWithValue("@EmpID", empID); cmd.Parameters.AddWithValue("@Part", part); cmd.Parameters.AddWithValue("@Year", year); cmd.ExecuteNonQuery(); }
                 return;
             }
-            const string upsert = @"IF EXISTS (SELECT 1 FROM training_progress WHERE EmployeeID=@EmpID AND Part=@Part AND TrainingYear=@Year)
-                UPDATE training_progress SET SlideIndex=@Slide, SlideId=@SlideId, Lang=@Lang, LastUpdated=GETDATE()
+            const string upsert = @"IF EXISTS (SELECT 1 FROM ABC_training_progress WHERE EmployeeID=@EmpID AND Part=@Part AND TrainingYear=@Year)
+                UPDATE ABC_training_progress SET SlideIndex=@Slide, SlideId=@SlideId, Lang=@Lang, LastUpdated=GETDATE()
                 WHERE EmployeeID=@EmpID AND Part=@Part AND TrainingYear=@Year
             ELSE
-                INSERT INTO training_progress(EmployeeID,Part,TrainingYear,Lang,SlideIndex,SlideId,LastUpdated)
+                INSERT INTO ABC_training_progress(EmployeeID,Part,TrainingYear,Lang,SlideIndex,SlideId,LastUpdated)
                 VALUES(@EmpID,@Part,@Year,@Lang,@Slide,@SlideId,GETDATE())";
             using (var con = Open()) using (var cmd = Cmd(upsert, con))
             {
@@ -396,10 +396,10 @@ namespace ABC_WebApp.Helpers
             int count = 0;
             using (var con = Open())
             {
-                using (var cmd = Cmd(@"UPDATE partOne_scores SET IsArchived=1, ArchivedAt=GETDATE(), ArchivedBy=@By
+                using (var cmd = Cmd(@"UPDATE ABC_partOne_scores SET IsArchived=1, ArchivedAt=GETDATE(), ArchivedBy=@By
                     WHERE EmployeeID=@Id AND (IsArchived=0 OR IsArchived IS NULL)", con))
                 { cmd.Parameters.AddWithValue("@By", archivedByID ?? ""); cmd.Parameters.AddWithValue("@Id", empID); count += cmd.ExecuteNonQuery(); }
-                using (var cmd = Cmd(@"UPDATE partTwo_scores SET IsArchived=1, ArchivedAt=GETDATE(), ArchivedBy=@By
+                using (var cmd = Cmd(@"UPDATE ABC_partTwo_scores SET IsArchived=1, ArchivedAt=GETDATE(), ArchivedBy=@By
                     WHERE EmployeeID=@Id AND (IsArchived=0 OR IsArchived IS NULL)", con))
                 { cmd.Parameters.AddWithValue("@By", archivedByID ?? ""); cmd.Parameters.AddWithValue("@Id", empID); count += cmd.ExecuteNonQuery(); }
             }
@@ -412,10 +412,10 @@ namespace ABC_WebApp.Helpers
             int count = 0;
             using (var con = Open())
             {
-                using (var cmd = Cmd(@"UPDATE partOne_scores SET IsArchived=1, ArchivedAt=GETDATE(), ArchivedBy=@By
+                using (var cmd = Cmd(@"UPDATE ABC_partOne_scores SET IsArchived=1, ArchivedAt=GETDATE(), ArchivedBy=@By
                     WHERE TrainingYear=@Year AND (IsArchived=0 OR IsArchived IS NULL)", con))
                 { cmd.Parameters.AddWithValue("@By", archivedByID ?? ""); cmd.Parameters.AddWithValue("@Year", year); count += cmd.ExecuteNonQuery(); }
-                using (var cmd = Cmd(@"UPDATE partTwo_scores SET IsArchived=1, ArchivedAt=GETDATE(), ArchivedBy=@By
+                using (var cmd = Cmd(@"UPDATE ABC_partTwo_scores SET IsArchived=1, ArchivedAt=GETDATE(), ArchivedBy=@By
                     WHERE TrainingYear=@Year AND (IsArchived=0 OR IsArchived IS NULL)", con))
                 { cmd.Parameters.AddWithValue("@By", archivedByID ?? ""); cmd.Parameters.AddWithValue("@Year", year); count += cmd.ExecuteNonQuery(); }
             }
@@ -425,7 +425,7 @@ namespace ABC_WebApp.Helpers
         /// <summary>Archive selected score records by their IDs.</summary>
         public static int ArchiveScoreRecords(string table, List<int> ids, string archivedByID)
         {
-            if (table != "partOne_scores" && table != "partTwo_scores") throw new ArgumentException("Invalid table.");
+            if (table != "ABC_partOne_scores" && table != "ABC_partTwo_scores") throw new ArgumentException("Invalid table.");
             if (ids == null || ids.Count == 0) return 0;
             var paramNames = new List<string>();
             for (int i = 0; i < ids.Count; i++) paramNames.Add("@id" + i);
@@ -444,10 +444,10 @@ namespace ABC_WebApp.Helpers
             int count = 0;
             using (var con = Open())
             {
-                using (var cmd = Cmd(@"UPDATE partOne_scores SET IsArchived=0, ArchivedAt=NULL, ArchivedBy=NULL
+                using (var cmd = Cmd(@"UPDATE ABC_partOne_scores SET IsArchived=0, ArchivedAt=NULL, ArchivedBy=NULL
                     WHERE EmployeeID=@Id AND IsArchived=1", con))
                 { cmd.Parameters.AddWithValue("@Id", empID); count += cmd.ExecuteNonQuery(); }
-                using (var cmd = Cmd(@"UPDATE partTwo_scores SET IsArchived=0, ArchivedAt=NULL, ArchivedBy=NULL
+                using (var cmd = Cmd(@"UPDATE ABC_partTwo_scores SET IsArchived=0, ArchivedAt=NULL, ArchivedBy=NULL
                     WHERE EmployeeID=@Id AND IsArchived=1", con))
                 { cmd.Parameters.AddWithValue("@Id", empID); count += cmd.ExecuteNonQuery(); }
             }
@@ -460,10 +460,10 @@ namespace ABC_WebApp.Helpers
             int count = 0;
             using (var con = Open())
             {
-                using (var cmd = Cmd(@"UPDATE partOne_scores SET IsArchived=0, ArchivedAt=NULL, ArchivedBy=NULL
+                using (var cmd = Cmd(@"UPDATE ABC_partOne_scores SET IsArchived=0, ArchivedAt=NULL, ArchivedBy=NULL
                     WHERE TrainingYear=@Year AND IsArchived=1", con))
                 { cmd.Parameters.AddWithValue("@Year", year); count += cmd.ExecuteNonQuery(); }
-                using (var cmd = Cmd(@"UPDATE partTwo_scores SET IsArchived=0, ArchivedAt=NULL, ArchivedBy=NULL
+                using (var cmd = Cmd(@"UPDATE ABC_partTwo_scores SET IsArchived=0, ArchivedAt=NULL, ArchivedBy=NULL
                     WHERE TrainingYear=@Year AND IsArchived=1", con))
                 { cmd.Parameters.AddWithValue("@Year", year); count += cmd.ExecuteNonQuery(); }
             }
@@ -473,7 +473,7 @@ namespace ABC_WebApp.Helpers
         /// <summary>Restore selected score records by their IDs.</summary>
         public static int RestoreScoreRecords(string table, List<int> ids)
         {
-            if (table != "partOne_scores" && table != "partTwo_scores") throw new ArgumentException("Invalid table.");
+            if (table != "ABC_partOne_scores" && table != "ABC_partTwo_scores") throw new ArgumentException("Invalid table.");
             if (ids == null || ids.Count == 0) return 0;
             var paramNames = new List<string>();
             for (int i = 0; i < ids.Count; i++) paramNames.Add("@id" + i);
@@ -491,8 +491,8 @@ namespace ABC_WebApp.Helpers
             string sql = @"SELECT 'Part1' AS Part, s.ID, s.EmployeeID, s.UserName, s.ScorePercentage, s.ScoreStatus,
                     s.TrainingYear, s.Timestamp, CONVERT(NVARCHAR(50),s.ArchivedAt,120) AS ArchivedAt, s.ArchivedBy,
                     ISNULL(e.Department,'') AS Department, ISNULL(e.CompanyID,'') AS CompanyID
-                FROM partOne_scores s
-                LEFT JOIN empMaster_lists e ON s.EmployeeID=e.EmployeeID
+                FROM ABC_partOne_scores s
+                LEFT JOIN ABC_empMaster_lists e ON s.EmployeeID=e.EmployeeID
                 WHERE s.IsArchived=1";
             if (filterYear.HasValue) sql += " AND s.TrainingYear=@Year";
             if (!string.IsNullOrEmpty(filterEmpID)) sql += " AND s.EmployeeID=@EmpID";
@@ -500,8 +500,8 @@ namespace ABC_WebApp.Helpers
                 SELECT 'Part2' AS Part, s.ID, s.EmployeeID, s.UserName, s.ScorePercentage, s.ScoreStatus,
                     s.TrainingYear, s.Timestamp, CONVERT(NVARCHAR(50),s.ArchivedAt,120) AS ArchivedAt, s.ArchivedBy,
                     ISNULL(e.Department,'') AS Department, ISNULL(e.CompanyID,'') AS CompanyID
-                FROM partTwo_scores s
-                LEFT JOIN empMaster_lists e ON s.EmployeeID=e.EmployeeID
+                FROM ABC_partTwo_scores s
+                LEFT JOIN ABC_empMaster_lists e ON s.EmployeeID=e.EmployeeID
                 WHERE s.IsArchived=1";
             if (filterYear.HasValue) sql += " AND s.TrainingYear=@Year";
             if (!string.IsNullOrEmpty(filterEmpID)) sql += " AND s.EmployeeID=@EmpID";
@@ -537,8 +537,8 @@ namespace ABC_WebApp.Helpers
         {
             var list = new List<int>();
             string sql = @"SELECT DISTINCT TrainingYear FROM (
-                SELECT TrainingYear FROM partOne_scores WHERE IsArchived=1
-                UNION SELECT TrainingYear FROM partTwo_scores WHERE IsArchived=1
+                SELECT TrainingYear FROM ABC_partOne_scores WHERE IsArchived=1
+                UNION SELECT TrainingYear FROM ABC_partTwo_scores WHERE IsArchived=1
             ) x WHERE TrainingYear IS NOT NULL ORDER BY TrainingYear DESC";
             using (var con = Open()) using (var cmd = Cmd(sql, con))
             using (var r = cmd.ExecuteReader()) while (r.Read()) list.Add((int)r[0]);
@@ -550,8 +550,8 @@ namespace ABC_WebApp.Helpers
         {
             var list = new List<int>();
             string sql = @"SELECT DISTINCT TrainingYear FROM (
-                SELECT TrainingYear FROM partOne_scores WHERE (IsArchived=0 OR IsArchived IS NULL)
-                UNION SELECT TrainingYear FROM partTwo_scores WHERE (IsArchived=0 OR IsArchived IS NULL)
+                SELECT TrainingYear FROM ABC_partOne_scores WHERE (IsArchived=0 OR IsArchived IS NULL)
+                UNION SELECT TrainingYear FROM ABC_partTwo_scores WHERE (IsArchived=0 OR IsArchived IS NULL)
             ) x WHERE TrainingYear IS NOT NULL ORDER BY TrainingYear DESC";
             using (var con = Open()) using (var cmd = Cmd(sql, con))
             using (var r = cmd.ExecuteReader()) while (r.Read()) list.Add((int)r[0]);

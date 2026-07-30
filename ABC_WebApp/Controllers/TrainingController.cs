@@ -49,7 +49,7 @@ namespace ABC_WebApp.Controllers
 
             try
             {
-                DbHelper.SaveScore("partOne_scores", model);
+                DbHelper.SaveScore("ABC_partOne_scores", model);
                 return Json(new
                 {
                     success   = true,
@@ -107,7 +107,7 @@ namespace ABC_WebApp.Controllers
 
             try
             {
-                DbHelper.SaveScore("partTwo_scores", model);
+                DbHelper.SaveScore("ABC_partTwo_scores", model);
                 return Json(new
                 {
                     success   = true,
